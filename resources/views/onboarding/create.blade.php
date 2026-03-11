@@ -308,7 +308,7 @@
                         {{-- This button is outside the form so it must explicitly target the form via form= --}}
                         <button type="submit" id="submit-btn" form="onboarding-form"
                             class="hidden px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition">
-                            Create Profile
+                            Submit for Review
                         </button>
                     </div>
                 </div>
@@ -320,6 +320,58 @@
         document.addEventListener('DOMContentLoaded', function () {
             let currentStep = 1;
             const totalSteps = 3;
+
+            // ---- localStorage soft-save ----
+            const STORAGE_KEY = 'onboarding_draft_{{ auth()->id() }}';
+
+            function saveToLocalStorage() {
+                const form = document.getElementById('onboarding-form');
+                const data = {};
+                form.querySelectorAll('input:not([type=file]):not([type=radio]):not([type=hidden]), select, textarea').forEach(el => {
+                    if (el.name) data[el.name] = el.value;
+                });
+                // Save radio selection
+                const checkedRadio = form.querySelector('input[name=primary_image]:checked');
+                if (checkedRadio) data['primary_image'] = checkedRadio.value;
+                data['_step'] = currentStep;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            }
+
+            function restoreFromLocalStorage() {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (!saved) return;
+                try {
+                    const data = JSON.parse(saved);
+                    const form = document.getElementById('onboarding-form');
+                    for (const [name, value] of Object.entries(data)) {
+                        if (name === '_step') {
+                            currentStep = Math.min(Math.max(parseInt(value) || 1, 1), totalSteps);
+                            continue;
+                        }
+                        if (name === 'primary_image') {
+                            const radio = form.querySelector(`input[name=primary_image][value="${value}"]`);
+                            if (radio) radio.checked = true;
+                            continue;
+                        }
+                        const el = form.querySelector(`[name="${name}"]`);
+                        if (el && !el.matches('[type=file]')) el.value = value;
+                    }
+                } catch(e) { /* ignore corrupt data */ }
+            }
+
+            function clearLocalStorage() {
+                localStorage.removeItem(STORAGE_KEY);
+            }
+
+            // Restore saved data on load
+            restoreFromLocalStorage();
+
+            // Auto-save on any input change
+            document.getElementById('onboarding-form').addEventListener('input', saveToLocalStorage);
+            document.getElementById('onboarding-form').addEventListener('change', saveToLocalStorage);
+
+            // Clear localStorage on form submit
+            document.getElementById('onboarding-form').addEventListener('submit', clearLocalStorage);
 
             const steps = {
                 1: document.getElementById('step1'),

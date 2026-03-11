@@ -1,10 +1,10 @@
 <x-layout title="{{ $profile->full_name ?? 'Profile' }} - Profile">
-    {{-- jsPDF library --}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    {{-- html2pdf library --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {{-- Navigation Bar with Back Button and Download PDF --}}
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
             <a href="{{ route('root.matrimony') }}" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-pink-600 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -12,15 +12,27 @@
                 Back to Matches
             </a>
 
-            <button onclick="downloadProfilePDF()" class="inline-flex items-center gap-2 px-4 py-2 bg-pink-50 text-pink-600 rounded-lg text-sm font-medium hover:bg-pink-100 transition border border-pink-200 shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                </svg>
-                Download Profile
-            </button>
+            <div class="flex items-center gap-3">
+                <!-- Language Toggle -->
+                <div class="flex items-center bg-white border border-gray-200 rounded-lg shadow-sm p-1">
+                    <button id="lang-btn-en" onclick="setLanguage('en')" class="px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-gray-500 hover:text-gray-900">
+                        English
+                    </button>
+                    <button id="lang-btn-mr" onclick="setLanguage('mr')" class="px-3 py-1.5 text-xs font-semibold rounded-md transition-colors bg-pink-100 text-pink-700 shadow-sm">
+                        मराठी
+                    </button>
+                </div>
+
+                <button onclick="downloadProfilePDF()" class="inline-flex items-center gap-2 px-4 py-2 bg-pink-50 text-pink-600 rounded-lg text-sm font-medium hover:bg-pink-100 transition border border-pink-200 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download Profile
+                </button>
+            </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden" id="profile-card">
             <!-- Header -->
             <div class="bg-gradient-to-r from-pink-500 to-purple-600 h-32 relative"></div>
 
@@ -48,7 +60,7 @@
                     <div class="text-center sm:text-left pb-2 flex-grow">
                         <h1 class="text-2xl font-bold text-gray-900 flex items-center justify-center sm:justify-start gap-2">
                             {{ $profile->full_name ?? 'N/A' }}
-                            @if($profile->user && $profile->user->approved)
+                            @if($profile->user && $profile->user->isApproved())
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
                                     <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                                     Verified
@@ -82,27 +94,6 @@
                     @endif
                 </div>
 
-                {{-- ── Photo gallery (other uploaded photos) ── --}}
-                @if (count($allImgs) > 1 || (count($allImgs) === 1 && !$primaryUrl))
-                    <div class="mb-8">
-                        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Photos</h3>
-                        <div class="flex flex-wrap gap-3">
-                            @foreach ($allImgs as $slot => $url)
-                                <div class="relative w-28 h-28 rounded-xl overflow-hidden border-2 shadow-sm
-                                            {{ $slot === ($profile->primary_image ?? 1) ? 'border-pink-400' : 'border-gray-200' }}">
-                                    <img src="{{ $url }}"
-                                         alt="Photo {{ $slot }}"
-                                         class="w-full h-full object-cover">
-                                    @if ($slot === ($profile->primary_image ?? 1))
-                                        <span class="absolute bottom-1 left-1/2 -translate-x-1/2 bg-pink-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow whitespace-nowrap">
-                                            Primary
-                                        </span>
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
 
                 <!-- Profile Details Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 mt-10">
@@ -110,26 +101,26 @@
                     <div class="space-y-10">
                         <!-- Personal Details -->
                         <section>
-                            <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">Personal Details</h3>
+                            <h3 class="lang-label text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4" data-en="Personal Details" data-mr="वैयक्तिक माहिती">Personal Details</h3>
                             <dl class="space-y-4">
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Navras Naav</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Navras Naav" data-mr="नावरस नाव">Navras Naav</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->navras_naav ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Date of Birth</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Date of Birth" data-mr="जन्मतारीख">Date of Birth</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->date_of_birth ? \Carbon\Carbon::parse($profile->date_of_birth)->format('d M Y') : 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Day and Time of Birth</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Time of Birth" data-mr="जन्मदिवस आणि वेळ">Time of Birth</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->day_and_time_of_birth ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Place of Birth</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Place of Birth" data-mr="जन्म ठिकाण">Place of Birth</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->place_of_birth ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Marital Status</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Marital Status" data-mr="वैवाहिक स्थिती">Marital Status</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ ucfirst($profile->marital_status ?? 'Not provided') }}</dd>
                                 </div>
                             </dl>
@@ -137,38 +128,38 @@
 
                         <!-- Physical & Astrology -->
                         <section>
-                            <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">Physical Details & Astrology</h3>
+                            <h3 class="lang-label text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4" data-en="Physical Details & Astrology" data-mr="शारीरिक आणि ज्योतिषविषयक माहिती">Physical Details & Astrology</h3>
                             <dl class="space-y-4">
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Height (Oonchi)</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Height (Oonchi)" data-mr="उंची">Height (Oonchi)</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->height_cm__Oonchi ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Skin Complexion (Rang)</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Skin Complexion (Rang)" data-mr="रंग">Skin Complexion (Rang)</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->skin_complexion__Rang ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Jaath</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Jaath" data-mr="जात">Jaath</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->jaath ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Zodiac Sign (Raas)</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Zodiac Sign (Raas)" data-mr="रास">Zodiac Sign (Raas)</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->zodiac_sign__Raas ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Naadi</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Naadi" data-mr="नाडी">Naadi</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->naadi ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Gann</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Gann" data-mr="गण">Gann</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->gann ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Devak</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Devak" data-mr="देवक">Devak</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->devak ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Kul Devata</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Kul Devata" data-mr="कुलदैवत">Kul Devata</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->kul_devata ?? 'Not provided' }}</dd>
                                 </div>
                             </dl>
@@ -179,18 +170,18 @@
                     <div class="space-y-10">
                         <!-- Education & Profession -->
                         <section>
-                            <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">Education & Career</h3>
+                            <h3 class="lang-label text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4" data-en="Education & Career" data-mr="शिक्षण आणि व्यवसाय">Education & Career</h3>
                             <dl class="space-y-4">
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Education</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Education" data-mr="शिक्षण">Education</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->education ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Occupation</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Occupation" data-mr="नोकरी">Occupation</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->occupation ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Annual Income</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Annual Income" data-mr="वार्षिक पगार">Annual Income</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->annual_income ? '₹' . number_format($profile->annual_income, 2) : 'Not provided' }}</dd>
                                 </div>
                             </dl>
@@ -198,30 +189,30 @@
 
                         <!-- Family Background -->
                         <section>
-                            <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">Family Background</h3>
+                            <h3 class="lang-label text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4" data-en="Family Background" data-mr="कौटुंबिक माहिती">Family Background</h3>
                             <dl class="space-y-4">
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Father's Name</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Father's Name" data-mr="वडिलांचे नाव">Father's Name</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->fathers_name ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Mother's Name</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Mother's Name" data-mr="आईचे नाव">Mother's Name</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->mothers_name ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Siblings Details</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Siblings Details" data-mr="भावंड">Siblings Details</dt>
                                     <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->siblings ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Uncles Details</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Uncles Details" data-mr="संबंधित आडनावे">Uncles Details</dt>
                                     <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->uncles ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Aunts Details</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Aunts Details" data-mr="मावशी / आत्या">Aunts Details</dt>
                                     <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->aunts ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Naathe / Relationships</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Naathe / Relationships" data-mr="नातेवाईक">Naathe / Relationships</dt>
                                     <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->naathe_relationships ?? 'Not provided' }}</dd>
                                 </div>
                             </dl>
@@ -229,18 +220,18 @@
 
                         <!-- Location Details -->
                         <section>
-                            <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">Location & Address</h3>
+                            <h3 class="lang-label text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4" data-en="Location & Address" data-mr="पत्ता आणि संपर्क">Location & Address</h3>
                             <dl class="space-y-4">
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Mumbai Address</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Mumbai Address" data-mr="पत्ता">Mumbai Address</dt>
                                     <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->mumbai_address ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Village Address</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Village Address" data-mr="गावाचा पत्ता">Village Address</dt>
                                     <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->village_address ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Village Farm</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Village Farm" data-mr="मालमत्ता">Village Farm</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->village_farm ?? 'Not provided' }}</dd>
                                 </div>
                             </dl>
@@ -248,175 +239,100 @@
                     </div>
                 </div>
             </div>
+
+            {{-- ── NEW Vertical Photo stack ── --}}
+            @if (count($allImgs) > 1 || (count($allImgs) === 1 && !$primaryUrl))
+                <div class="border-t border-gray-100 bg-gray-50/50 px-6 sm:px-10 py-10">
+                    <h3 class="lang-label text-2xl font-semibold text-gray-900 mb-8 text-center" data-en="Photo Gallery" data-mr="फोटो गॅलरी">Photo Gallery</h3>
+                    <div class="flex flex-col items-center gap-8 max-w-2xl mx-auto">
+                        @foreach ($allImgs as $slot => $url)
+                            <div class="relative w-full aspect-4/5 sm:aspect-auto sm:h-[600px] rounded-2xl overflow-hidden shadow-md group border border-gray-200">
+                                <img src="{{ $url }}"
+                                     alt="Photo {{ $slot }}"
+                                     class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+                                @if ($slot === ($profile->primary_image ?? 1))
+                                    <span class="absolute top-4 right-4 bg-pink-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md whitespace-nowrap tracking-wide">
+                                        Primary Profile Photo
+                                    </span>
+                                @endif
+                                <div class="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-2xl pointer-events-none"></div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
         </div>
     </div>
 
-    {{-- Script for Generating PDF --}}
+    {{-- Script for Generating PDF and Language Toggle --}}
     <script>
+        // --- Language Toggle Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('matrimony_lang') || 'mr';
+            setLanguage(savedLang);
+        });
+
+        function setLanguage(lang) {
+            localStorage.setItem('matrimony_lang', lang);
+
+            // Update Labels
+            document.querySelectorAll('.lang-label').forEach(el => {
+                if (lang === 'mr' && el.dataset.mr) {
+                    el.textContent = el.dataset.mr;
+                } else if (lang === 'en' && el.dataset.en) {
+                    el.textContent = el.dataset.en;
+                }
+            });
+
+            // Update UI Button states
+            const btnEn = document.getElementById('lang-btn-en');
+            const btnMr = document.getElementById('lang-btn-mr');
+
+            if (lang === 'mr') {
+                btnMr.className = "px-3 py-1.5 text-xs font-semibold rounded-md transition-colors bg-pink-100 text-pink-700 shadow-sm";
+                btnEn.className = "px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-gray-500 hover:text-gray-900";
+            } else {
+                btnEn.className = "px-3 py-1.5 text-xs font-semibold rounded-md transition-colors bg-pink-100 text-pink-700 shadow-sm";
+                btnMr.className = "px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-gray-500 hover:text-gray-900";
+            }
+        }
+
         function downloadProfilePDF() {
             try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-
-                // Color palette
-                const primaryColor = [219, 39, 119]; // Pink-600
-                const secondaryColor = [75, 85, 99]; // Gray-600
-                const textColor = [17, 24, 39]; // Gray-900
-                const lightBg = [253, 242, 248]; // Pink-50
-
-                let yPos = 20;
-                const margin = 20;
-                const pageWidth = doc.internal.pageSize.width;
-                const contentWidth = pageWidth - 2 * margin;
-
-                // Helper functions
-                const checkPageBreak = (neededHeight) => {
-                    if (yPos + neededHeight > doc.internal.pageSize.height - margin) {
-                        doc.addPage();
-                        yPos = margin;
-                        return true;
-                    }
-                    return false;
-                };
-
-                const addSectionTitle = (title) => {
-                    checkPageBreak(15);
-                    yPos += 5;
-                    doc.setFillColor(...lightBg);
-                    doc.rect(margin, yPos - 5, contentWidth, 10, 'F');
-                    doc.setFont("helvetica", "bold");
-                    doc.setFontSize(12);
-                    doc.setTextColor(...primaryColor);
-                    doc.text(title, margin + 5, yPos + 2);
-                    yPos += 12;
-                };
-
-                const addField = (label, value) => {
-                    if (!value || value === 'Not provided' || value === 'N/A') return;
-
-                    const strValue = String(value);
-                    const splitValue = doc.splitTextToSize(strValue, contentWidth / 2);
-                    const fieldHeight = Math.max(7, splitValue.length * 5);
-
-                    checkPageBreak(fieldHeight);
-
-                    doc.setFont("helvetica", "normal");
-                    doc.setFontSize(10);
-                    doc.setTextColor(...secondaryColor);
-                    doc.text(label + ":", margin, yPos);
-
-                    doc.setTextColor(...textColor);
-                    doc.text(splitValue, margin + contentWidth / 2 - 10, yPos);
-
-                    yPos += fieldHeight;
-                };
-
-                // Header
-                doc.setFillColor(...primaryColor);
-                doc.rect(0, 0, pageWidth, 40, 'F');
-
-                doc.setTextColor(255, 255, 255);
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(24);
-                doc.text("Matrimonial Profile", margin, 25);
-
-                yPos = 50;
-
-                // Fetch Profile Data from blade
-                const profile = {
-                    name: '{{ $profile->full_name ?? "Not provided" }}',
-                    navras_naav: '{{ $profile->navras_naav ?? "Not provided" }}',
-                    gender: '{{ ucfirst($profile->gender ?? "") }}',
-                    maritalStatus: '{{ ucfirst($profile->marital_status ?? "") }}',
-                    dob: '{{ $profile->date_of_birth ? \Carbon\Carbon::parse($profile->date_of_birth)->format("d M Y") : "" }}',
-                    timeOfBirth: '{{ $profile->day_and_time_of_birth ?? "" }}',
-                    placeOfBirth: '{{ $profile->place_of_birth ?? "" }}',
-
-                    height: '{{ $profile->height_cm__Oonchi ?? "" }}',
-                    complexion: '{{ $profile->skin_complexion__Rang ?? "" }}',
-                    jaath: '{{ $profile->jaath ?? "" }}',
-                    zodiac: '{{ $profile->zodiac_sign__Raas ?? "" }}',
-                    naadi: '{{ $profile->naadi ?? "" }}',
-                    gann: '{{ $profile->gann ?? "" }}',
-                    devak: '{{ $profile->devak ?? "" }}',
-                    kulDevata: '{{ $profile->kul_devata ?? "" }}',
-
-                    education: '{{ $profile->education ?? "" }}',
-                    occupation: '{{ $profile->occupation ?? "" }}',
-                    income: '{{ $profile->annual_income ? "Rs. ".number_format($profile->annual_income, 2) : "" }}',
-
-                    father: '{{ $profile->fathers_name ?? "" }}',
-                    mother: '{{ $profile->mothers_name ?? "" }}',
-                    siblings: `{{ addslashes(str_replace("\r\n", " ", $profile->siblings ?? '')) }}`,
-                    uncles: `{{ addslashes(str_replace("\r\n", " ", $profile->uncles ?? '')) }}`,
-                    aunts: `{{ addslashes(str_replace("\r\n", " ", $profile->aunts ?? '')) }}`,
-                    naathe: `{{ addslashes(str_replace("\r\n", " ", $profile->naathe_relationships ?? '')) }}`,
-
-                    mumbaiAddr: `{{ addslashes(str_replace("\r\n", " ", $profile->mumbai_address ?? '')) }}`,
-                    villageAddr: `{{ addslashes(str_replace("\r\n", " ", $profile->village_address ?? '')) }}`,
-                    villageFarm: '{{ $profile->village_farm ?? "" }}'
-                };
-
-                // Personal Details
-                addSectionTitle("Personal Details");
-                addField("Full Name", profile.name);
-                addField("Navras Naav", profile.navras_naav);
-                addField("Gender", profile.gender);
-                addField("Date of Birth", profile.dob);
-                addField("Time of Birth", profile.timeOfBirth);
-                addField("Place of Birth", profile.placeOfBirth);
-                addField("Marital Status", profile.maritalStatus);
-
-                // Physical & Astrology
-                addSectionTitle("Physical Details & Astrology");
-                addField("Height (Oonchi)", profile.height);
-                addField("Complexion (Rang)", profile.complexion);
-                addField("Jaath", profile.jaath);
-                addField("Zodiac (Raas)", profile.zodiac);
-                addField("Naadi", profile.naadi);
-                addField("Gann", profile.gann);
-                addField("Devak", profile.devak);
-                addField("Kul Devata", profile.kulDevata);
-
-                // Education & Career
-                addSectionTitle("Education & Career");
-                addField("Education", profile.education);
-                addField("Occupation", profile.occupation);
-                addField("Annual Income", profile.income);
-
-                // Family Background
-                addSectionTitle("Family Background");
-                addField("Father's Name", profile.father);
-                addField("Mother's Name", profile.mother);
-                addField("Siblings Details", profile.siblings);
-                addField("Uncles Details", profile.uncles);
-                addField("Aunts Details", profile.aunts);
-                addField("Naathe / Relationships", profile.naathe);
-
-                // Location Details
-                addSectionTitle("Location Details");
-                addField("Mumbai Address", profile.mumbaiAddr);
-                addField("Village Address", profile.villageAddr);
-                addField("Village Farm", profile.villageFarm);
-
-                // Footer
-                const pageCount = doc.internal.getNumberOfPages();
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(8);
-                doc.setTextColor(150, 150, 150);
-
-                for(let i = 1; i <= pageCount; i++) {
-                    doc.setPage(i);
-                    doc.text(
-                        "Generated from Matrimony Platform - Page " + i + " of " + pageCount,
-                        pageWidth / 2,
-                        doc.internal.pageSize.height - 10,
-                        { align: "center" }
-                    );
+                const element = document.getElementById('profile-card');
+                // Provide user feedback
+                const btn = document.querySelector('button[onclick="downloadProfilePDF()"]');
+                const originalText = btn ? btn.innerHTML : '';
+                if(btn){
+                    btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Generating...`;
+                    btn.disabled = true;
                 }
 
-                // Save PDF
-                doc.save(`Profile_${profile.name.replace(/\s+/g, '_')}.pdf`);
+                // Defer to prevent blocking the UI layout update!
+                setTimeout(() => {
+                    const opt = {
+                        margin:       10,
+                        filename:     `Profile_{{ str_replace(' ', '_', $profile->full_name ?? 'Matrimony') }}.pdf`,
+                        image:        { type: 'jpeg', quality: 0.90 }, // Slightly lower quality for much better speed
+                        html2canvas:  { scale: 1.2, useCORS: true, letterRendering: true, logging: false }, // Lower scale massively speeds up canvas rendering
+                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    };
+
+                    html2pdf().set(opt).from(element).save().then(() => {
+                        if(btn){
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        }
+                    }).catch(error => {
+                        console.error('Error during generation:', error);
+                        alert('There was an error generating the PDF. Please try again.');
+                        if(btn){
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        }
+                    });
+                }, 100);
 
             } catch (error) {
                 console.error('Error generating PDF:', error);

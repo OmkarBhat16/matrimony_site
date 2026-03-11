@@ -1,10 +1,10 @@
 <x-layout title="Matrimony">
     @php
-        $showFilters = auth()->check() && auth()->user()->approved;
+        $showFilters = auth()->check() && auth()->user()->isApproved();
     @endphp
     {{-- Pending Approval Banner --}}
     @auth
-        @unless (auth()->user()->approved)
+        @unless (auth()->user()->isApproved())
             <div class="bg-amber-50 border-l-4 border-amber-400 p-4">
                 <div class="max-w-7xl mx-auto flex items-center gap-3">
                     <svg class="w-6 h-6 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

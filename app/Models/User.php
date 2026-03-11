@@ -22,10 +22,8 @@ class User extends Authenticatable
         'email',
         'phone_number',
         'password',
-        'approved_by',
-        'approved_at',
         'role',
-        'approved',
+        'verification_step',
     ];
 
     /**
@@ -50,6 +48,29 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // -------------------------------------------------------------------------
+    // Verification helpers
+    // -------------------------------------------------------------------------
+
+    public function isApproved(): bool
+    {
+        return $this->verification_step === 'approved';
+    }
+
+    public function needsOnboarding(): bool
+    {
+        return $this->verification_step === 'step1_complete';
+    }
+
+    public function isPendingReview(): bool
+    {
+        return $this->verification_step === 'step2_pending';
+    }
+
+    // -------------------------------------------------------------------------
+    // Relationships
+    // -------------------------------------------------------------------------
 
     public function profile()
     {

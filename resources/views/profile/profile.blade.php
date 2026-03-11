@@ -8,23 +8,6 @@
         $primaryUrl = $profile->primaryImageUrl();
     @endphp
 
-    {{-- Flash messages --}}
-    @if (session('success'))
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-            <div class="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
-                <svg class="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                {{ session('success') }}
-            </div>
-        </div>
-    @endif
-    @if (session('error'))
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-            <div class="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-                <svg class="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v4a1 1 0 002 0V5zm-1 8a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"/></svg>
-                {{ session('error') }}
-            </div>
-        </div>
-    @endif
 
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -52,10 +35,12 @@
                     <div class="text-center sm:text-left pb-2 flex-grow">
                         <h1 class="text-2xl font-bold text-gray-900 flex items-center justify-center sm:justify-start gap-2">
                             {{ $profile->full_name ?? $user->name }}
-                            @if($user->approved)
+                            @if($user->isApproved())
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Approved</span>
+                            @elseif($user->isPendingReview())
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">Pending Review</span>
                             @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending Approval</span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>
                             @endif
                         </h1>
                         <p class="text-gray-600 text-sm mt-1">
@@ -63,12 +48,23 @@
                         </p>
                     </div>
 
-                    <div class="pb-2">
+                    <div class="pb-2 flex gap-2">
+                        <a href="{{ route('profile.edit') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-white bg-pink-600 hover:bg-pink-700 rounded-lg text-sm font-medium transition shadow-sm">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            Edit Profile
+                        </a>
                         <a href="{{ route('profile.show', $profile) }}" class="inline-flex items-center px-4 py-2 border border-pink-600 text-pink-600 bg-white hover:bg-pink-50 rounded-lg text-sm font-medium transition shadow-sm">
                             View Public Profile
                         </a>
                     </div>
                 </div>
+
+                @if($pendingEdit)
+                    <div class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3">
+                        <svg class="w-5 h-5 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <p class="text-sm text-amber-700"><strong>Pending Edit:</strong> You have profile changes submitted for admin review ({{ $pendingEdit->created_at->diffForHumans() }}).</p>
+                    </div>
+                @endif
 
                 {{-- ============================================================
                      PHOTO MANAGEMENT PANEL

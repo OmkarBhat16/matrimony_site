@@ -15,11 +15,11 @@ class MatrimonyController extends Controller
     {
         $user = auth()->user();
 
-        $showFilters = $user && $user->approved;
+        $showFilters = $user && $user->isApproved();
 
         $query = UserProfile::query()->whereHas(
             "user",
-            fn($q) => $q->where("approved", true),
+            fn($q) => $q->where("verification_step", "approved"),
         );
 
         // Exclude current user from the results
@@ -71,14 +71,14 @@ class MatrimonyController extends Controller
         $profiles = $query->latest()->paginate(12)->withQueryString();
 
         $cities = UserProfile::query()
-            ->whereHas("user", fn($q) => $q->where("approved", true))
+            ->whereHas("user", fn($q) => $q->where("verification_step", "approved"))
             ->whereNotNull("place_of_birth")
             ->distinct()
             ->orderBy("place_of_birth")
             ->pluck("place_of_birth");
 
         $jaaths = UserProfile::query()
-            ->whereHas("user", fn($q) => $q->where("approved", true))
+            ->whereHas("user", fn($q) => $q->where("verification_step", "approved"))
             ->whereNotNull("jaath")
             ->distinct()
             ->orderBy("jaath")

@@ -1,7 +1,7 @@
 <x-admin-layout>
     <x-slot:header>Dashboard</x-slot:header>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="bg-white rounded-xl shadow-sm p-6">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
@@ -10,8 +10,21 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-2xl font-bold text-gray-900">{{ \App\Models\User::count() }}</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ \App\Models\User::where('role', 'user')->count() }}</p>
                     <p class="text-sm text-gray-500">Total Users</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-gray-900">{{ \App\Models\User::where('verification_step', 'unverified')->count() }}</p>
+                    <p class="text-sm text-gray-500">New Registrations</p>
                 </div>
             </div>
         </div>
@@ -23,8 +36,8 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-2xl font-bold text-gray-900">{{ \App\Models\User::where('approved', false)->count() }}</p>
-                    <p class="text-sm text-gray-500">Pending Approval</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ \App\Models\User::where('verification_step', 'step2_pending')->count() }}</p>
+                    <p class="text-sm text-gray-500">Pending Review</p>
                 </div>
             </div>
         </div>
@@ -36,36 +49,49 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-2xl font-bold text-gray-900">{{ \App\Models\UserProfile::count() }}</p>
-                    <p class="text-sm text-gray-500">Profiles Created</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ \App\Models\User::where('verification_step', 'approved')->count() }}</p>
+                    <p class="text-sm text-gray-500">Approved</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-gray-900">{{ \App\Models\EditUserProfile::where('status', 'pending')->count() }}</p>
+                    <p class="text-sm text-gray-500">Pending Edits</p>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="bg-white rounded-xl shadow-sm p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Recent Users Pending Approval</h2>
-        @php $pendingUsers = \App\Models\User::where('approved', false)->latest()->limit(5)->get(); @endphp
-        @if ($pendingUsers->count())
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">New Registrations</h2>
+        @php $newRegistrations = \App\Models\User::where('verification_step', 'unverified')->where('role', 'user')->latest()->limit(5)->get(); @endphp
+        @if ($newRegistrations->count())
             <div class="space-y-3">
-                @foreach ($pendingUsers as $user)
+                @foreach ($newRegistrations as $user)
                     <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50">
                         <div>
                             <p class="text-sm font-medium text-gray-900">{{ $user->name }}</p>
-                            <p class="text-xs text-gray-500">{{ $user->email }} &middot; Registered {{ $user->created_at->diffForHumans() }}</p>
+                            <p class="text-xs text-gray-500">{{ $user->phone_number }} &middot; Registered {{ $user->created_at->diffForHumans() }}</p>
                         </div>
-                        <form action="{{ route('users.approve', $user) }}" method="POST">
+                        <form action="{{ route('admin.users.create-account', $user) }}" method="POST">
                             @csrf
-                            <button type="submit" class="text-xs font-medium text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-lg transition">
-                                Approve
+                            <button type="submit" class="text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition">
+                                Create Account
                             </button>
                         </form>
                     </div>
                 @endforeach
             </div>
-            <a href="{{ route('admin.users') }}" class="mt-4 inline-block text-sm text-pink-600 hover:text-pink-700 font-medium">View all users &rarr;</a>
+            <a href="{{ route('admin.users', ['tab' => 'registrations']) }}" class="mt-4 inline-block text-sm text-pink-600 hover:text-pink-700 font-medium">View all &rarr;</a>
         @else
-            <p class="text-sm text-gray-500">No users pending approval.</p>
+            <p class="text-sm text-gray-500">No new registrations.</p>
         @endif
     </div>
 </x-admin-layout>

@@ -14,17 +14,15 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
+            $table->string('email')->unique()->nullable();
             $table->string('phone_number')->unique();
             $table->string('username')->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->enum('role', ['superadmin','admin', 'user'])->default('user');
-            $table->boolean('approved')->default(false);
-            $table->foreignId('approved_by')->nullable()->constrained('users')->onDelete('set null');
-            $table->timestamp('approved_at')->nullable();
+            $table->enum('verification_step', ['unverified', 'step1_complete', 'step2_pending', 'approved'])->default('unverified');
             $table->string("profile_picture")->nullable();
         });
 

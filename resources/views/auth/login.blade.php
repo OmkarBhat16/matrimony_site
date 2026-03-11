@@ -35,27 +35,24 @@
                 <form method="POST" action="{{ route('login.submit') }}" class="space-y-6">
                     @csrf
 
-                    <!-- Email Field -->
+                    <!-- Phone Number Field -->
                     <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-                            Email
+                        <label for="phone_number" class="block text-sm font-medium text-gray-700 mb-1">
+                            Phone Number
                         </label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                                </svg>
-                            </div>
+                        <div class="relative flex">
+                            <span class="inline-flex items-center px-3 text-sm text-gray-500 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg">
+                                +91
+                            </span>
                             <input
-                                id="email"
-                                name="email"
-                                type="email"
-                                autocomplete="email"
+                                id="phone_number"
+                                name="phone_number"
+                                type="tel"
+                                autocomplete="tel"
                                 required
-                                value="{{ old('email') }}"
-                                class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('email') border-red-500 @enderror"
-                                placeholder="you@example.com"
+                                value="{{ old('phone_number') }}"
+                                class="block w-full px-3 py-3 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('phone_number') border-red-500 @enderror"
+                                placeholder="98765 43210"
                             >
                         </div>
                     </div>
@@ -83,25 +80,17 @@
                         </div>
                     </div>
 
-                    <!-- Remember Me & Forgot Password -->
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <input
-                                id="remember"
-                                name="remember"
-                                type="checkbox"
-                                class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
-                            >
-                            <label for="remember" class="ml-2 block text-sm text-gray-700">
-                                Remember me
-                            </label>
-                        </div>
-
-                        <div class="text-sm">
-                            <a href="#" class="font-medium text-pink-600 hover:text-pink-500 transition">
-                                Forgot password?
-                            </a>
-                        </div>
+                    <!-- Remember Me -->
+                    <div class="flex items-center">
+                        <input
+                            id="remember"
+                            name="remember"
+                            type="checkbox"
+                            class="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                        >
+                        <label for="remember" class="ml-2 block text-sm text-gray-700">
+                            Remember me
+                        </label>
                     </div>
 
                     <!-- Submit Button -->

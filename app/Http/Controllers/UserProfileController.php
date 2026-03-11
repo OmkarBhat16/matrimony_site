@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EditUserProfile;
 use App\Models\UserProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,29 +24,112 @@ class UserProfileController extends Controller
                 ->with("info", "Please complete your profile to get started.");
         }
 
-        return view("profile.profile");
+        $pendingEdit = EditUserProfile::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+
+        return view("profile.profile", compact('pendingEdit'));
+    }
+
+    /**
+     * Show the edit form, pre-filled with current profile data.
+     */
+    public function edit()
+    {
+        $user = auth()->user();
+        $profile = $user->profile;
+
+        if (!$profile) {
+            return redirect()->route('onboarding.create');
+        }
+
+        // If there's already a pending edit, load those values instead
+        $pendingEdit = EditUserProfile::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+
+        $values = $pendingEdit ?? $profile;
+
+        return view('profile.edit', compact('profile', 'values', 'pendingEdit'));
+    }
+
+    /**
+     * Save the edit request to the edit_user_profiles table (not directly to user_profile).
+     */
+    public function update(Request $request)
+    {
+        $validated = $request->validate([
+            'full_name'             => ['nullable', 'string', 'max:255'],
+            'navras_naav'           => ['nullable', 'string', 'max:255'],
+            'gender'                => ['nullable', 'in:male,female,other'],
+            'education'             => ['nullable', 'string', 'max:255'],
+            'occupation'            => ['nullable', 'string', 'max:255'],
+            'annual_income'         => ['nullable', 'numeric'],
+            'date_of_birth'         => ['nullable', 'date'],
+            'day_and_time_of_birth' => ['nullable', 'string', 'max:255'],
+            'place_of_birth'        => ['nullable', 'string', 'max:255'],
+            'jaath'                 => ['nullable', 'string', 'max:255'],
+            'height_cm__Oonchi'     => ['nullable', 'string', 'max:255'],
+            'skin_complexion__Rang' => ['nullable', 'string', 'max:255'],
+            'zodiac_sign__Raas'     => ['nullable', 'string', 'max:255'],
+            'naadi'                 => ['nullable', 'string', 'max:255'],
+            'gann'                  => ['nullable', 'string', 'max:255'],
+            'devak'                 => ['nullable', 'string', 'max:255'],
+            'kul_devata'            => ['nullable', 'string', 'max:255'],
+            'fathers_name'          => ['nullable', 'string', 'max:255'],
+            'mothers_name'          => ['nullable', 'string', 'max:255'],
+            'marital_status'        => ['nullable', 'string', 'max:255'],
+            'siblings'              => ['nullable', 'string'],
+            'uncles'                => ['nullable', 'string'],
+            'aunts'                 => ['nullable', 'string'],
+            'mumbai_address'        => ['nullable', 'string'],
+            'village_address'       => ['nullable', 'string'],
+            'village_farm'          => ['nullable', 'string', 'max:255'],
+            'naathe_relationships'  => ['nullable', 'string'],
+        ]);
+
+        $user = auth()->user();
+
+        // Delete any previous pending edit
+        EditUserProfile::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->delete();
+
+        $validated['user_id'] = $user->id;
+        $validated['status'] = 'pending';
+
+        EditUserProfile::create($validated);
+
+        return redirect()->route('profile')->with('success', 'Your profile edit has been submitted for review.');
     }
 
     /**
      * Show the form for creating a new resource.
+     * Allowed when verification_step is 'step1_complete'.
      */
     public function create()
     {
-        if (auth()->user()->profile()->exists()) {
+        $user = auth()->user();
+
+        if ($user->profile()->exists()) {
             return redirect()->route("root.matrimony");
-        } elseif (!auth()->user()->approved) {
+        }
+
+        if (!$user->needsOnboarding()) {
+            if ($user->isPendingReview()) {
+                return redirect("/pending-review");
+            }
             return redirect()
                 ->route("root.matrimony")
-                ->with(
-                    "error",
-                    "Your account is pending approval. Please wait for an administrator to approve your account before creating a profile.",
-                );
+                ->with("error", "You cannot access onboarding at this time.");
         }
+
         return view("onboarding.create");
     }
 
     /**
      * Store a newly created resource in storage.
+     * Sets verification_step to 'step2_pending' after profile creation.
      */
     public function store(Request $request)
     {
@@ -103,10 +187,10 @@ class UserProfileController extends Controller
         // Store uploaded images
         $this->storeImages($profile, $images);
 
-        return redirect("/matrimony")->with(
-            "success",
-            "Profile created successfully!",
-        );
+        // Move to step2_pending — profile is now under review
+        $user->update(['verification_step' => 'step2_pending']);
+
+        return redirect("/pending-review");
     }
 
     /**
@@ -172,7 +256,7 @@ class UserProfileController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user->approved || !$user->profile()->exists()) {
+        if (!$user->isApproved() || !$user->profile()->exists()) {
             abort(
                 403,
                 "You must be approved and have a profile to view other profiles.",

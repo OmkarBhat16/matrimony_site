@@ -6,6 +6,68 @@
 @source '../**/*.js';
 
 @theme {
+    --color-transparent: transparent;
+    --color-current: currentColor;
+    --color-black: hsl(0 0% 0%);
+    --color-white: hsl(0 0% 100%);
+    --color-gray-50: hsl(210 20% 98%);
+    --color-gray-100: hsl(220 14% 96%);
+    --color-gray-200: hsl(220 13% 91%);
+    --color-gray-300: hsl(216 12% 84%);
+    --color-gray-400: hsl(218 11% 65%);
+    --color-gray-500: hsl(220 9% 46%);
+    --color-gray-600: hsl(215 14% 34%);
+    --color-gray-700: hsl(217 19% 27%);
+    --color-gray-800: hsl(215 28% 17%);
+    --color-gray-900: hsl(221 39% 11%);
+    --color-gray-950: hsl(224 71% 4%);
+    --color-red-50: hsl(0 86% 97%);
+    --color-red-100: hsl(0 93% 94%);
+    --color-red-200: hsl(0 96% 89%);
+    --color-red-300: hsl(0 94% 82%);
+    --color-red-400: hsl(0 91% 71%);
+    --color-red-500: hsl(0 84% 60%);
+    --color-red-600: hsl(0 72% 51%);
+    --color-red-700: hsl(0 74% 42%);
+    --color-red-800: hsl(0 70% 35%);
+    --color-red-900: hsl(0 63% 31%);
+    --color-red-950: hsl(0 75% 15%);
+    --color-pink-50: hsl(327 73% 97%);
+    --color-pink-100: hsl(326 78% 95%);
+    --color-pink-200: hsl(326 85% 90%);
+    --color-pink-300: hsl(327 87% 82%);
+    --color-pink-400: hsl(329 86% 70%);
+    --color-pink-500: hsl(330 81% 60%);
+    --color-pink-600: hsl(333 71% 51%);
+    --color-pink-700: hsl(335 78% 42%);
+    --color-pink-800: hsl(336 74% 35%);
+    --color-pink-900: hsl(336 69% 30%);
+    --color-pink-950: hsl(336 84% 17%);
+    --color-purple-50: hsl(270 100% 98%);
+    --color-purple-100: hsl(269 100% 95%);
+    --color-purple-200: hsl(269 100% 92%);
+    --color-purple-300: hsl(269 97% 85%);
+    --color-purple-400: hsl(270 95% 75%);
+    --color-purple-500: hsl(271 91% 65%);
+    --color-purple-600: hsl(271 81% 56%);
+    --color-purple-700: hsl(272 72% 47%);
+    --color-purple-800: hsl(273 67% 39%);
+    --color-purple-900: hsl(274 66% 32%);
+    --color-purple-950: hsl(274 87% 21%);
+    --color-green-50: hsl(138 76% 97%);
+    --color-green-100: hsl(141 84% 93%);
+    --color-green-200: hsl(141 79% 85%);
+    --color-green-300: hsl(142 77% 73%);
+    --color-green-400: hsl(142 69% 58%);
+    --color-green-500: hsl(142 71% 45%);
+    --color-green-600: hsl(142 76% 36%);
+    --color-green-700: hsl(142 72% 29%);
+    --color-green-800: hsl(143 64% 24%);
+    --color-green-900: hsl(144 61% 20%);
+    --color-green-950: hsl(145 80% 10%);
+
+// existing theme
+
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
