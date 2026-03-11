@@ -1,53 +1,49 @@
 <x-layout>
     <x-slot:title>Create Profile - Matrimony</x-slot:title>
 
-    <div class="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 py-8 px-4">
+    <div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
         <div class="max-w-3xl mx-auto">
             <!-- Header -->
-            <div class="text-center mb-8">
+            <div class="text-center mb-10">
                 <h1 class="text-3xl font-extrabold text-gray-900">
-                    Welcome, {{ auth()->user()->username }}!
+                    Welcome! Let's Create Your Profile
                 </h1>
-                <p class="mt-2 text-gray-600">
-                    Let's create your profile in 3 simple steps
+                <p class="mt-2 text-sm text-gray-600">
+                    Please fill in the details below to complete your profile setup.
                 </p>
             </div>
 
-            <!-- Progress Steps -->
+            <!-- Progress Bar -->
             <div class="mb-8">
-                <div class="flex items-center justify-center">
-                    <div class="flex items-center">
-                        <!-- Step 1 -->
-                        <div class="flex flex-col items-center">
-                            <div id="step1-indicator" class="w-10 h-10 rounded-full bg-pink-600 text-white flex items-center justify-center font-bold">
-                                1
-                            </div>
-                            <span class="text-xs mt-1 text-pink-600 font-medium">Personal</span>
-                        </div>
-                        <div id="line1" class="w-16 sm:w-24 h-1 bg-gray-300 mx-2"></div>
-                        
-                        <!-- Step 2 -->
-                        <div class="flex flex-col items-center">
-                            <div id="step2-indicator" class="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-bold">
-                                2
-                            </div>
-                            <span class="text-xs mt-1 text-gray-500 font-medium">Background</span>
-                        </div>
-                        <div id="line2" class="w-16 sm:w-24 h-1 bg-gray-300 mx-2"></div>
-                        
-                        <!-- Step 3 -->
-                        <div class="flex flex-col items-center">
-                            <div id="step3-indicator" class="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-bold">
-                                3
-                            </div>
-                            <span class="text-xs mt-1 text-gray-500 font-medium">Lifestyle</span>
-                        </div>
+                <div class="flex items-center justify-between relative">
+                    <div class="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-gray-200 rounded-full z-0"></div>
+
+                    <!-- Progress Line -->
+                    <div class="absolute left-0 top-1/2 transform -translate-y-1/2 h-1 bg-pink-500 rounded-full z-0 transition-all duration-300" id="progress-line" style="width: 0%"></div>
+
+                    <!-- Step 1 Indicator -->
+                    <div class="relative z-10 flex flex-col items-center">
+                        <div id="indicator-1" class="w-10 h-10 bg-pink-600 text-white rounded-full flex items-center justify-center font-bold shadow-md transition-colors duration-300">1</div>
+                        <span id="label-1" class="mt-2 text-xs font-medium text-pink-600">Personal</span>
+                    </div>
+
+                    <!-- Step 2 Indicator -->
+                    <div class="relative z-10 flex flex-col items-center">
+                        <div id="indicator-2" class="w-10 h-10 bg-white border-2 border-gray-300 text-gray-400 rounded-full flex items-center justify-center font-bold transition-colors duration-300">2</div>
+                        <span id="label-2" class="mt-2 text-xs font-medium text-gray-500">Horoscope & Education</span>
+                    </div>
+
+                    <!-- Step 3 Indicator -->
+                    <div class="relative z-10 flex flex-col items-center">
+                        <div id="indicator-3" class="w-10 h-10 bg-white border-2 border-gray-300 text-gray-400 rounded-full flex items-center justify-center font-bold transition-colors duration-300">3</div>
+                        <span id="label-3" class="mt-2 text-xs font-medium text-gray-500">Family</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Form Card -->
-            <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+            <!-- Form Container -->
+            <div class="bg-white rounded-2xl shadow-xl p-6 sm:p-10">
+
                 <!-- Error Messages -->
                 @if ($errors->any())
                     <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -59,380 +55,423 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('onboarding.store') }}" enctype="multipart/form-data" id="onboarding-form">
+                {{-- novalidate disables native browser validation so our JS controls stepping --}}
+                <form method="POST" action="{{ route('onboarding.store') }}" id="onboarding-form" novalidate enctype="multipart/form-data">
                     @csrf
 
                     <!-- Step 1: Personal Information -->
-                    <div id="step1" class="step-content">
+                    <div id="step1" class="step-content block">
                         <h2 class="text-xl font-bold text-gray-900 mb-6">Personal Information</h2>
-                        
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                            <!-- First Name -->
                             <div>
-                                <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                                <input type="text" id="first_name" name="first_name" value="{{ old('first_name') }}" required
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('first_name') border-red-500 @enderror"
-                                    placeholder="John">
+                                <label for="full_name" class="block text-sm font-medium text-gray-700 mb-1">Full Name <span class="text-red-500">*</span></label>
+                                <input type="text" id="full_name" name="full_name" value="{{ old('full_name') }}" required
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 @error('full_name') border-red-500 @enderror">
                             </div>
 
-                            <!-- Last Name -->
                             <div>
-                                <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                                <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}" required
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('last_name') border-red-500 @enderror"
-                                    placeholder="Doe">
+                                <label for="navras_naav" class="block text-sm font-medium text-gray-700 mb-1">Navras Naav</label>
+                                <input type="text" id="navras_naav" name="navras_naav" value="{{ old('navras_naav') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 @error('navras_naav') border-red-500 @enderror">
                             </div>
 
-                            <!-- Date of Birth -->
+                            <div>
+                                <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender <span class="text-red-500">*</span></label>
+                                <select id="gender" name="gender" required
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 @error('gender') border-red-500 @enderror">
+                                    <option value="">Select Gender</option>
+                                    <option value="male"   {{ old('gender') == 'male'   ? 'selected' : '' }}>Male</option>
+                                    <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
+                                    <option value="other"  {{ old('gender') == 'other'  ? 'selected' : '' }}>Other</option>
+                                </select>
+                            </div>
+
                             <div>
                                 <label for="date_of_birth" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
-                                <input type="text" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth') }}" required
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('date_of_birth') border-red-500 @enderror"
-                                    placeholder="dd-mm-yyyy" pattern="\d{2}-\d{2}-\d{4}" maxlength="10">
+                                <input type="date" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 @error('date_of_birth') border-red-500 @enderror">
                             </div>
 
-                            <!-- Gender -->
-                            <div>
-                                <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-                                <select id="gender" name="gender" required
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('gender') border-red-500 @enderror">
-                                    <option value="">Select Gender</option>
-                                    <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
-                                    <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
-                                </select>
-                            </div>
-
-                            <!-- Marital Status -->
                             <div>
                                 <label for="marital_status" class="block text-sm font-medium text-gray-700 mb-1">Marital Status</label>
-                                <select id="marital_status" name="marital_status" required
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('marital_status') border-red-500 @enderror">
+                                <select id="marital_status" name="marital_status"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 @error('marital_status') border-red-500 @enderror">
                                     <option value="">Select Status</option>
-                                    <option value="single" {{ old('marital_status') == 'single' ? 'selected' : '' }}>Single</option>
-                                    <option value="divorced" {{ old('marital_status') == 'divorced' ? 'selected' : '' }}>Divorced</option>
-                                    <option value="widowed" {{ old('marital_status') == 'widowed' ? 'selected' : '' }}>Widowed</option>
+                                    <option value="Single"   {{ old('marital_status') == 'Single'   ? 'selected' : '' }}>Single</option>
+                                    <option value="Married"  {{ old('marital_status') == 'Married'  ? 'selected' : '' }}>Married</option>
+                                    <option value="Divorced" {{ old('marital_status') == 'Divorced' ? 'selected' : '' }}>Divorced</option>
+                                    <option value="Widowed"  {{ old('marital_status') == 'Widowed'  ? 'selected' : '' }}>Widowed</option>
                                 </select>
                             </div>
 
-                            <!-- Phone Number -->
                             <div>
-                                <label for="phone_number" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                                <div class="relative flex">
-                                    <span class="inline-flex items-center px-3 text-sm text-gray-500 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg">+91</span>
-                                    <input type="tel" id="phone_number" name="phone_number" value="{{ old('phone_number') }}" required
-                                        class="block w-full px-4 py-3 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('phone_number') border-red-500 @enderror"
-                                        placeholder="98765 43210">
-                                </div>
+                                <label for="height_cm__Oonchi" class="block text-sm font-medium text-gray-700 mb-1">Height (Oonchi)</label>
+                                <input type="text" id="height_cm__Oonchi" name="height_cm__Oonchi" value="{{ old('height_cm__Oonchi') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 @error('height_cm__Oonchi') border-red-500 @enderror">
+                            </div>
+
+                            <div>
+                                <label for="skin_complexion__Rang" class="block text-sm font-medium text-gray-700 mb-1">Skin Complexion (Rang)</label>
+                                <input type="text" id="skin_complexion__Rang" name="skin_complexion__Rang" value="{{ old('skin_complexion__Rang') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 @error('skin_complexion__Rang') border-red-500 @enderror">
                             </div>
                         </div>
 
-                        <!-- Profile Picture -->
-                        <div class="mt-5">
-                            <label for="profile_picture" class="block text-sm font-medium text-gray-700 mb-1">Profile Picture</label>
-                            <div class="flex items-center space-x-4">
-                                <div class="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden" id="preview-container">
-                                    <svg class="w-10 h-10 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <input type="file" id="profile_picture" name="profile_picture" accept="image/*" required
-                                    class="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-pink-50 file:text-pink-600 hover:file:bg-pink-100 transition">
-                            </div>
-                        </div>
+                        <!-- Photo Upload -->
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <h3 class="text-base font-semibold text-gray-900 mb-1">Profile Photos</h3>
+                            <p class="text-sm text-gray-500 mb-4">Upload up to 3 photos. The one you mark as primary will be shown on your card. Photo 1 is primary by default.</p>
 
-                        <!-- Bio -->
-                        <div class="mt-5">
-                            <label for="bio" class="block text-sm font-medium text-gray-700 mb-1">About Me</label>
-                            <textarea id="bio" name="bio" rows="3" required
-                                class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('bio') border-red-500 @enderror"
-                                placeholder="Tell us a little about yourself...">{{ old('bio') }}</textarea>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="photo-upload-grid">
+                                @foreach ([1, 2, 3] as $slot)
+                                    <div class="flex flex-col items-center gap-2" id="photo-slot-{{ $slot }}">
+                                        {{-- Preview area --}}
+                                        <div class="relative w-full aspect-square rounded-xl border-2 border-dashed border-gray-300 overflow-hidden bg-gray-50 hover:border-pink-400 transition cursor-pointer"
+                                             id="preview-box-{{ $slot }}"
+                                             onclick="document.getElementById('image-input-{{ $slot }}').click()">
+                                            <img id="preview-img-{{ $slot }}"
+                                                 src=""
+                                                 alt="Photo {{ $slot }}"
+                                                 class="hidden w-full h-full object-cover">
+                                            <div id="preview-placeholder-{{ $slot }}" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-1">
+                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                </svg>
+                                                <span class="text-xs font-medium">Photo {{ $slot }}</span>
+                                                <span class="text-xs">Click to upload</span>
+                                            </div>
+                                        </div>
+
+                                        {{-- Hidden file input — name uses 1-based slot key --}}
+                                        <input type="file"
+                                               id="image-input-{{ $slot }}"
+                                               name="images[{{ $slot }}]"
+                                               accept="image/jpeg,image/png,image/webp"
+                                               class="hidden"
+                                               onchange="previewPhoto({{ $slot }}, this)">
+
+                                        {{-- Primary radio --}}
+                                        <label class="flex items-center gap-1.5 text-sm cursor-pointer select-none"
+                                               id="primary-label-{{ $slot }}">
+                                            <input type="radio"
+                                                   name="primary_image"
+                                                   value="{{ $slot }}"
+                                                   id="primary-radio-{{ $slot }}"
+                                                   {{ $slot === 1 ? 'checked' : '' }}
+                                                   class="accent-pink-600 cursor-pointer">
+                                            <span class="text-gray-600">{{ $slot === 1 ? 'Primary (default)' : 'Set as primary' }}</span>
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Step 2: Background & Location -->
+                    <!-- Step 2: Horoscope & Education -->
                     <div id="step2" class="step-content hidden">
-                        <h2 class="text-xl font-bold text-gray-900 mb-6">Background & Location</h2>
-                        
+                        <h2 class="text-xl font-bold text-gray-900 mb-6">Horoscope, Education & Profession</h2>
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                            <!-- Religion -->
                             <div>
-                                <label for="religion" class="block text-sm font-medium text-gray-700 mb-1">Religion</label>
-                                <input type="text" id="religion" name="religion" value="{{ old('religion') }}" required
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('religion') border-red-500 @enderror"
-                                    placeholder="e.g., Hindu, Muslim, Christian">
+                                <label for="day_and_time_of_birth" class="block text-sm font-medium text-gray-700 mb-1">Day and Time of Birth</label>
+                                <input type="text" id="day_and_time_of_birth" name="day_and_time_of_birth" value="{{ old('day_and_time_of_birth') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
                             </div>
-
-                            <!-- Caste -->
                             <div>
-                                <label for="caste" class="block text-sm font-medium text-gray-700 mb-1">Caste</label>
-                                <input type="text" id="caste" name="caste" value="{{ old('caste') }}" required
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('caste') border-red-500 @enderror"
-                                    placeholder="Enter your caste">
+                                <label for="place_of_birth" class="block text-sm font-medium text-gray-700 mb-1">Place of Birth</label>
+                                <input type="text" id="place_of_birth" name="place_of_birth" value="{{ old('place_of_birth') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
                             </div>
-
-                            <!-- Mother Tongue -->
                             <div>
-                                <label for="mother_tongue" class="block text-sm font-medium text-gray-700 mb-1">Mother Tongue</label>
-                                <input type="text" id="mother_tongue" name="mother_tongue" value="{{ old('mother_tongue') }}" required
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('mother_tongue') border-red-500 @enderror"
-                                    placeholder="e.g., Hindi, Tamil, Telugu">
+                                <label for="zodiac_sign__Raas" class="block text-sm font-medium text-gray-700 mb-1">Zodiac Sign (Raas)</label>
+                                <input type="text" id="zodiac_sign__Raas" name="zodiac_sign__Raas" value="{{ old('zodiac_sign__Raas') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
                             </div>
-
-                            <!-- Education -->
+                            <div>
+                                <label for="naadi" class="block text-sm font-medium text-gray-700 mb-1">Naadi</label>
+                                <input type="text" id="naadi" name="naadi" value="{{ old('naadi') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
+                            </div>
+                            <div>
+                                <label for="gann" class="block text-sm font-medium text-gray-700 mb-1">Gann</label>
+                                <input type="text" id="gann" name="gann" value="{{ old('gann') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
+                            </div>
+                            <div>
+                                <label for="jaath" class="block text-sm font-medium text-gray-700 mb-1">Religion / Jaath</label>
+                                <input type="text" id="jaath" name="jaath" value="{{ old('jaath') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
+                            </div>
+                            <div>
+                                <label for="devak" class="block text-sm font-medium text-gray-700 mb-1">Devak</label>
+                                <input type="text" id="devak" name="devak" value="{{ old('devak') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
+                            </div>
+                            <div>
+                                <label for="kul_devata" class="block text-sm font-medium text-gray-700 mb-1">Kul Devata</label>
+                                <input type="text" id="kul_devata" name="kul_devata" value="{{ old('kul_devata') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
+                            </div>
                             <div>
                                 <label for="education" class="block text-sm font-medium text-gray-700 mb-1">Education</label>
-                                <input type="text" id="education" name="education" value="{{ old('education') }}" required
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('education') border-red-500 @enderror"
-                                    placeholder="e.g., B.Tech, MBA, MBBS">
+                                <input type="text" id="education" name="education" value="{{ old('education') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
                             </div>
-
-                            <!-- Occupation -->
                             <div>
                                 <label for="occupation" class="block text-sm font-medium text-gray-700 mb-1">Occupation</label>
-                                <input type="text" id="occupation" name="occupation" value="{{ old('occupation') }}" required
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('occupation') border-red-500 @enderror"
-                                    placeholder="e.g., Software Engineer, Doctor">
+                                <input type="text" id="occupation" name="occupation" value="{{ old('occupation') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
                             </div>
-
-                            <!-- Annual Income -->
                             <div>
-                                <label for="annual_income" class="block text-sm font-medium text-gray-700 mb-1">Annual Income (₹)</label>
-                                <input type="number" id="annual_income" name="annual_income" value="{{ old('annual_income') }}" required min="0" step="1000"
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('annual_income') border-red-500 @enderror"
-                                    placeholder="e.g., 500000">
+                                <label for="annual_income" class="block text-sm font-medium text-gray-700 mb-1">Annual Income</label>
+                                <input type="number" step="0.01" id="annual_income" name="annual_income" value="{{ old('annual_income') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
                             </div>
-
-                            <!-- State -->
-                            <div>
-                                <label for="state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
-                                <input type="text" id="state" name="state" value="{{ old('state') }}" required
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('state') border-red-500 @enderror"
-                                    placeholder="e.g., Maharashtra, Karnataka">
-                            </div>
-
-                            <!-- City -->
-                            <div>
-                                <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
-                                <input type="text" id="city" name="city" value="{{ old('city') }}" required
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('city') border-red-500 @enderror"
-                                    placeholder="e.g., Mumbai, Bangalore">
-                            </div>
-                        </div>
-
-                        <!-- Address -->
-                        <div class="mt-5">
-                            <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                            <textarea id="address" name="address" rows="2" required
-                                class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('address') border-red-500 @enderror"
-                                placeholder="Enter your full address">{{ old('address') }}</textarea>
                         </div>
                     </div>
 
-                    <!-- Step 3: Lifestyle & Preferences -->
+                    <!-- Step 3: Family Details -->
                     <div id="step3" class="step-content hidden">
-                        <h2 class="text-xl font-bold text-gray-900 mb-6">Lifestyle & Preferences</h2>
-                        
+                        <h2 class="text-xl font-bold text-gray-900 mb-6">Family Details</h2>
+
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                            <!-- Height -->
                             <div>
-                                <label for="height_cm" class="block text-sm font-medium text-gray-700 mb-1">Height (cm)</label>
-                                <input type="number" id="height_cm" name="height_cm" value="{{ old('height_cm') }}" required min="100" max="250"
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('height_cm') border-red-500 @enderror"
-                                    placeholder="e.g., 170">
+                                <label for="fathers_name" class="block text-sm font-medium text-gray-700 mb-1">Father's Name</label>
+                                <input type="text" id="fathers_name" name="fathers_name" value="{{ old('fathers_name') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
+                            </div>
+                            <div>
+                                <label for="mothers_name" class="block text-sm font-medium text-gray-700 mb-1">Mother's Name</label>
+                                <input type="text" id="mothers_name" name="mothers_name" value="{{ old('mothers_name') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
                             </div>
 
-                            <!-- Weight -->
-                            <div>
-                                <label for="weight_kg" class="block text-sm font-medium text-gray-700 mb-1">Weight (kg)</label>
-                                <input type="number" id="weight_kg" name="weight_kg" value="{{ old('weight_kg') }}" required min="30" max="200" step="0.1"
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('weight_kg') border-red-500 @enderror"
-                                    placeholder="e.g., 65">
-                            </div>
-
-                            <!-- Dietary Preferences -->
-                            <div>
-                                <label for="dietary_preferences" class="block text-sm font-medium text-gray-700 mb-1">Dietary Preference</label>
-                                <select id="dietary_preferences" name="dietary_preferences" required
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('dietary_preferences') border-red-500 @enderror">
-                                    <option value="">Select Preference</option>
-                                    <option value="vegetarian" {{ old('dietary_preferences') == 'vegetarian' ? 'selected' : '' }}>Vegetarian</option>
-                                    <option value="non-vegetarian" {{ old('dietary_preferences') == 'non-vegetarian' ? 'selected' : '' }}>Non-Vegetarian</option>
-                                    <option value="vegan" {{ old('dietary_preferences') == 'vegan' ? 'selected' : '' }}>Vegan</option>
-                                </select>
-                            </div>
-
-                            <!-- Smoking Habits -->
-                            <div>
-                                <label for="smoking_habits" class="block text-sm font-medium text-gray-700 mb-1">Smoking Habits</label>
-                                <select id="smoking_habits" name="smoking_habits" required
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('smoking_habits') border-red-500 @enderror">
-                                    <option value="">Select Option</option>
-                                    <option value="non-smoker" {{ old('smoking_habits') == 'non-smoker' ? 'selected' : '' }}>Non-Smoker</option>
-                                    <option value="occasional" {{ old('smoking_habits') == 'occasional' ? 'selected' : '' }}>Occasional</option>
-                                    <option value="regular" {{ old('smoking_habits') == 'regular' ? 'selected' : '' }}>Regular</option>
-                                </select>
-                            </div>
-
-                            <!-- Drinking Habits -->
                             <div class="sm:col-span-2">
-                                <label for="drinking_habits" class="block text-sm font-medium text-gray-700 mb-1">Drinking Habits</label>
-                                <select id="drinking_habits" name="drinking_habits" required
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('drinking_habits') border-red-500 @enderror">
-                                    <option value="">Select Option</option>
-                                    <option value="non-drinker" {{ old('drinking_habits') == 'non-drinker' ? 'selected' : '' }}>Non-Drinker</option>
-                                    <option value="occasional" {{ old('drinking_habits') == 'occasional' ? 'selected' : '' }}>Occasional</option>
-                                    <option value="regular" {{ old('drinking_habits') == 'regular' ? 'selected' : '' }}>Regular</option>
-                                </select>
+                                <label for="siblings" class="block text-sm font-medium text-gray-700 mb-1">Siblings</label>
+                                <textarea id="siblings" name="siblings" rows="2"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">{{ old('siblings') }}</textarea>
                             </div>
-                        </div>
 
-                        <!-- Hobbies & Interests -->
-                        <div class="mt-5">
-                            <label for="hobbies_interests" class="block text-sm font-medium text-gray-700 mb-1">Hobbies & Interests</label>
-                            <textarea id="hobbies_interests" name="hobbies_interests" rows="3" required
-                                class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('hobbies_interests') border-red-500 @enderror"
-                                placeholder="e.g., Reading, Traveling, Music, Sports...">{{ old('hobbies_interests') }}</textarea>
+                            <div class="sm:col-span-2">
+                                <label for="uncles" class="block text-sm font-medium text-gray-700 mb-1">Uncles</label>
+                                <textarea id="uncles" name="uncles" rows="2"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">{{ old('uncles') }}</textarea>
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label for="aunts" class="block text-sm font-medium text-gray-700 mb-1">Aunts</label>
+                                <textarea id="aunts" name="aunts" rows="2"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">{{ old('aunts') }}</textarea>
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label for="naathe_relationships" class="block text-sm font-medium text-gray-700 mb-1">Naathe Relationships</label>
+                                <textarea id="naathe_relationships" name="naathe_relationships" rows="2"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">{{ old('naathe_relationships') }}</textarea>
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label for="mumbai_address" class="block text-sm font-medium text-gray-700 mb-1">Mumbai Address</label>
+                                <textarea id="mumbai_address" name="mumbai_address" rows="2"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">{{ old('mumbai_address') }}</textarea>
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label for="village_address" class="block text-sm font-medium text-gray-700 mb-1">Village Address</label>
+                                <textarea id="village_address" name="village_address" rows="2"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">{{ old('village_address') }}</textarea>
+                            </div>
+
+                            <div>
+                                <label for="village_farm" class="block text-sm font-medium text-gray-700 mb-1">Village Farm</label>
+                                <input type="text" id="village_farm" name="village_farm" value="{{ old('village_farm') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Navigation Buttons -->
-                    <div class="mt-8 flex justify-between">
-                        <button type="button" id="prev-btn" 
-                            class="hidden px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition">
-                            ← Previous
-                        </button>
-                        <div></div>
+                </form>
+                {{-- Navigation buttons are OUTSIDE the form so Enter / button clicks never accidentally submit --}}
+                <div class="mt-10 flex items-center justify-between border-t border-gray-200 pt-6">
+                    <button type="button" id="prev-btn"
+                        class="hidden px-6 py-3 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition">
+                        &larr; Back
+                    </button>
+
+                    <div class="ml-auto flex gap-3">
                         <button type="button" id="next-btn"
-                            class="px-6 py-3 bg-pink-600 text-white rounded-lg font-medium hover:bg-pink-700 transition transform hover:scale-[1.02]">
-                            Next →
+                            class="px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition">
+                            Continue &rarr;
                         </button>
-                        <button type="submit" id="submit-btn"
-                            class="hidden px-6 py-3 bg-pink-600 text-white rounded-lg font-medium hover:bg-pink-700 transition transform hover:scale-[1.02]">
+
+                        {{-- This button is outside the form so it must explicitly target the form via form= --}}
+                        <button type="submit" id="submit-btn" form="onboarding-form"
+                            class="hidden px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition">
                             Create Profile
                         </button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             let currentStep = 1;
             const totalSteps = 3;
 
             const steps = {
                 1: document.getElementById('step1'),
                 2: document.getElementById('step2'),
-                3: document.getElementById('step3')
+                3: document.getElementById('step3'),
             };
 
             const indicators = {
-                1: document.getElementById('step1-indicator'),
-                2: document.getElementById('step2-indicator'),
-                3: document.getElementById('step3-indicator')
+                1: document.getElementById('indicator-1'),
+                2: document.getElementById('indicator-2'),
+                3: document.getElementById('indicator-3'),
             };
 
-            const lines = {
-                1: document.getElementById('line1'),
-                2: document.getElementById('line2')
+            const labels = {
+                1: document.getElementById('label-1'),
+                2: document.getElementById('label-2'),
+                3: document.getElementById('label-3'),
             };
 
-            const prevBtn = document.getElementById('prev-btn');
-            const nextBtn = document.getElementById('next-btn');
-            const submitBtn = document.getElementById('submit-btn');
+            const prevBtn    = document.getElementById('prev-btn');
+            const nextBtn    = document.getElementById('next-btn');
+            const submitBtn  = document.getElementById('submit-btn');
+            const progressLine = document.getElementById('progress-line');
+
+            // ---- Photo preview ----
+            window.previewPhoto = function (slot, input) {
+                if (!input.files || !input.files[0]) return;
+                const file = input.files[0];
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.getElementById('preview-img-' + slot);
+                    const placeholder = document.getElementById('preview-placeholder-' + slot);
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            };
+
+            // Prevent Enter key from submitting the form while on step 1 or 2
+            document.getElementById('onboarding-form').addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    const tag = e.target.tagName.toLowerCase();
+                    // Allow Enter in textareas (multiline), block it everywhere else unless on last step
+                    if (tag !== 'textarea' && currentStep < totalSteps) {
+                        e.preventDefault();
+                        advanceStep();
+                    }
+                }
+            });
 
             function updateUI() {
-                // Hide all steps
-                Object.values(steps).forEach(step => step.classList.add('hidden'));
-                // Show current step
-                steps[currentStep].classList.remove('hidden');
+                // Progress line: 0% on step 1, 50% on step 2, 100% on step 3
+                const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+                progressLine.style.width = `${progress}%`;
 
-                // Update indicators
                 for (let i = 1; i <= totalSteps; i++) {
-                    if (i < currentStep) {
-                        // Completed
-                        indicators[i].classList.remove('bg-gray-300', 'text-gray-600');
-                        indicators[i].classList.add('bg-pink-600', 'text-white');
-                        indicators[i].innerHTML = '✓';
-                    } else if (i === currentStep) {
-                        // Current
-                        indicators[i].classList.remove('bg-gray-300', 'text-gray-600');
-                        indicators[i].classList.add('bg-pink-600', 'text-white');
-                        indicators[i].innerHTML = i;
+                    const ind = indicators[i];
+                    const lbl = labels[i];
+
+                    if (i === currentStep) {
+                        // Active step
+                        steps[i].classList.remove('hidden');
+                        steps[i].classList.add('block');
+                        ind.className = 'w-10 h-10 bg-pink-600 text-white rounded-full flex items-center justify-center font-bold shadow-md transition-colors duration-300';
+                        ind.innerHTML = i;
+                        lbl.className = 'mt-2 text-xs font-medium text-pink-600';
+                    } else if (i < currentStep) {
+                        // Completed step
+                        steps[i].classList.add('hidden');
+                        steps[i].classList.remove('block');
+                        ind.className = 'w-10 h-10 bg-pink-100 border-2 border-pink-500 text-pink-600 rounded-full flex items-center justify-center font-bold transition-colors duration-300';
+                        ind.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>';
+                        lbl.className = 'mt-2 text-xs font-medium text-pink-600';
                     } else {
-                        // Future
-                        indicators[i].classList.remove('bg-pink-600', 'text-white');
-                        indicators[i].classList.add('bg-gray-300', 'text-gray-600');
-                        indicators[i].innerHTML = i;
+                        // Future step
+                        steps[i].classList.add('hidden');
+                        steps[i].classList.remove('block');
+                        ind.className = 'w-10 h-10 bg-white border-2 border-gray-300 text-gray-400 rounded-full flex items-center justify-center font-bold transition-colors duration-300';
+                        ind.innerHTML = i;
+                        lbl.className = 'mt-2 text-xs font-medium text-gray-500';
                     }
                 }
 
-                // Update lines
-                for (let i = 1; i < totalSteps; i++) {
-                    if (i < currentStep) {
-                        lines[i].classList.remove('bg-gray-300');
-                        lines[i].classList.add('bg-pink-600');
-                    } else {
-                        lines[i].classList.remove('bg-pink-600');
-                        lines[i].classList.add('bg-gray-300');
-                    }
+                // Back button
+                if (currentStep === 1) {
+                    prevBtn.classList.add('hidden');
+                } else {
+                    prevBtn.classList.remove('hidden');
                 }
 
-                // Update buttons
-                prevBtn.classList.toggle('hidden', currentStep === 1);
-                nextBtn.classList.toggle('hidden', currentStep === totalSteps);
-                submitBtn.classList.toggle('hidden', currentStep !== totalSteps);
+                // Continue vs Submit
+                if (currentStep === totalSteps) {
+                    nextBtn.classList.add('hidden');
+                    submitBtn.classList.remove('hidden');
+                } else {
+                    nextBtn.classList.remove('hidden');
+                    submitBtn.classList.add('hidden');
+                }
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
             function validateCurrentStep() {
-                const currentStepEl = steps[currentStep];
-                const inputs = currentStepEl.querySelectorAll('input[required], select[required], textarea[required]');
-                let isValid = true;
+                const stepEl = steps[currentStep];
+                const required = stepEl.querySelectorAll('[required]');
+                let valid = true;
 
-                inputs.forEach(input => {
-                    if (!input.value.trim()) {
-                        input.classList.add('border-red-500');
-                        isValid = false;
+                required.forEach(function (field) {
+                    if (!field.value.trim()) {
+                        valid = false;
+                        field.classList.add('border-red-500');
+                        field.classList.remove('border-gray-300');
                     } else {
-                        input.classList.remove('border-red-500');
+                        field.classList.remove('border-red-500');
+                        field.classList.add('border-gray-300');
                     }
                 });
 
-                return isValid;
+                if (!valid) {
+                    // Scroll to the first invalid field
+                    const firstInvalid = stepEl.querySelector('.border-red-500');
+                    if (firstInvalid) {
+                        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstInvalid.focus();
+                    }
+                }
+
+                return valid;
             }
 
-            nextBtn.addEventListener('click', function() {
-                if (validateCurrentStep() && currentStep < totalSteps) {
+            function advanceStep() {
+                if (currentStep < totalSteps && validateCurrentStep()) {
                     currentStep++;
                     updateUI();
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
+            }
+
+            nextBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                advanceStep();
             });
 
-            prevBtn.addEventListener('click', function() {
+            prevBtn.addEventListener('click', function (e) {
+                e.preventDefault();
                 if (currentStep > 1) {
                     currentStep--;
                     updateUI();
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             });
 
-            // Profile picture preview
-            const profileInput = document.getElementById('profile_picture');
-            const previewContainer = document.getElementById('preview-container');
-
-            profileInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        previewContainer.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-
+            // Initialise
             updateUI();
         });
     </script>

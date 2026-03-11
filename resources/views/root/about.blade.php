@@ -50,7 +50,7 @@
                     </div>
                     <div>
                         <h3 class="font-semibold text-gray-900">Advanced Filters</h3>
-                        <p class="text-sm text-gray-500 mt-1">Search by religion, city, age, and more to find your ideal match.</p>
+                        <p class="text-sm text-gray-500 mt-1">Search by religion/jaath, city, age, and more to find your ideal match.</p>
                     </div>
                 </div>
                 <div class="flex gap-4">

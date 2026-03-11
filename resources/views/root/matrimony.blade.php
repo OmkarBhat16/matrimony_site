@@ -1,4 +1,7 @@
 <x-layout title="Matrimony">
+    @php
+        $showFilters = auth()->check() && auth()->user()->approved;
+    @endphp
     {{-- Pending Approval Banner --}}
     @auth
         @unless (auth()->user()->approved)
@@ -32,7 +35,7 @@
                         </svg>
                         <h2 class="text-sm font-semibold text-gray-900">Filter Profiles</h2>
                     </div>
-                    @if (request()->hasAny(['gender', 'religion', 'city', 'age_min', 'age_max']))
+                    @if (request()->hasAny(['gender', 'jaath', 'city', 'age_min', 'age_max']))
                         <a href="{{ route('root.matrimony') }}" class="text-xs text-pink-600 hover:text-pink-700 font-medium flex items-center gap-1">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             Clear all
@@ -47,7 +50,7 @@
                             <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Gender</label>
                             <input type="hidden" name="gender" :value="selected">
                             <button type="button" @click="open = !open" @click.outside="open = false" class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-left hover:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-400 transition">
-                                <span :class="selected ? 'text-gray-900' : 'text-gray-400'" x-text="selected ? (selected === 'male' ? 'Male' : 'Female') : 'Any gender'"></span>
+                                <span :class="selected ? 'text-gray-900' : 'text-gray-400'" x-text="selected ? (selected === 'male' ? 'Male' : (selected === 'female' ? 'Female' : 'Other')) : 'Any gender'"></span>
                                 <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </button>
                             <div x-show="open" x-transition.opacity.duration.150ms class="absolute z-20 mt-1.5 w-full bg-white border border-gray-200 rounded-lg shadow-lg py-1">
@@ -57,22 +60,22 @@
                             </div>
                         </div>
 
-                        {{-- Religion Dropdown --}}
-                        <div x-data="{ open: false, selected: '{{ request('religion', '') }}', search: '' }" class="relative">
-                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Religion</label>
-                            <input type="hidden" name="religion" :value="selected">
-                            <button type="button" @click="open = !open; $nextTick(() => $refs.religionSearch?.focus())" @click.outside="open = false" class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-left hover:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-400 transition">
-                                <span :class="selected ? 'text-gray-900' : 'text-gray-400'" x-text="selected || 'Any religion'" class="truncate"></span>
+                        {{-- Religion / Jaath Dropdown --}}
+                        <div x-data="{ open: false, selected: '{{ request('jaath', '') }}', search: '' }" class="relative">
+                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Religion / Jaath</label>
+                            <input type="hidden" name="jaath" :value="selected">
+                            <button type="button" @click="open = !open; $nextTick(() => $refs.jaathSearch?.focus())" @click.outside="open = false" class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-left hover:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-400 transition">
+                                <span :class="selected ? 'text-gray-900' : 'text-gray-400'" x-text="selected || 'Any jaath'" class="truncate"></span>
                                 <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </button>
                             <div x-show="open" x-transition.opacity.duration.150ms class="absolute z-20 mt-1.5 w-full bg-white border border-gray-200 rounded-lg shadow-lg py-1">
                                 <div class="px-3 py-1.5">
-                                    <input x-ref="religionSearch" x-model="search" type="text" placeholder="Search..." class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-pink-400">
+                                    <input x-ref="jaathSearch" x-model="search" type="text" placeholder="Search..." class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-pink-400">
                                 </div>
                                 <div class="max-h-40 overflow-y-auto">
-                                    <button type="button" @click="selected = ''; open = false; search = ''" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="!selected && 'text-pink-600 font-medium'">Any religion</button>
-                                    @foreach ($religions as $religion)
-                                        <button type="button" x-show="!search || '{{ strtolower($religion) }}'.includes(search.toLowerCase())" @click="selected = '{{ $religion }}'; open = false; search = ''" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="selected === '{{ $religion }}' && 'text-pink-600 font-medium'">{{ ucfirst($religion) }}</button>
+                                    <button type="button" @click="selected = ''; open = false; search = ''" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="!selected && 'text-pink-600 font-medium'">Any jaath</button>
+                                    @foreach ($jaaths as $jaath)
+                                        <button type="button" x-show="!search || '{{ strtolower($jaath) }}'.includes(search.toLowerCase())" @click="selected = '{{ addslashes($jaath) }}'; open = false; search = ''" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="selected === '{{ addslashes($jaath) }}' && 'text-pink-600 font-medium'">{{ ucfirst($jaath) }}</button>
                                     @endforeach
                                 </div>
                             </div>
@@ -93,7 +96,7 @@
                                 <div class="max-h-40 overflow-y-auto">
                                     <button type="button" @click="selected = ''; open = false; search = ''" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="!selected && 'text-pink-600 font-medium'">Any city</button>
                                     @foreach ($cities as $city)
-                                        <button type="button" x-show="!search || '{{ strtolower($city) }}'.includes(search.toLowerCase())" @click="selected = '{{ $city }}'; open = false; search = ''" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="selected === '{{ $city }}' && 'text-pink-600 font-medium'">{{ $city }}</button>
+                                        <button type="button" x-show="!search || '{{ strtolower($city) }}'.includes(search.toLowerCase())" @click="selected = '{{ addslashes($city) }}'; open = false; search = ''" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="selected === '{{ addslashes($city) }}' && 'text-pink-600 font-medium'">{{ $city }}</button>
                                     @endforeach
                                 </div>
                             </div>

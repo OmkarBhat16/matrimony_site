@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,30 +18,49 @@ class UserProfileFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => \App\Models\User::factory(),
-            'first_name' => fake()->firstName(),
-            'last_name' => fake()->lastName(),
-            'date_of_birth' => fake()->date(),
-            'gender' => fake()->randomElement(['male', 'female']),
-            'address' => fake()->address(),
-            'phone_number' => fake()->unique()->phoneNumber(),
-            'bio' => fake()->paragraph(),
-            'profile_picture' => 'https://www.loremfaces.net/96/id/' . fake()->numberBetween(1, 5) . '.jpg',
-            'marital_status' => fake()->randomElement(['single', 'married', 'divorced', 'widowed']),
-            'education' => fake()->word(),
-            'occupation' => fake()->jobTitle(),
-            'annual_income' => fake()->randomFloat(2, 10000, 1000000),
-            'religion' => fake()->word(),
-            'caste' => fake()->word(),
-            'mother_tongue' => fake()->languageCode(),
-            'state' => fake()->state(),
-            'city' => fake()->city(),
-            'height_cm' => fake()->numberBetween(150, 200),
-            'weight_kg' => fake()->randomFloat(2, 40, 120),
-            'dietary_preferences' => fake()->randomElement(['vegetarian', 'non-vegetarian', 'vegan']),
-            'smoking_habits' => fake()->randomElement(['non-smoker', 'occasional', 'regular']),
-            'drinking_habits' => fake()->randomElement(['non-drinker', 'occasional', 'regular']),
-            'hobbies_interests' => fake()->sentence(),
+            "user_id" => User::factory(),
+            "full_name" => $this->faker->name(),
+            "navras_naav" => $this->faker->firstName(),
+            "gender" => $this->faker->randomElement([
+                "male",
+                "female",
+                "other",
+            ]),
+            "education" => $this->faker->word(),
+            "occupation" => $this->faker->jobTitle(),
+            "annual_income" => $this->faker->randomFloat(2, 100000, 5000000),
+            "date_of_birth" => $this->faker
+                ->dateTimeBetween("-40 years", "-18 years")
+                ->format("Y-m-d"),
+            "day_and_time_of_birth" =>
+                $this->faker->dayOfWeek() . " " . $this->faker->time(),
+            "place_of_birth" => $this->faker->city(),
+            "jaath" => $this->faker->word(),
+            "height_cm__Oonchi" => (string) $this->faker->numberBetween(
+                140,
+                195,
+            ),
+            "skin_complexion__Rang" => $this->faker->word(),
+            "zodiac_sign__Raas" => $this->faker->word(),
+            "naadi" => $this->faker->word(),
+            "gann" => $this->faker->word(),
+            "devak" => $this->faker->word(),
+            "kul_devata" => $this->faker->word(),
+            "fathers_name" => $this->faker->name("male"),
+            "mothers_name" => $this->faker->name("female"),
+            "marital_status" => $this->faker->randomElement([
+                "single",
+                "married",
+                "divorced",
+                "widowed",
+            ]),
+            "siblings" => $this->faker->sentence(),
+            "uncles" => $this->faker->sentence(),
+            "aunts" => $this->faker->sentence(),
+            "mumbai_address" => $this->faker->address(),
+            "village_address" => $this->faker->address(),
+            "village_farm" => $this->faker->word(),
+            "naathe_relationships" => $this->faker->text(),
         ];
     }
 }

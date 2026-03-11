@@ -3,83 +3,91 @@
 namespace App\Http\Controllers;
 
 use App\Models\UserProfile;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Carbon\Carbon;
 
 class MatrimonyController extends Controller
 {
-    public function index(Request $request): View|RedirectResponse
+    /**
+     * Display a listing of profiles.
+     */
+    public function index(Request $request)
     {
         $user = auth()->user();
 
-        // Approved user with no profile → redirect to onboarding
-        if ($user && $user->approved && !$user->profile()->exists()) {
-            return redirect()->route('onboarding.create');
-        }
+        $showFilters = $user && $user->approved;
 
-        // Build query for approved users' profiles (exclude current user)
-        $query = UserProfile::query()
-            ->whereHas('user', fn ($q) => $q->where('approved', true))
-            ->with('user');
+        $query = UserProfile::query()->whereHas(
+            "user",
+            fn($q) => $q->where("approved", true),
+        );
 
+        // Exclude current user from the results
         if ($user) {
-            $query->where('user_id', '!=', $user->id);
+            $query->where("user_id", "!=", $user->id);
         }
-
-        // Apply filters for authenticated approved users with profiles
-        $showFilters = $user && $user->approved && $user->profile()->exists();
 
         if ($showFilters) {
-            if ($request->filled('gender')) {
-                $query->where('gender', $request->input('gender'));
+            if ($request->filled("gender")) {
+                $query->where("gender", $request->input("gender"));
             }
-            if ($request->filled('religion')) {
-                $query->where('religion', 'like', '%' . $request->input('religion') . '%');
+            if ($request->filled("jaath")) {
+                $query->where(
+                    "jaath",
+                    "like",
+                    "%" . $request->input("jaath") . "%",
+                );
             }
-            if ($request->filled('city')) {
-                $query->where('city', 'like', '%' . $request->input('city') . '%');
+            if ($request->filled("city")) {
+                $query->where(function ($q) use ($request) {
+                    $city = $request->input("city");
+                    $q->where("place_of_birth", "like", "%" . $city . "%")
+                        ->orWhere("mumbai_address", "like", "%" . $city . "%")
+                        ->orWhere("village_address", "like", "%" . $city . "%");
+                });
             }
-            if ($request->filled('age_min')) {
-                $query->whereDate('date_of_birth', '<=', now()->subYears((int) $request->input('age_min')));
+
+            if ($request->filled("age_min")) {
+                $query->whereDate(
+                    "date_of_birth",
+                    "<=",
+                    Carbon::now()
+                        ->subYears($request->input("age_min"))
+                        ->format("Y-m-d"),
+                );
             }
-            if ($request->filled('age_max')) {
-                $query->whereDate('date_of_birth', '>=', now()->subYears((int) $request->input('age_max')));
+            if ($request->filled("age_max")) {
+                // If they specify max age 30, they can be up to 30.99 years old
+                $query->whereDate(
+                    "date_of_birth",
+                    ">=",
+                    Carbon::now()
+                        ->subYears($request->input("age_max") + 1)
+                        ->format("Y-m-d"),
+                );
             }
         }
 
         $profiles = $query->latest()->paginate(12)->withQueryString();
 
-        if(!auth()->check()) {
-            $profiles = $profiles->take(6); // Show only 6 profiles to guests
-        }
+        $cities = UserProfile::query()
+            ->whereHas("user", fn($q) => $q->where("approved", true))
+            ->whereNotNull("place_of_birth")
+            ->distinct()
+            ->orderBy("place_of_birth")
+            ->pluck("place_of_birth");
 
-        $religions = [];
-        $cities = [];
+        $jaaths = UserProfile::query()
+            ->whereHas("user", fn($q) => $q->where("approved", true))
+            ->whereNotNull("jaath")
+            ->distinct()
+            ->orderBy("jaath")
+            ->pluck("jaath");
 
-        if ($showFilters) {
-            $religions = UserProfile::query()
-                ->whereHas('user', fn ($q) => $q->where('approved', true))
-                ->whereNotNull('religion')
-                ->distinct()
-                ->orderBy('religion')
-                ->pluck('religion')
-                ->all();
-
-            $cities = UserProfile::query()
-                ->whereHas('user', fn ($q) => $q->where('approved', true))
-                ->whereNotNull('city')
-                ->distinct()
-                ->orderBy('city')
-                ->pluck('city')
-                ->all();
-        }
-
-        return view('root.matrimony', [
-            'profiles' => $profiles,
-            'showFilters' => $showFilters,
-            'religions' => $religions,
-            'cities' => $cities,
+        return view("root.matrimony", [
+            "profiles" => $profiles,
+            "cities" => $cities,
+            "jaaths" => $jaaths,
         ]);
     }
 }

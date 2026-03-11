@@ -15,22 +15,22 @@ class LoginController extends Controller
     public function __invoke(Request $request)
     {
         $credentials = $request->validate([
-            'username' => ['required', 'string'],
-            'password' => ['required'],
+            "email" => ["required", "email"],
+            "password" => ["required"],
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (Auth::attempt($credentials, $request->boolean("remember"))) {
             $request->session()->regenerate();
 
             if (auth()->user()->profile()->exists()) {
-                return redirect()->intended('/matrimony');
+                return redirect()->intended("/matrimony");
             } else {
-                return redirect()->intended('/onboarding/create');
+                return redirect()->intended("/onboarding/create");
             }
         }
 
         throw ValidationException::withMessages([
-            'email' => 'The provided credentials do not match our records.',
+            "email" => "The provided credentials do not match our records.",
         ]);
     }
 }

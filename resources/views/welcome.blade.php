@@ -87,7 +87,7 @@
                         </svg>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900">2. Browse & Filter</h3>
-                    <p class="mt-2 text-sm text-gray-500">Search verified profiles by religion, city, age, and more to find compatible matches.</p>
+                    <p class="mt-2 text-sm text-gray-500">Search verified profiles by religion/jaath, city, age, and more to find compatible matches.</p>
                 </div>
                 <div class="text-center">
                     <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">

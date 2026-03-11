@@ -37,8 +37,8 @@
 
                     <!-- Email Field -->
                     <div>
-                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
-                            Username
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                            Email
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -48,13 +48,13 @@
                                 </svg>
                             </div>
                             <input
-                                id="username"
-                                name="username"
-                                type="text"
-                                autocomplete="username"
+                                id="email"
+                                name="email"
+                                type="email"
+                                autocomplete="email"
                                 required
-                                value="{{ old('username') }}"
-                                class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('username') border-red-500 @enderror"
+                                value="{{ old('email') }}"
+                                class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('email') border-red-500 @enderror"
                                 placeholder="you@example.com"
                             >
                         </div>
