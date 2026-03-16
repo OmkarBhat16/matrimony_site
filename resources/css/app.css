@@ -66,8 +66,6 @@
     --color-green-900: hsl(144 61% 20%);
     --color-green-950: hsl(145 80% 10%);
 
-// existing theme
-
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
