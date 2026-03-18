@@ -40,7 +40,7 @@
                     </a>
                 </div>
 
-                <!-- Auth Buttons -->
+                <!-- Auth Buttons + Language Toggle -->
                 <div class="hidden md:flex items-center gap-3">
                     @guest
                         <a href="{{ route('login') }}" class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-pink-600 transition">
@@ -65,6 +65,15 @@
                             </button>
                         </form>
                     @endguest
+
+                    <div class="flex items-center bg-white border border-gray-200 rounded-lg shadow-sm p-1">
+                        <button type="button" class="lang-toggle-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-colors" data-lang-btn data-lang="en" aria-pressed="false">
+                            English
+                        </button>
+                        <button type="button" class="lang-toggle-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-colors" data-lang-btn data-lang="mr" aria-pressed="false">
+                            मराठी
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Mobile Menu Button -->
@@ -81,6 +90,16 @@
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100">
             <div class="px-4 py-3 space-y-1">
+                <div class="pt-1 pb-3">
+                    <div class="flex items-center bg-white border border-gray-200 rounded-lg shadow-sm p-1 w-max">
+                        <button type="button" class="lang-toggle-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-colors" data-lang-btn data-lang="en" aria-pressed="false">
+                            English
+                        </button>
+                        <button type="button" class="lang-toggle-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-colors" data-lang-btn data-lang="mr" aria-pressed="false">
+                            मराठी
+                        </button>
+                    </div>
+                </div>
                 <a href="{{ url('/') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->is('/') ? 'text-pink-600 bg-pink-50' : 'text-gray-600 hover:text-pink-600 hover:bg-pink-50' }}">Home</a>
                 <a href="{{ route('root.matrimony') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('root.matrimony') ? 'text-pink-600 bg-pink-50' : 'text-gray-600 hover:text-pink-600 hover:bg-pink-50' }}">Matrimony</a>
                 <a href="{{ route('root.about') }}" class="block px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('root.about') ? 'text-pink-600 bg-pink-50' : 'text-gray-600 hover:text-pink-600 hover:bg-pink-50' }}">About Us</a>
@@ -167,6 +186,91 @@
         document.getElementById('mobile-menu-btn').addEventListener('click', function() {
             document.getElementById('mobile-menu').classList.toggle('hidden');
         });
+    </script>
+    <script>
+        (function () {
+            const STORAGE_KEY = 'matrimony_lang';
+            const DEFAULT_LANG = 'mr';
+            const activeClasses = 'bg-pink-100 text-pink-700 shadow-sm';
+            const inactiveClasses = 'text-gray-500 hover:text-gray-900';
+
+            function normalizeLang(lang) {
+                return lang === 'mr' ? 'mr' : 'en';
+            }
+
+            function updateToggleStates(lang) {
+                document.querySelectorAll('[data-lang-btn]').forEach(btn => {
+                    const isActive = btn.dataset.lang === lang;
+                    btn.classList.toggle('bg-pink-100', isActive);
+                    btn.classList.toggle('text-pink-700', isActive);
+                    btn.classList.toggle('shadow-sm', isActive);
+                    btn.classList.toggle('text-gray-500', !isActive);
+                    btn.classList.toggle('hover:text-gray-900', !isActive);
+                    btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                });
+
+                const legacyEn = document.getElementById('lang-btn-en');
+                const legacyMr = document.getElementById('lang-btn-mr');
+                if (legacyEn && legacyMr) {
+                    if (lang === 'mr') {
+                        legacyMr.className = `px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${activeClasses}`;
+                        legacyEn.className = `px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${inactiveClasses}`;
+                    } else {
+                        legacyEn.className = `px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${activeClasses}`;
+                        legacyMr.className = `px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${inactiveClasses}`;
+                    }
+                }
+            }
+
+            function applyLanguage(lang) {
+                const normalized = normalizeLang(lang);
+                document.documentElement.setAttribute('lang', normalized);
+
+                document.querySelectorAll('.lang-label').forEach(el => {
+                    const text = normalized === 'mr' ? el.dataset.mr : el.dataset.en;
+                    if (text) el.textContent = text;
+                });
+
+                document.querySelectorAll('[data-placeholder-en],[data-placeholder-mr]').forEach(el => {
+                    const text = normalized === 'mr' ? el.dataset.placeholderMr : el.dataset.placeholderEn;
+                    if (typeof text !== 'undefined') el.setAttribute('placeholder', text);
+                });
+
+                document.querySelectorAll('[data-alt-en],[data-alt-mr]').forEach(el => {
+                    const text = normalized === 'mr' ? el.dataset.altMr : el.dataset.altEn;
+                    if (typeof text !== 'undefined') el.setAttribute('alt', text);
+                });
+
+                updateToggleStates(normalized);
+            }
+
+            function setLanguage(lang) {
+                const normalized = normalizeLang(lang);
+                localStorage.setItem(STORAGE_KEY, normalized);
+                applyLanguage(normalized);
+            }
+
+            function initLanguageToggle() {
+                let saved = localStorage.getItem(STORAGE_KEY);
+                if (!saved) {
+                    saved = DEFAULT_LANG;
+                    localStorage.setItem(STORAGE_KEY, saved);
+                }
+                applyLanguage(saved);
+
+                document.querySelectorAll('[data-lang-btn]').forEach(btn => {
+                    btn.addEventListener('click', () => setLanguage(btn.dataset.lang));
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initLanguageToggle);
+            } else {
+                initLanguageToggle();
+            }
+
+            window.setLanguage = setLanguage;
+        })();
     </script>
 </body>
 </html>

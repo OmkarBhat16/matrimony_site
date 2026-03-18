@@ -5,10 +5,10 @@
         <div class="max-w-md w-full space-y-8">
             <!-- Header -->
             <div class="text-center">
-                <h2 class="text-3xl font-extrabold text-gray-900">
+                <h2 class="lang-label text-3xl font-extrabold text-gray-900" data-en="Register Your Interest" data-mr="आपली रुची नोंदवा">
                     Register Your Interest
                 </h2>
-                <p class="mt-2 text-sm text-gray-600">
+                <p class="lang-label mt-2 text-sm text-gray-600" data-en="Submit your details and an admin will create your account" data-mr="तुमची माहिती सबमिट करा आणि प्रशासक तुमचे खाते तयार करतील">
                     Submit your details and an admin will create your account
                 </p>
             </div>
@@ -32,7 +32,7 @@
                     <!-- Name Field -->
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-                            Full Name <span class="text-red-500">*</span>
+                            <span class="lang-label" data-en="Full Name" data-mr="पूर्ण नाव">Full Name</span> <span class="text-red-500">*</span>
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -49,6 +49,8 @@
                                 value="{{ old('name') }}"
                                 class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('name') border-red-500 @enderror"
                                 placeholder="John Doe"
+                                data-placeholder-en="John Doe"
+                                data-placeholder-mr="उदा. राहुल पाटील"
                             >
                         </div>
                     </div>
@@ -56,7 +58,7 @@
                     <!-- Phone Number Field -->
                     <div>
                         <label for="phone_number" class="block text-sm font-medium text-gray-700 mb-1">
-                            Phone Number <span class="text-red-500">*</span>
+                            <span class="lang-label" data-en="Phone Number" data-mr="मोबाईल नंबर">Phone Number</span> <span class="text-red-500">*</span>
                         </label>
                         <div class="relative flex">
                             <span class="inline-flex items-center px-3 text-sm text-gray-500 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg">
@@ -71,6 +73,8 @@
                                 value="{{ old('phone_number') }}"
                                 class="block w-full px-3 py-3 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('phone_number') border-red-500 @enderror"
                                 placeholder="98765 43210"
+                                data-placeholder-en="98765 43210"
+                                data-placeholder-mr="98765 43210"
                             >
                         </div>
                     </div>
@@ -78,7 +82,7 @@
                     <!-- Email Field (Optional) -->
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-                            Email Address <span class="text-gray-400 text-xs">(optional)</span>
+                            <span class="lang-label" data-en="Email Address" data-mr="ईमेल पत्ता">Email Address</span> <span class="lang-label text-gray-400 text-xs" data-en="(optional)" data-mr="(ऐच्छिक)">(optional)</span>
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -95,6 +99,8 @@
                                 value="{{ old('email') }}"
                                 class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('email') border-red-500 @enderror"
                                 placeholder="you@example.com"
+                                data-placeholder-en="you@example.com"
+                                data-placeholder-mr="you@example.com"
                             >
                         </div>
                     </div>
@@ -105,7 +111,7 @@
                             type="submit"
                             class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition transform hover:scale-[1.02]"
                         >
-                            Register
+                            <span class="lang-label" data-en="Register" data-mr="नोंदणी करा">Register</span>
                         </button>
                     </div>
                 </form>
@@ -113,9 +119,9 @@
 
             <!-- Login Link -->
             <p class="text-center text-sm text-gray-600">
-                Already have an account?
+                <span class="lang-label" data-en="Already have an account?" data-mr="आधीच खाते आहे का?">Already have an account?</span>
                 <a href="{{ route('login') }}" class="font-medium text-pink-600 hover:text-pink-500 transition">
-                    Sign in
+                    <span class="lang-label" data-en="Sign in" data-mr="लॉगिन करा">Sign in</span>
                 </a>
             </p>
         </div>
