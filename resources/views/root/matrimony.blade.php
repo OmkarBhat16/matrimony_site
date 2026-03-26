@@ -27,7 +27,7 @@
 
         {{-- Filters (only for approved users with profiles) --}}
         @if ($showFilters)
-            <form method="GET" action="{{ route('root.matrimony') }}" class="bg-white rounded-2xl shadow-sm border border-gray-100 mb-8">
+            <form method="GET" action="{{ route('root.matrimony') }}" x-data="{ filtersCollapsed: false }" class="bg-white/95 backdrop-blur rounded-2xl shadow-lg border border-gray-100 mb-8 md:sticky md:top-20 z-30">
                 <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <svg class="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,15 +35,23 @@
                         </svg>
                         <h2 class="text-sm font-semibold text-gray-900">Filter Profiles</h2>
                     </div>
-                    @if (request()->hasAny(['gender', 'jaath', 'city', 'age_min', 'age_max']))
-                        <a href="{{ route('root.matrimony') }}" class="text-xs text-pink-600 hover:text-pink-700 font-medium flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                            Clear all
-                        </a>
-                    @endif
+                    <div class="flex items-center gap-3">
+                        @if (request()->hasAny(['gender', 'jaath', 'city', 'age_min', 'age_max']))
+                            <a href="{{ route('root.matrimony') }}" class="text-xs text-pink-600 hover:text-pink-700 font-medium flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                Clear all
+                            </a>
+                        @endif
+
+                        <button type="button" @click="filtersCollapsed = !filtersCollapsed" class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 text-gray-500 hover:text-pink-600 hover:border-pink-300 transition" :aria-expanded="(!filtersCollapsed).toString()" aria-label="Toggle filters">
+                            <svg class="w-4 h-4 transition-transform duration-200" :class="filtersCollapsed ? '' : 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="p-6">
+                <div class="p-6" x-show="!filtersCollapsed" x-transition.opacity.duration.200ms>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                         {{-- Gender Dropdown --}}
                         <div x-data="{ open: false, selected: '{{ request('gender', '') }}' }" class="relative">

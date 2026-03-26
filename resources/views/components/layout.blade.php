@@ -32,11 +32,13 @@
                     <a href="{{ url('/') }}" class="px-3 py-2 rounded-lg text-sm font-medium {{ request()->is('/') ? 'text-pink-600 bg-pink-50' : 'text-gray-600 hover:text-pink-600 hover:bg-pink-50' }} transition">
                         Home
                     </a>
-                    <a href="{{ route('root.matrimony') }}" class="px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('root.matrimony') ? 'text-pink-600 bg-pink-50' : 'text-gray-600 hover:text-pink-600 hover:bg-pink-50' }} transition">
-                        Matrimony
-                    </a>
+                   
                     <a href="{{ route('root.about') }}" class="px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('root.about') ? 'text-pink-600 bg-pink-50' : 'text-gray-600 hover:text-pink-600 hover:bg-pink-50' }} transition">
                         About Us
+                    </a>
+
+                     <a href="{{ route('root.matrimony') }}" class="px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('root.matrimony') ? 'text-white bg-pink-600' : 'text-white bg-pink-500 hover:bg-pink-600' }} transition">
+                        Profiles
                     </a>
                 </div>
 
@@ -56,7 +58,7 @@
                             </a>
                         @endif
                         <a href="{{ route('profile') }}" class="px-3 py-2 text-sm font-medium {{ request()->routeIs('profile') ? 'text-pink-600' : 'text-gray-600 hover:text-pink-600' }} transition">
-                            Profile
+                            My Account
                         </a>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf

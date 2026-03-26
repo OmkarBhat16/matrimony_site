@@ -88,9 +88,20 @@
 
                     @if(auth()->user() && auth()->user()->id !== $profile->user_id)
                     <div class="pb-2 flex gap-2">
-                        <a href="mailto:{{ $profile->user->email ?? '' }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 transition">
-                            Contact User
-                        </a>
+                        @php
+                            $phoneNumber = trim((string) ($profile->user->phone_number ?? ''));
+                            $dialNumber = preg_replace('/[^0-9+]/', '', $phoneNumber);
+                        @endphp
+
+                        @if($dialNumber !== '')
+                            <a href="tel:{{ $dialNumber }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 transition">
+                                Contact : {{ $phoneNumber }}
+                            </a>
+                        @else
+                            <span class="inline-flex items-center px-4 py-2 rounded-lg shadow-sm text-sm font-medium text-white bg-gray-400 cursor-not-allowed">
+                                Contact User: Not available
+                            </span>
+                        @endif
                     </div>
                     @endif
                 </div>
@@ -191,6 +202,35 @@
                         <!-- Family Background -->
                         <section>
                             <h3 class="lang-label text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4" data-en="Family Background" data-mr="कौटुंबिक माहिती">Family Background</h3>
+                            @php
+                                $siblingsList = json_decode($profile->siblings ?? '', true);
+                                $siblingsText = collect(is_array($siblingsList) ? $siblingsList : [])->map(function ($item) {
+                                    $relation = trim((string) ($item['relation'] ?? ''));
+                                    $value = trim((string) ($item['value'] ?? ''));
+
+                                    if ($relation !== '' && $value !== '') {
+                                        return $relation . ': ' . $value;
+                                    }
+
+                                    return $relation !== '' ? $relation : $value;
+                                })->filter()->implode("\n");
+
+                                $relativesList = json_decode($profile->uncles ?? '', true);
+                                if (!is_array($relativesList)) {
+                                    $relativesList = json_decode($profile->naathe_relationships ?? '', true);
+                                }
+                                $relativeEntries = collect(is_array($relativesList) ? $relativesList : [])->map(function ($item) {
+                                    $relation = trim((string) ($item['relation'] ?? ''));
+                                    $value = trim((string) ($item['value'] ?? ''));
+
+                                    return [
+                                        'relation' => $relation,
+                                        'value' => $value,
+                                    ];
+                                })->filter(function ($item) {
+                                    return $item['relation'] !== '' || $item['value'] !== '';
+                                })->values();
+                            @endphp
                             <dl class="space-y-4">
                                 <div>
                                     <dt class="lang-label text-sm font-medium text-gray-500" data-en="Father's Name" data-mr="वडिलांचे नाव">Father's Name</dt>
@@ -202,19 +242,26 @@
                                 </div>
                                 <div>
                                     <dt class="lang-label text-sm font-medium text-gray-500" data-en="Siblings Details" data-mr="भावंड">Siblings Details</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->siblings ?? 'Not provided' }}</dd>
+                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $siblingsText !== '' ? $siblingsText : ($profile->siblings ?? 'Not provided') }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Uncles Details" data-mr="संबंधित आडनावे">Uncles Details</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->uncles ?? 'Not provided' }}</dd>
-                                </div>
-                                <div>
-                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Aunts Details" data-mr="मावशी / आत्या">Aunts Details</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->aunts ?? 'Not provided' }}</dd>
-                                </div>
-                                <div>
-                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Naathe / Relationships" data-mr="नातेवाईक">Naathe / Relationships</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->naathe_relationships ?? 'Not provided' }}</dd>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Relatives" data-mr="नातेवाईक">Relatives</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">
+                                        @if($relativeEntries->isNotEmpty())
+                                            <ul class="space-y-1">
+                                                @foreach($relativeEntries as $relativeEntry)
+                                                    <li>
+                                                        {{ $relativeEntry['relation'] !== '' ? $relativeEntry['relation'] : 'Relation' }}
+                                                        @if($relativeEntry['value'] !== '')
+                                                            : {{ $relativeEntry['value'] }}
+                                                        @endif
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            Not provided
+                                        @endif
+                                    </dd>
                                 </div>
                             </dl>
                         </section>
@@ -224,12 +271,12 @@
                             <h3 class="lang-label text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4" data-en="Location & Address" data-mr="पत्ता आणि संपर्क">Location & Address</h3>
                             <dl class="space-y-4">
                                 <div>
-                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Mumbai Address" data-mr="पत्ता">Mumbai Address</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->mumbai_address ?? 'Not provided' }}</dd>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Residential Address" data-mr="निवासी पत्ता">Residential Address</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->address ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Village Address" data-mr="गावाचा पत्ता">Village Address</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->village_address ?? 'Not provided' }}</dd>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Native Address" data-mr="मुळचा पत्ता">Native Address</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->native_address ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
                                     <dt class="lang-label text-sm font-medium text-gray-500" data-en="Village Farm" data-mr="मालमत्ता">Village Farm</dt>
@@ -245,9 +292,9 @@
             @if (count($allImgs) > 1 || (count($allImgs) === 1 && !$primaryUrl))
                 <div class="border-t border-gray-100 bg-gray-50/50 px-6 sm:px-10 py-10">
                     <h3 class="lang-label text-2xl font-semibold text-gray-900 mb-8 text-center" data-en="Photo Gallery" data-mr="फोटो गॅलरी">Photo Gallery</h3>
-                    <div class="flex flex-col items-center gap-8 max-w-2xl mx-auto">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         @foreach ($allImgs as $slot => $url)
-                            <div class="relative w-full aspect-4/5 sm:aspect-auto sm:h-[600px] rounded-2xl overflow-hidden shadow-md group border border-gray-200">
+                            <div class="relative w-full aspect-square rounded-2xl overflow-hidden shadow-md group border border-gray-200">
                                 <img src="{{ $url }}"
                                      alt="Photo {{ $slot }}"
                                      class="w-full h-full object-cover transition duration-700 group-hover:scale-105">

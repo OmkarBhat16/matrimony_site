@@ -74,8 +74,8 @@
                     <h3 class="text-base font-semibold text-gray-900 mb-1">Your Photos</h3>
                     <p class="text-sm text-gray-500 mb-5">Your uploaded photos are shown here. To add or replace photos, use Edit Profile.</p>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                        @foreach ([1, 2, 3] as $slot)
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                        @foreach ([1, 2, 3, 4] as $slot)
                             @php $imgUrl = $allImgs[$slot] ?? null; @endphp
                             <div class="flex flex-col items-center gap-3">
                                 <div class="relative w-full aspect-square rounded-xl overflow-hidden border-2
@@ -222,6 +222,35 @@
                         <!-- Family Background -->
                         <section>
                             <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">Family Background</h3>
+                            @php
+                                $siblingsList = json_decode($profile->siblings ?? '', true);
+                                $siblingsText = collect(is_array($siblingsList) ? $siblingsList : [])->map(function ($item) {
+                                    $relation = trim((string) ($item['relation'] ?? ''));
+                                    $value = trim((string) ($item['value'] ?? ''));
+
+                                    if ($relation !== '' && $value !== '') {
+                                        return $relation . ': ' . $value;
+                                    }
+
+                                    return $relation !== '' ? $relation : $value;
+                                })->filter()->implode("\n");
+
+                                $relativesList = json_decode($profile->uncles ?? '', true);
+                                if (!is_array($relativesList)) {
+                                    $relativesList = json_decode($profile->naathe_relationships ?? '', true);
+                                }
+                                $relativeEntries = collect(is_array($relativesList) ? $relativesList : [])->map(function ($item) {
+                                    $relation = trim((string) ($item['relation'] ?? ''));
+                                    $value = trim((string) ($item['value'] ?? ''));
+
+                                    return [
+                                        'relation' => $relation,
+                                        'value' => $value,
+                                    ];
+                                })->filter(function ($item) {
+                                    return $item['relation'] !== '' || $item['value'] !== '';
+                                })->values();
+                            @endphp
                             <dl class="space-y-4">
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500">Father's Name</dt>
@@ -232,20 +261,27 @@
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->mothers_name ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Siblings</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->siblings ?? 'Not provided' }}</dd>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Siblings" data-mr="भावंड">Siblings</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $siblingsText !== '' ? $siblingsText : ($profile->siblings ?? 'Not provided') }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Uncles</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->uncles ?? 'Not provided' }}</dd>
-                                </div>
-                                <div>
-                                    <dt class="text-sm font-medium text-gray-500">Aunts</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->aunts ?? 'Not provided' }}</dd>
-                                </div>
-                                <div>
-                                    <dt class="text-sm font-medium text-gray-500">Naathe / Relationships</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->naathe_relationships ?? 'Not provided' }}</dd>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Relatives" data-mr="नातेवाईक">Relatives</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">
+                                        @if($relativeEntries->isNotEmpty())
+                                            <ul class="space-y-1">
+                                                @foreach($relativeEntries as $relativeEntry)
+                                                    <li>
+                                                        {{ $relativeEntry['relation'] !== '' ? $relativeEntry['relation'] : 'Relation' }}
+                                                        @if($relativeEntry['value'] !== '')
+                                                            : {{ $relativeEntry['value'] }}
+                                                        @endif
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            Not provided
+                                        @endif
+                                    </dd>
                                 </div>
                             </dl>
                         </section>
@@ -255,12 +291,12 @@
                             <h3 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">Location Details</h3>
                             <dl class="space-y-4">
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Mumbai Address</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->mumbai_address ?? 'Not provided' }}</dd>
+                                    <dt class="text-sm font-medium text-gray-500">Residential Address</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->address ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">Village Address</dt>
-                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->village_address ?? 'Not provided' }}</dd>
+                                    <dt class="text-sm font-medium text-gray-500">Native Address</dt>
+                                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->native_address ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500">Village Farm</dt>

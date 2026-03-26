@@ -43,8 +43,8 @@
                     <h2 class="text-lg font-semibold text-gray-900 mb-1">Profile Photos</h2>
                     <p class="text-sm text-gray-500 mb-5">Add missing photos here. Replacing an existing photo will go to admin review. Changing the primary photo stays immediate.</p>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                        @foreach ([1, 2, 3] as $slot)
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                        @foreach ([1, 2, 3, 4] as $slot)
                             @php $imgUrl = $allImgs[$slot] ?? null; @endphp
                             <div class="flex flex-col items-center gap-3">
                                 <form method="POST"
@@ -84,7 +84,7 @@
                                     <input type="file"
                                            id="upload-input-{{ $slot }}"
                                            name="images[{{ $slot }}]"
-                                           accept="image/jpeg,image/png,image/webp"
+                                        accept="*/*"
                                            class="hidden"
                                            onchange="this.closest('form').submit()">
                                 </form>
@@ -186,12 +186,14 @@
                     <section>
                         <h2 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">Location & Address</h2>
                         <div class="grid grid-cols-1 gap-y-4">
-                            @foreach(['mumbai_address', 'village_address'] as $field)
-                                <div>
-                                    <label for="{{ $field }}" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields[$field] }}</label>
-                                    <textarea id="{{ $field }}" name="{{ $field }}" rows="2" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">{{ old($field, $values->{$field} ?? '') }}</textarea>
-                                </div>
-                            @endforeach
+                            <div>
+                                <label for="address" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['address'] }}</label>
+                                <textarea id="address" name="address" rows="2" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">{{ old('address', $values->address ?? '') }}</textarea>
+                            </div>
+                            <div>
+                                <label for="native_address" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['native_address'] }}</label>
+                                <textarea id="native_address" name="native_address" rows="2" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">{{ old('native_address', $values->native_address ?? '') }}</textarea>
+                            </div>
                             <div>
                                 <label for="village_farm" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['village_farm'] }}</label>
                                 <input type="text" id="village_farm" name="village_farm" value="{{ old('village_farm', $values->village_farm ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">

@@ -11,44 +11,44 @@ class UserProfile extends Model
 
     public const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
 
-    protected $table = "user_profile";
+    protected $table = 'user_profile';
 
     protected $fillable = [
-        "user_id",
-        "full_name",
-        "navras_naav",
-        "gender",
-        "education",
-        "occupation",
-        "annual_income",
-        "date_of_birth",
-        "day_and_time_of_birth",
-        "place_of_birth",
-        "jaath",
-        "height_cm__Oonchi",
-        "skin_complexion__Rang",
-        "zodiac_sign__Raas",
-        "naadi",
-        "gann",
-        "devak",
-        "kul_devata",
-        "fathers_name",
-        "mothers_name",
-        "marital_status",
-        "siblings",
-        "uncles",
-        "aunts",
-        "mumbai_address",
-        "village_address",
-        "village_farm",
-        "naathe_relationships",
-        "primary_image",
+        'user_id',
+        'full_name',
+        'navras_naav',
+        'gender',
+        'education',
+        'occupation',
+        'annual_income',
+        'date_of_birth',
+        'day_and_time_of_birth',
+        'place_of_birth',
+        'jaath',
+        'height_cm__Oonchi',
+        'skin_complexion__Rang',
+        'zodiac_sign__Raas',
+        'naadi',
+        'gann',
+        'devak',
+        'kul_devata',
+        'fathers_name',
+        'mothers_name',
+        'marital_status',
+        'siblings',
+        'uncles',
+        'aunts',
+        'address',
+        'native_address',
+        'village_farm',
+        'naathe_relationships',
+        'primary_image',
     ];
 
     protected $casts = [
-        "date_of_birth" => "date",
-        "annual_income" => "decimal:2",
-        "primary_image" => "integer",
+        'date_of_birth' => 'date',
+        'annual_income' => 'decimal:2',
+        'primary_image' => 'integer',
     ];
 
     public function user()
@@ -61,10 +61,10 @@ class UserProfile extends Model
      */
     public function imageFolder(): string
     {
-        $phoneNumber = $this->user?->phone_number ?? "user_" . $this->user_id;
-        $safe = preg_replace("/[^a-zA-Z0-9._\-]/", "_", $phoneNumber);
+        $phoneNumber = $this->user?->phone_number ?? 'user_'.$this->user_id;
+        $safe = preg_replace("/[^a-zA-Z0-9._\-]/", '_', $phoneNumber);
 
-        return resource_path("assets/" . $safe);
+        return resource_path('assets/'.$safe);
     }
 
     /**
@@ -72,7 +72,7 @@ class UserProfile extends Model
      */
     public function imageBaseName(int $slot, ?string $suffix = null): string
     {
-        return $slot . ($suffix ? "_" . $suffix : "");
+        return $slot.($suffix ? '_'.$suffix : '');
     }
 
     /**
@@ -83,11 +83,11 @@ class UserProfile extends Model
         $extension = $extension ? strtolower($extension) : null;
 
         if ($extension !== null) {
-            return $this->imageFolder() . DIRECTORY_SEPARATOR . $this->imageBaseName($slot, $suffix) . "." . $extension;
+            return $this->imageFolder().DIRECTORY_SEPARATOR.$this->imageBaseName($slot, $suffix).'.'.$extension;
         }
 
         foreach (self::IMAGE_EXTENSIONS as $ext) {
-            $path = $this->imageFolder() . DIRECTORY_SEPARATOR . $this->imageBaseName($slot, $suffix) . "." . $ext;
+            $path = $this->imageFolder().DIRECTORY_SEPARATOR.$this->imageBaseName($slot, $suffix).'.'.$ext;
             if (is_file($path)) {
                 return $path;
             }
@@ -133,17 +133,17 @@ class UserProfile extends Model
     }
 
     /**
-     * Return the public URL for a given slot (1, 2, or 3), or null if the
+     * Return the public URL for a given slot (1, 2, 3, or 4), or null if the
      * file does not exist.
      */
     public function imageUrl(int $slot): ?string
     {
-        foreach (["jpg", "png", "jpeg", "webp"] as $ext) {
-            $path = $this->imageFolder() . DIRECTORY_SEPARATOR . $this->imageBaseName($slot) . "." . $ext;
+        foreach (['jpg', 'png', 'jpeg', 'webp'] as $ext) {
+            $path = $this->imageFolder().DIRECTORY_SEPARATOR.$this->imageBaseName($slot).'.'.$ext;
             if (is_file($path)) {
-                return route("profile.images.show", [
-                    "userProfile" => $this,
-                    "slot" => $slot,
+                return route('profile.images.show', [
+                    'userProfile' => $this,
+                    'slot' => $slot,
                 ]);
             }
         }
@@ -164,13 +164,13 @@ class UserProfile extends Model
      */
     public function pendingImageUrl(int $slot): ?string
     {
-        if (!$this->hasPendingImageReplacement($slot)) {
+        if (! $this->hasPendingImageReplacement($slot)) {
             return null;
         }
 
-        return route("profile.images.pending.show", [
-            "userProfile" => $this,
-            "slot" => $slot,
+        return route('profile.images.pending.show', [
+            'userProfile' => $this,
+            'slot' => $slot,
         ]);
     }
 
@@ -182,12 +182,13 @@ class UserProfile extends Model
     public function allImageUrls(): array
     {
         $urls = [];
-        foreach ([1, 2, 3] as $slot) {
+        foreach ([1, 2, 3, 4] as $slot) {
             $url = $this->imageUrl($slot);
             if ($url !== null) {
                 $urls[$slot] = $url;
             }
         }
+
         return $urls;
     }
 }

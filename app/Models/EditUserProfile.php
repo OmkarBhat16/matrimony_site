@@ -12,33 +12,33 @@ class EditUserProfile extends Model
      * Fields that can be compared between the current profile and the edit request.
      */
     public const DIFFABLE_FIELDS = [
-        'full_name'             => 'Full Name',
-        'navras_naav'           => 'Navras Naav',
-        'gender'                => 'Gender',
-        'education'             => 'Education',
-        'occupation'            => 'Occupation',
-        'annual_income'         => 'Annual Income',
-        'date_of_birth'         => 'Date of Birth',
+        'full_name' => 'Full Name',
+        'navras_naav' => 'Navras Naav',
+        'gender' => 'Gender',
+        'education' => 'Education',
+        'occupation' => 'Occupation',
+        'annual_income' => 'Annual Income',
+        'date_of_birth' => 'Date of Birth',
         'day_and_time_of_birth' => 'Day & Time of Birth',
-        'place_of_birth'        => 'Place of Birth',
-        'jaath'                 => 'Jaath',
-        'height_cm__Oonchi'     => 'Height (Oonchi)',
+        'place_of_birth' => 'Place of Birth',
+        'jaath' => 'Jaath',
+        'height_cm__Oonchi' => 'Height (Oonchi)',
         'skin_complexion__Rang' => 'Skin Complexion (Rang)',
-        'zodiac_sign__Raas'     => 'Zodiac Sign (Raas)',
-        'naadi'                 => 'Naadi',
-        'gann'                  => 'Gann',
-        'devak'                 => 'Devak',
-        'kul_devata'            => 'Kul Devata',
-        'fathers_name'          => "Father's Name",
-        'mothers_name'          => "Mother's Name",
-        'marital_status'        => 'Marital Status',
-        'siblings'              => 'Siblings',
-        'uncles'                => 'Uncles',
-        'aunts'                 => 'Aunts',
-        'mumbai_address'        => 'Mumbai Address',
-        'village_address'       => 'Village Address',
-        'village_farm'          => 'Village Farm',
-        'naathe_relationships'  => 'Naathe Relationships',
+        'zodiac_sign__Raas' => 'Zodiac Sign (Raas)',
+        'naadi' => 'Naadi',
+        'gann' => 'Gann',
+        'devak' => 'Devak',
+        'kul_devata' => 'Kul Devata',
+        'fathers_name' => "Father's Name",
+        'mothers_name' => "Mother's Name",
+        'marital_status' => 'Marital Status',
+        'siblings' => 'Siblings',
+        'uncles' => 'Uncles',
+        'aunts' => 'Aunts',
+        'address' => 'Residential Address',
+        'native_address' => 'Native Address',
+        'village_farm' => 'Village Farm',
+        'naathe_relationships' => 'Naathe Relationships',
     ];
 
     protected $fillable = [
@@ -67,8 +67,8 @@ class EditUserProfile extends Model
         'siblings',
         'uncles',
         'aunts',
-        'mumbai_address',
-        'village_address',
+        'address',
+        'native_address',
         'village_farm',
         'naathe_relationships',
         'image_changes',
@@ -101,8 +101,8 @@ class EditUserProfile extends Model
             if ($oldVal !== $newVal) {
                 $changes[$field] = [
                     'label' => $label,
-                    'old'   => $oldVal ?: '—',
-                    'new'   => $newVal ?: '—',
+                    'old' => $oldVal ?: '—',
+                    'new' => $newVal ?: '—',
                 ];
             }
         }
@@ -138,6 +138,6 @@ class EditUserProfile extends Model
      */
     public function hasPendingChanges(UserProfile $currentProfile): bool
     {
-        return !empty($this->diff($currentProfile)) || !empty($this->pendingImageSlots());
+        return ! empty($this->diff($currentProfile)) || ! empty($this->pendingImageSlots());
     }
 }

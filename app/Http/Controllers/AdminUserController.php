@@ -13,9 +13,7 @@ use Illuminate\Support\Str;
 
 class AdminUserController extends Controller
 {
-    public function __construct(private ProfileImageManager $images)
-    {
-    }
+    public function __construct(private ProfileImageManager $images) {}
 
     /**
      * Show users list with tabs based on verification_step.
@@ -47,6 +45,8 @@ class AdminUserController extends Controller
             ->get()
             ->keyBy('user_id');
 
+        $totalUsersCount = User::where('role', 'user')->count();
+
         $allUsers = User::query()
             ->where('role', 'user')
             ->when($stepFilter !== 'all', fn ($query) => $query->where('verification_step', $stepFilter))
@@ -70,6 +70,7 @@ class AdminUserController extends Controller
             'approved',
             'pendingEditsByUser',
             'allUsers',
+            'totalUsersCount',
         ));
     }
 
@@ -315,13 +316,13 @@ class AdminUserController extends Controller
         try {
             $pendingImageSlots = $edit->pendingImageSlots();
             $shouldSkipLegacyBlankProfileUpdate = $edit->edit_type === 'profile'
-                && !$edit->hasProfileFieldValues()
-                && !empty($pendingImageSlots);
+                && ! $edit->hasProfileFieldValues()
+                && ! empty($pendingImageSlots);
 
-            if ($edit->edit_type !== 'image' && !$shouldSkipLegacyBlankProfileUpdate) {
+            if ($edit->edit_type !== 'image' && ! $shouldSkipLegacyBlankProfileUpdate) {
                 $profileDiff = $edit->diff($profile);
 
-                if (!empty($profileDiff)) {
+                if (! empty($profileDiff)) {
                     $data = [];
                     foreach (array_keys($profileDiff) as $field) {
                         $data[$field] = $edit->{$field};

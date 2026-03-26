@@ -33,6 +33,9 @@
                class="whitespace-nowrap pb-3 px-1 border-b-2 text-sm font-medium transition
                    {{ $tab === 'all' ? 'border-pink-500 text-pink-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                 All Users
+                @if($totalUsersCount)
+                    <span class="ml-1.5 px-2 py-0.5 text-xs font-semibold rounded-full {{ $tab === 'all' ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-gray-500' }}">{{ $totalUsersCount }}</span>
+                @endif
             </a>
         </nav>
     </div>

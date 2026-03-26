@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('edit_user_profiles', function (Blueprint $table) {
@@ -33,8 +34,8 @@ return new class extends Migration {
             $table->string('siblings')->nullable();
             $table->string('uncles')->nullable();
             $table->string('aunts')->nullable();
-            $table->text('mumbai_address')->nullable();
-            $table->text('village_address')->nullable();
+            $table->text('address')->nullable();
+            $table->text('native_address')->nullable();
             $table->string('village_farm')->nullable();
             $table->text('naathe_relationships')->nullable();
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');

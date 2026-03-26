@@ -12,9 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class UserProfileController extends Controller
 {
-    public function __construct(private ProfileImageManager $images)
-    {
-    }
+    public function __construct(private ProfileImageManager $images) {}
 
     /**
      * Show the logged-in user's own profile page.
@@ -29,22 +27,22 @@ class UserProfileController extends Controller
             'verification_step' => $user->verification_step,
         ]);
 
-        if (!$user->profile()->exists()) {
+        if (! $user->profile()->exists()) {
             Log::info('User redirected to onboarding because no profile exists.', [
                 'user_id' => $user->id,
                 'verification_step' => $user->verification_step,
             ]);
 
             return redirect()
-                ->route("onboarding.create")
-                ->with("info", "Please complete your profile to get started.");
+                ->route('onboarding.create')
+                ->with('info', 'Please complete your profile to get started.');
         }
 
         $pendingEdit = EditUserProfile::where('user_id', $user->id)
             ->where('status', 'pending')
             ->first();
 
-        return view("profile.profile", compact('pendingEdit'));
+        return view('profile.profile', compact('pendingEdit'));
     }
 
     /**
@@ -61,7 +59,7 @@ class UserProfileController extends Controller
             'has_profile' => (bool) $profile,
         ]);
 
-        if (!$profile) {
+        if (! $profile) {
             return redirect()->route('onboarding.create');
         }
 
@@ -72,10 +70,10 @@ class UserProfileController extends Controller
 
         $hasLegacyImageOnlyDraft = $pendingEdit
             && $pendingEdit->edit_type === 'profile'
-            && !$pendingEdit->hasProfileFieldValues()
-            && !empty($pendingEdit->pendingImageSlots());
+            && ! $pendingEdit->hasProfileFieldValues()
+            && ! empty($pendingEdit->pendingImageSlots());
 
-        $values = $pendingEdit && $pendingEdit->edit_type !== 'image' && !$hasLegacyImageOnlyDraft
+        $values = $pendingEdit && $pendingEdit->edit_type !== 'image' && ! $hasLegacyImageOnlyDraft
             ? $pendingEdit
             : $profile;
 
@@ -88,33 +86,41 @@ class UserProfileController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'full_name'             => ['nullable', 'string', 'max:255'],
-            'navras_naav'           => ['nullable', 'string', 'max:255'],
-            'gender'                => ['nullable', 'in:male,female,other'],
-            'education'             => ['nullable', 'string', 'max:255'],
-            'occupation'            => ['nullable', 'string', 'max:255'],
-            'annual_income'         => ['nullable', 'numeric'],
-            'date_of_birth'         => ['nullable', 'date'],
+            'full_name' => ['nullable', 'string', 'max:255'],
+            'navras_naav' => ['nullable', 'string', 'max:255'],
+            'gender' => ['nullable', 'in:male,female,other'],
+            'education' => ['nullable', 'string', 'max:255'],
+            'occupation' => ['nullable', 'string', 'max:255'],
+            'annual_income' => ['nullable', 'numeric'],
+            'date_of_birth' => ['nullable', 'date'],
             'day_and_time_of_birth' => ['nullable', 'string', 'max:255'],
-            'place_of_birth'        => ['nullable', 'string', 'max:255'],
-            'jaath'                 => ['nullable', 'string', 'max:255'],
-            'height_cm__Oonchi'     => ['nullable', 'string', 'max:255'],
+            'place_of_birth' => ['nullable', 'string', 'max:255'],
+            'jaath' => ['nullable', 'string', 'max:255'],
+            'height_cm__Oonchi' => ['nullable', 'string', 'max:255'],
             'skin_complexion__Rang' => ['nullable', 'string', 'max:255'],
-            'zodiac_sign__Raas'     => ['nullable', 'string', 'max:255'],
-            'naadi'                 => ['nullable', 'string', 'max:255'],
-            'gann'                  => ['nullable', 'string', 'max:255'],
-            'devak'                 => ['nullable', 'string', 'max:255'],
-            'kul_devata'            => ['nullable', 'string', 'max:255'],
-            'fathers_name'          => ['nullable', 'string', 'max:255'],
-            'mothers_name'          => ['nullable', 'string', 'max:255'],
-            'marital_status'        => ['nullable', 'string', 'max:255'],
-            'siblings'              => ['nullable', 'string'],
-            'uncles'                => ['nullable', 'string'],
-            'aunts'                 => ['nullable', 'string'],
-            'mumbai_address'        => ['nullable', 'string'],
-            'village_address'       => ['nullable', 'string'],
-            'village_farm'          => ['nullable', 'string', 'max:255'],
-            'naathe_relationships'  => ['nullable', 'string'],
+            'zodiac_sign__Raas' => ['nullable', 'string', 'max:255'],
+            'naadi' => ['nullable', 'string', 'max:255'],
+            'gann' => ['nullable', 'string', 'max:255'],
+            'devak' => ['nullable', 'string', 'max:255'],
+            'kul_devata' => ['nullable', 'string', 'max:255'],
+            'fathers_name' => ['nullable', 'string', 'max:255'],
+            'mothers_name' => ['nullable', 'string', 'max:255'],
+            'marital_status' => ['nullable', 'string', 'max:255'],
+            'siblings' => [
+                'nullable',
+                'string',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (strlen((string) $value) > 5 * 1024 * 1024) {
+                        $fail('The siblings field must not be greater than 5MB.');
+                    }
+                },
+            ],
+            'uncles' => ['nullable', 'string'],
+            'aunts' => ['nullable', 'string'],
+            'address' => ['nullable', 'string'],
+            'native_address' => ['nullable', 'string'],
+            'village_farm' => ['nullable', 'string', 'max:255'],
+            'naathe_relationships' => ['nullable', 'string'],
         ]);
 
         $user = auth()->user();
@@ -123,7 +129,7 @@ class UserProfileController extends Controller
         Log::debug('User profile edit submission received.', [
             'user_id' => $user->id,
             'verification_step' => $user->verification_step,
-            'field_count' => count(array_filter($validated, fn ($value) => !is_null($value) && $value !== '')),
+            'field_count' => count(array_filter($validated, fn ($value) => ! is_null($value) && $value !== '')),
         ]);
 
         $existingPending = EditUserProfile::where('user_id', $user->id)
@@ -185,19 +191,20 @@ class UserProfileController extends Controller
         ]);
 
         if ($user->profile()->exists()) {
-            return redirect()->route("root.matrimony");
+            return redirect()->route('root.matrimony');
         }
 
-        if (!$user->needsOnboarding()) {
+        if (! $user->needsOnboarding()) {
             if ($user->isPendingReview()) {
-                return redirect("/pending-review");
+                return redirect('/pending-review');
             }
+
             return redirect()
-                ->route("root.matrimony")
-                ->with("error", "You cannot access onboarding at this time.");
+                ->route('root.matrimony')
+                ->with('error', 'You cannot access onboarding at this time.');
         }
 
-        return view("onboarding.create");
+        return view('onboarding.create');
     }
 
     /**
@@ -207,53 +214,60 @@ class UserProfileController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            "full_name" => ["nullable", "string", "max:255"],
-            "navras_naav" => ["nullable", "string", "max:255"],
-            "gender" => ["nullable", "in:male,female,other"],
-            "education" => ["nullable", "string", "max:255"],
-            "occupation" => ["nullable", "string", "max:255"],
-            "annual_income" => ["nullable", "numeric"],
-            "date_of_birth" => ["nullable", "date"],
-            "day_and_time_of_birth" => ["nullable", "string", "max:255"],
-            "place_of_birth" => ["nullable", "string", "max:255"],
-            "jaath" => ["nullable", "string", "max:255"],
-            "height_cm__Oonchi" => ["nullable", "string", "max:255"],
-            "skin_complexion__Rang" => ["nullable", "string", "max:255"],
-            "zodiac_sign__Raas" => ["nullable", "string", "max:255"],
-            "naadi" => ["nullable", "string", "max:255"],
-            "gann" => ["nullable", "string", "max:255"],
-            "devak" => ["nullable", "string", "max:255"],
-            "kul_devata" => ["nullable", "string", "max:255"],
-            "fathers_name" => ["nullable", "string", "max:255"],
-            "mothers_name" => ["nullable", "string", "max:255"],
-            "marital_status" => ["nullable", "string", "max:255"],
-            "siblings" => ["nullable", "string"],
-            "uncles" => ["nullable", "string"],
-            "aunts" => ["nullable", "string"],
-            "mumbai_address" => ["nullable", "string"],
-            "village_address" => ["nullable", "string"],
-            "village_farm" => ["nullable", "string", "max:255"],
-            "naathe_relationships" => ["nullable", "string"],
-            // Images: up to 3, each max 5 MB, jpg/png/webp
-            "images" => ["nullable", "array", "max:3"],
-            "images.*" => [
-                "nullable",
-                "image",
-                "mimes:jpg,jpeg,png,webp",
-                "max:5120",
+            'full_name' => ['nullable', 'string', 'max:255'],
+            'navras_naav' => ['nullable', 'string', 'max:255'],
+            'gender' => ['nullable', 'in:male,female,other'],
+            'education' => ['nullable', 'string', 'max:255'],
+            'occupation' => ['nullable', 'string', 'max:255'],
+            'annual_income' => ['nullable', 'numeric'],
+            'date_of_birth' => ['nullable', 'date'],
+            'day_and_time_of_birth' => ['nullable', 'string', 'max:255'],
+            'place_of_birth' => ['nullable', 'string', 'max:255'],
+            'jaath' => ['nullable', 'string', 'max:255'],
+            'height_cm__Oonchi' => ['nullable', 'string', 'max:255'],
+            'skin_complexion__Rang' => ['nullable', 'string', 'max:255'],
+            'zodiac_sign__Raas' => ['nullable', 'string', 'max:255'],
+            'naadi' => ['nullable', 'string', 'max:255'],
+            'gann' => ['nullable', 'string', 'max:255'],
+            'devak' => ['nullable', 'string', 'max:255'],
+            'kul_devata' => ['nullable', 'string', 'max:255'],
+            'fathers_name' => ['nullable', 'string', 'max:255'],
+            'mothers_name' => ['nullable', 'string', 'max:255'],
+            'marital_status' => ['nullable', 'string', 'max:255'],
+            'siblings' => [
+                'nullable',
+                'string',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (strlen((string) $value) > 5 * 1024 * 1024) {
+                        $fail('The siblings field must not be greater than 5MB.');
+                    }
+                },
             ],
-            "primary_image" => ["nullable", "integer", "in:1,2,3"],
+            'uncles' => ['nullable', 'string'],
+            'aunts' => ['nullable', 'string'],
+            'address' => ['nullable', 'string'],
+            'native_address' => ['nullable', 'string'],
+            'village_farm' => ['nullable', 'string', 'max:255'],
+            'naathe_relationships' => ['nullable', 'string'],
+            // Files: up to 4, each max 5 MB
+            'images' => ['nullable', 'array', 'max:4'],
+            'images.*' => [
+                'nullable',
+                'file',
+                'max:5120',
+            ],
+            'primary_image' => ['nullable', 'integer', 'in:1,2,3,4'],
         ], [
             'images.1.uploaded' => 'The first image failed to upload. It might be too large.',
             'images.2.uploaded' => 'The second image failed to upload. It might be too large.',
             'images.3.uploaded' => 'The third image failed to upload. It might be too large.',
+            'images.4.uploaded' => 'The fourth image failed to upload. It might be too large.',
             'images.*.max' => 'Each image must not be greater than 5MB.',
-            'images.*.image' => 'The file must be an image.',
-            'images.*.mimes' => 'Images must be a file of type: jpg, jpeg, png, webp.',
+            'images.*.file' => 'Each upload must be a valid file.',
         ]);
 
         $user = Auth::user();
-        $validated["user_id"] = $user->id;
+        $validated['user_id'] = $user->id;
 
         Log::debug('User onboarding submission received.', [
             'user_id' => $user->id,
@@ -262,11 +276,11 @@ class UserProfileController extends Controller
         ]);
 
         // Default primary image to 1
-        $validated["primary_image"] = $validated["primary_image"] ?? 1;
+        $validated['primary_image'] = $validated['primary_image'] ?? 1;
 
         // Remove images from validated before creating the DB record
-        $images = $request->file("images") ?? [];
-        unset($validated["images"]);
+        $images = $request->file('images') ?? [];
+        unset($validated['images']);
 
         try {
             $profile = DB::transaction(function () use ($validated, $user) {
@@ -298,16 +312,16 @@ class UserProfileController extends Controller
             'image_count' => count($images),
         ]);
 
-        return redirect("/pending-review");
+        return redirect('/pending-review');
     }
 
     /**
-     * Set which slot (1, 2, or 3) is the primary image for the logged-in user's profile.
+     * Set which slot (1, 2, 3, or 4) is the primary image for the logged-in user's profile.
      */
     public function setPrimaryImage(Request $request)
     {
         $request->validate([
-            "slot" => ["required", "integer", "in:1,2,3"],
+            'slot' => ['required', 'integer', 'in:1,2,3,4'],
         ]);
 
         $user = auth()->user();
@@ -319,11 +333,11 @@ class UserProfileController extends Controller
             'has_profile' => (bool) $profile,
         ]);
 
-        if (!$profile) {
+        if (! $profile) {
             abort(404);
         }
 
-        $slot = (int) $request->input("slot");
+        $slot = (int) $request->input('slot');
 
         // Only allow setting a slot that actually has an uploaded image
         if ($profile->imageUrl($slot) === null) {
@@ -332,11 +346,11 @@ class UserProfileController extends Controller
                 'requested_slot' => $slot,
             ]);
 
-            return back()->with("error", "No image uploaded for that slot.");
+            return back()->with('error', 'No image uploaded for that slot.');
         }
 
         try {
-            $profile->update(["primary_image" => $slot]);
+            $profile->update(['primary_image' => $slot]);
         } catch (\Throwable $e) {
             Log::error('User primary image change failed.', [
                 'user_id' => $user->id,
@@ -344,7 +358,7 @@ class UserProfileController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return back()->with("error", "Primary photo could not be updated.");
+            return back()->with('error', 'Primary photo could not be updated.');
         }
 
         Log::info('User primary image updated.', [
@@ -352,40 +366,46 @@ class UserProfileController extends Controller
             'primary_image' => $slot,
         ]);
 
-        return back()->with("success", "Primary photo updated.");
+        return back()->with('success', 'Primary photo updated.');
     }
 
     /**
-     * Upload new images to an existing profile (slot 1–3).
+     * Upload new images to an existing profile (slot 1-4).
      * Called from the profile management page.
      */
     public function uploadImages(Request $request)
     {
         $request->validate([
-            "images" => ["required", "array", "max:3"],
-            "images.*" => [
-                "required",
-                "image",
-                "mimes:jpg,jpeg,png,webp",
-                "max:5120",
+            'images' => ['required', 'array', 'max:4'],
+            'images.*' => [
+                'required',
+                'file',
+                'max:5120',
             ],
+        ], [
+            'images.1.uploaded' => 'The first image failed to upload. It might be too large.',
+            'images.2.uploaded' => 'The second image failed to upload. It might be too large.',
+            'images.3.uploaded' => 'The third image failed to upload. It might be too large.',
+            'images.4.uploaded' => 'The fourth image failed to upload. It might be too large.',
+            'images.*.max' => 'Each image must not be greater than 5MB.',
+            'images.*.file' => 'Each upload must be a valid file.',
         ]);
 
         $user = auth()->user();
         $profile = $user->profile;
 
-        if (!$profile) {
+        if (! $profile) {
             abort(404);
         }
 
-        $images = $request->file("images") ?? [];
+        $images = $request->file('images') ?? [];
         $pendingEdit = EditUserProfile::where('user_id', $user->id)
             ->where('status', 'pending')
             ->first();
         $imageChanges = $pendingEdit?->image_changes ?? [];
 
         foreach ($images as $index => $file) {
-            if (!$file || !$file->isValid()) {
+            if (! $file || ! $file->isValid()) {
                 continue;
             }
 
@@ -394,7 +414,7 @@ class UserProfileController extends Controller
                 $slot = 1;
             }
 
-            if ($slot < 1 || $slot > 3) {
+            if ($slot < 1 || $slot > 4) {
                 continue;
             }
 
@@ -410,7 +430,7 @@ class UserProfileController extends Controller
             }
         }
 
-        $hasPendingReplacements = !empty($imageChanges);
+        $hasPendingReplacements = ! empty($imageChanges);
 
         if ($hasPendingReplacements) {
             if ($pendingEdit) {
@@ -428,10 +448,10 @@ class UserProfileController extends Controller
         }
 
         $message = $hasPendingReplacements
-            ? "Your replacement photo has been submitted for admin approval."
-            : "Photos updated successfully.";
+            ? 'Your replacement photo has been submitted for admin approval.'
+            : 'Photos updated successfully.';
 
-        return back()->with("success", $message);
+        return back()->with('success', $message);
     }
 
     /**
@@ -439,7 +459,7 @@ class UserProfileController extends Controller
      */
     public function showImage(UserProfile $userProfile, int $slot)
     {
-        abort_unless(in_array($slot, [1, 2, 3], true), 404);
+        abort_unless(in_array($slot, [1, 2, 3, 4], true), 404);
 
         $path = $userProfile->imagePath($slot);
 
@@ -455,7 +475,7 @@ class UserProfileController extends Controller
      */
     public function showPendingImage(UserProfile $userProfile, int $slot)
     {
-        abort_unless(in_array($slot, [1, 2, 3], true), 404);
+        abort_unless(in_array($slot, [1, 2, 3, 4], true), 404);
 
         $path = $userProfile->pendingImagePath($slot);
 
@@ -473,17 +493,17 @@ class UserProfileController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user->isApproved() || !$user->profile()->exists()) {
+        if (! $user->isApproved() || ! $user->profile()->exists()) {
             abort(
                 403,
-                "You must be approved and have a profile to view other profiles.",
+                'You must be approved and have a profile to view other profiles.',
             );
         }
 
-        $userProfile->load("user");
+        $userProfile->load('user');
 
-        return view("profile.show", [
-            "profile" => $userProfile,
+        return view('profile.show', [
+            'profile' => $userProfile,
         ]);
     }
 
@@ -493,10 +513,9 @@ class UserProfileController extends Controller
 
     /**
      * Persist uploaded image files into resources/assets/<phone>/
-     * naming them 1.ext, 2.ext, 3.ext based on the array index (1-based).
+     * naming them 1.ext, 2.ext, 3.ext, 4.ext based on the array index (1-based).
      * Any pre-existing file in that slot is deleted first.
      *
-     * @param  UserProfile        $profile
      * @param  \Illuminate\Http\UploadedFile[]  $images  Indexed from 0 or 1
      */
     private function storeImages(UserProfile $profile, array $images): void
@@ -506,18 +525,18 @@ class UserProfileController extends Controller
         }
 
         foreach ($images as $index => $file) {
-            if (!$file || !$file->isValid()) {
+            if (! $file || ! $file->isValid()) {
                 continue;
             }
 
-            // Slots are 1-based; form sends images[1], images[2], images[3]
+            // Slots are 1-based; form sends images[1], images[2], images[3], images[4]
             $slot = is_int($index) ? $index : (int) $index;
             // If the form uses 0-based keys, shift up
             if ($slot === 0) {
                 $slot = 1;
             }
             // Clamp to valid range
-            if ($slot < 1 || $slot > 3) {
+            if ($slot < 1 || $slot > 4) {
                 continue;
             }
 

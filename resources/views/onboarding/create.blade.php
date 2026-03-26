@@ -135,10 +135,10 @@
                         <!-- Photo Upload -->
                         <div class="mt-8 pt-6 border-t border-gray-200">
                             <h3 class="lang-label text-base font-semibold text-gray-900 mb-1" data-en="Profile Photos" data-mr="प्रोफाइल फोटो">Profile Photos</h3>
-                            <p class="lang-label text-sm text-gray-500 mb-4" data-en="Upload up to 3 photos. The one you mark as primary will be shown on your card. Photo 1 is primary by default." data-mr="जास्तीत जास्त 3 फोटो अपलोड करा. तुम्ही प्राथमिक म्हणून निवडलेला फोटो तुमच्या कार्डवर दिसेल. फोटो 1 डीफॉल्टने प्राथमिक आहे.">Upload up to 3 photos. The one you mark as primary will be shown on your card. Photo 1 is primary by default.</p>
+                            <p class="lang-label text-sm text-gray-500 mb-4" data-en="Upload up to 4 photos. The one you mark as primary will be shown on your card. Photo 1 is primary by default." data-mr="जास्तीत जास्त 4 फोटो अपलोड करा. तुम्ही प्राथमिक म्हणून निवडलेला फोटो तुमच्या कार्डवर दिसेल. फोटो 1 डीफॉल्टने प्राथमिक आहे.">Upload up to 4 photos. The one you mark as primary will be shown on your card. Photo 1 is primary by default.</p>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="photo-upload-grid">
-                                @foreach ([1, 2, 3] as $slot)
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="photo-upload-grid">
+                                @foreach ([1, 2, 3, 4] as $slot)
                                     <div class="flex flex-col items-center gap-2" id="photo-slot-{{ $slot }}">
                                         {{-- Preview area --}}
                                         <div class="relative w-full aspect-square rounded-xl border-2 border-dashed border-gray-300 overflow-hidden bg-gray-50 hover:border-pink-400 transition cursor-pointer"
@@ -163,7 +163,7 @@
                                         <input type="file"
                                                id="image-input-{{ $slot }}"
                                                name="images[{{ $slot }}]"
-                                               accept="image/jpeg,image/png,image/webp"
+                                                 accept="*/*"
                                                class="hidden"
                                                onchange="previewPhoto({{ $slot }}, this)">
 
@@ -290,51 +290,55 @@
                             </div>
 
                             <div class="sm:col-span-2">
-                                <label for="siblings" class="block text-sm font-medium text-gray-700 mb-1">
-                                    <span class="lang-label" data-en="Siblings" data-mr="भावंड">Siblings</span>
-                                </label>
-                                <textarea id="siblings" name="siblings" rows="2"
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">{{ old('siblings') }}</textarea>
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="block text-sm font-medium text-gray-700">
+                                        <span class="lang-label" data-en="Siblings" data-mr="भावंड">Siblings</span>
+                                    </label>
+                                    <button type="button" id="add-sibling-btn"
+                                        class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md border border-pink-300 text-pink-700 bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-500 transition">
+                                        <span class="lang-label" data-en="Add Sibling" data-mr="भावंड जोडा">Add Sibling</span>
+                                    </button>
+                                </div>
+
+                                <div id="siblings-list" class="space-y-3"></div>
+
+                                <input type="hidden" id="siblings" name="siblings" value="{{ old('siblings') }}">
                             </div>
 
                             <div class="sm:col-span-2">
-                                <label for="uncles" class="block text-sm font-medium text-gray-700 mb-1">
-                                    <span class="lang-label" data-en="Uncles" data-mr="काका / मामा">Uncles</span>
-                                </label>
-                                <textarea id="uncles" name="uncles" rows="2"
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">{{ old('uncles') }}</textarea>
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="block text-sm font-medium text-gray-700">
+                                        <span class="lang-label" data-en="Relatives" data-mr="नातेवाईक">Relatives</span>
+                                    </label>
+                                    <button type="button" id="add-relative-btn"
+                                        class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md border border-pink-300 text-pink-700 bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-500 transition">
+                                        <span class="lang-label" data-en="Add Relative" data-mr="नातेवाईक जोडा">Add Relative</span>
+                                    </button>
+                                </div>
+
+                                <div id="relatives-list" class="space-y-3"></div>
+
+                                <input type="hidden" id="uncles" name="uncles" value="{{ old('uncles') }}">
+                                <input type="hidden" name="aunts" value="">
+                                <input type="hidden" name="naathe_relationships" value="">
+
+                                <p class="lang-label mt-2 text-xs text-gray-500" data-en="Use the relation dropdown and add details in the text box." data-mr="नात्याचा प्रकार निवडा आणि उजवीकडे तपशील लिहा.">Use the relation dropdown and add details in the text box.</p>
                             </div>
 
                             <div class="sm:col-span-2">
-                                <label for="aunts" class="block text-sm font-medium text-gray-700 mb-1">
-                                    <span class="lang-label" data-en="Aunts" data-mr="मावशी / आत्या">Aunts</span>
+                                <label for="address" class="block text-sm font-medium text-gray-700 mb-1">
+                                    <span class="lang-label" data-en="Residential Address" data-mr="निवासी पत्ता">Residential Address</span>
                                 </label>
-                                <textarea id="aunts" name="aunts" rows="2"
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">{{ old('aunts') }}</textarea>
+                                <textarea id="address" name="address" rows="2"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">{{ old('address') }}</textarea>
                             </div>
 
                             <div class="sm:col-span-2">
-                                <label for="naathe_relationships" class="block text-sm font-medium text-gray-700 mb-1">
-                                    <span class="lang-label" data-en="Naathe Relationships" data-mr="नातेवाईक">Naathe Relationships</span>
+                                <label for="native_address" class="block text-sm font-medium text-gray-700 mb-1">
+                                    <span class="lang-label" data-en="Native Address" data-mr="मुळचा पत्ता">Native Address</span>
                                 </label>
-                                <textarea id="naathe_relationships" name="naathe_relationships" rows="2"
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">{{ old('naathe_relationships') }}</textarea>
-                            </div>
-
-                            <div class="sm:col-span-2">
-                                <label for="mumbai_address" class="block text-sm font-medium text-gray-700 mb-1">
-                                    <span class="lang-label" data-en="Mumbai Address" data-mr="मुंबईचा पत्ता">Mumbai Address</span>
-                                </label>
-                                <textarea id="mumbai_address" name="mumbai_address" rows="2"
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">{{ old('mumbai_address') }}</textarea>
-                            </div>
-
-                            <div class="sm:col-span-2">
-                                <label for="village_address" class="block text-sm font-medium text-gray-700 mb-1">
-                                    <span class="lang-label" data-en="Village Address" data-mr="गावाचा पत्ता">Village Address</span>
-                                </label>
-                                <textarea id="village_address" name="village_address" rows="2"
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">{{ old('village_address') }}</textarea>
+                                <textarea id="native_address" name="native_address" rows="2"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">{{ old('native_address') }}</textarea>
                             </div>
 
                             <div>
@@ -388,9 +392,37 @@
                 form.querySelectorAll('input:not([type=file]):not([type=radio]):not([type=hidden]), select, textarea').forEach(el => {
                     if (el.name) data[el.name] = el.value;
                 });
+
+                const relativesSnapshot = Array.from(document.querySelectorAll('#relatives-list .relative-row')).map((row) => {
+                    return {
+                        relation: row.querySelector('.relative-relation')?.value || '',
+                        value: row.querySelector('.relative-value')?.value || '',
+                    };
+                }).filter((item) => item.relation || item.value);
+
+                const siblingsSnapshot = Array.from(document.querySelectorAll('#siblings-list .sibling-row')).map((row) => {
+                    return {
+                        relation: row.querySelector('.sibling-relation')?.value || '',
+                        value: row.querySelector('.sibling-value')?.value || '',
+                    };
+                }).filter((item) => item.relation || item.value);
+
+                const relativesJson = JSON.stringify(relativesSnapshot);
+                const siblingsJson = JSON.stringify(siblingsSnapshot);
+                const hiddenRelativesField = document.getElementById('uncles');
+                if (hiddenRelativesField) {
+                    hiddenRelativesField.value = relativesJson;
+                }
+                const hiddenSiblingsField = document.getElementById('siblings');
+                if (hiddenSiblingsField) {
+                    hiddenSiblingsField.value = siblingsJson;
+                }
+
                 // Save radio selection
                 const checkedRadio = form.querySelector('input[name=primary_image]:checked');
                 if (checkedRadio) data['primary_image'] = checkedRadio.value;
+                data['uncles'] = relativesJson;
+                data['siblings'] = siblingsJson;
                 data['_step'] = currentStep;
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
             }
@@ -418,18 +450,9 @@
             }
 
             function clearLocalStorage() {
+                syncRelativesToHiddenInput();
                 localStorage.removeItem(STORAGE_KEY);
             }
-
-            // Restore saved data on load
-            restoreFromLocalStorage();
-
-            // Auto-save on any input change
-            document.getElementById('onboarding-form').addEventListener('input', saveToLocalStorage);
-            document.getElementById('onboarding-form').addEventListener('change', saveToLocalStorage);
-
-            // Clear localStorage on form submit
-            document.getElementById('onboarding-form').addEventListener('submit', clearLocalStorage);
 
             const steps = {
                 1: document.getElementById('step1'),
@@ -453,6 +476,209 @@
             const nextBtn    = document.getElementById('next-btn');
             const submitBtn  = document.getElementById('submit-btn');
             const progressLine = document.getElementById('progress-line');
+            const relativesList = document.getElementById('relatives-list');
+            const addRelativeBtn = document.getElementById('add-relative-btn');
+            const relativesHiddenInput = document.getElementById('uncles');
+            const siblingsList = document.getElementById('siblings-list');
+            const addSiblingBtn = document.getElementById('add-sibling-btn');
+            const siblingsHiddenInput = document.getElementById('siblings');
+
+            function parseRelatives(rawValue) {
+                if (!rawValue || typeof rawValue !== 'string') {
+                    return [];
+                }
+
+                try {
+                    const parsed = JSON.parse(rawValue);
+
+                    if (!Array.isArray(parsed)) {
+                        return [];
+                    }
+
+                    return parsed.filter((item) => item && typeof item === 'object');
+                } catch (error) {
+                    return [];
+                }
+            }
+
+            function collectRelativesFromUi() {
+                return Array.from(relativesList.querySelectorAll('.relative-row')).map((row) => {
+                    return {
+                        relation: row.querySelector('.relative-relation')?.value || '',
+                        value: row.querySelector('.relative-value')?.value || '',
+                    };
+                }).filter((item) => item.relation || item.value);
+            }
+
+            function syncRelativesToHiddenInput() {
+                const relatives = collectRelativesFromUi();
+                relativesHiddenInput.value = JSON.stringify(relatives);
+            }
+
+            function parseSiblings(rawValue) {
+                if (!rawValue || typeof rawValue !== 'string') {
+                    return [];
+                }
+
+                try {
+                    const parsed = JSON.parse(rawValue);
+
+                    if (!Array.isArray(parsed)) {
+                        return [];
+                    }
+
+                    return parsed.filter((item) => item && typeof item === 'object');
+                } catch (error) {
+                    return [];
+                }
+            }
+
+            function collectSiblingsFromUi() {
+                return Array.from(siblingsList.querySelectorAll('.sibling-row')).map((row) => {
+                    return {
+                        relation: row.querySelector('.sibling-relation')?.value || '',
+                        value: row.querySelector('.sibling-value')?.value || '',
+                    };
+                }).filter((item) => item.relation || item.value);
+            }
+
+            function syncSiblingsToHiddenInput() {
+                const siblings = collectSiblingsFromUi();
+                siblingsHiddenInput.value = JSON.stringify(siblings);
+            }
+
+            function createRelativeRow(data = {}) {
+                const row = document.createElement('div');
+                row.className = 'relative-row grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_auto] gap-2 items-center';
+
+                row.innerHTML = `
+                    <div>
+                        <select class="relative-relation block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 text-sm">
+                            <option value="" data-en="Select relation" data-mr="नातं निवडा">Select relation</option>
+                            <option value="Uncle" data-en="Uncle" data-mr="काका">Uncle</option>
+                            <option value="Aunt" data-en="Aunt" data-mr="मावशी / आत्या">Aunt</option>
+                            <option value="Mama" data-en="Mama" data-mr="मामा">Mama</option>
+                        </select>
+                    </div>
+                    <div>
+                        <input type="text" class="relative-value block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 text-sm" placeholder="Enter details">
+                    </div>
+                    <div class="justify-self-end">
+                        <button type="button" class="remove-relative-btn inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 text-gray-500 hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition" aria-label="Remove relative">&times;</button>
+                    </div>
+                `;
+
+                const relationSelect = row.querySelector('.relative-relation');
+                const valueInput = row.querySelector('.relative-value');
+                const removeBtn = row.querySelector('.remove-relative-btn');
+
+                relationSelect.value = data.relation || '';
+                valueInput.value = data.value || '';
+
+                relationSelect.addEventListener('change', function () {
+                    syncRelativesToHiddenInput();
+                    saveToLocalStorage();
+                });
+
+                valueInput.addEventListener('input', function () {
+                    syncRelativesToHiddenInput();
+                    saveToLocalStorage();
+                });
+
+                removeBtn.addEventListener('click', function () {
+                    row.remove();
+                    syncRelativesToHiddenInput();
+                    saveToLocalStorage();
+                });
+
+                relativesList.appendChild(row);
+                syncRelativesToHiddenInput();
+            }
+
+            function createSiblingRow(data = {}) {
+                const row = document.createElement('div');
+                row.className = 'sibling-row grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_auto] gap-2 items-center';
+
+                row.innerHTML = `
+                    <div>
+                        <select class="sibling-relation block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 text-sm">
+                            <option value="" data-en="Select sibling" data-mr="भावंड निवडा">Select sibling</option>
+                            <option value="Brother" data-en="Brother" data-mr="भाऊ">Brother</option>
+                            <option value="Sister" data-en="Sister" data-mr="बहीण">Sister</option>
+                        </select>
+                    </div>
+                    <div>
+                        <input type="text" class="sibling-value block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 text-sm" placeholder="Sibling details">
+                    </div>
+                    <div class="justify-self-end">
+                        <button type="button" class="remove-sibling-btn inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 text-gray-500 hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition" aria-label="Remove sibling">&times;</button>
+                    </div>
+                `;
+
+                const siblingRelationSelect = row.querySelector('.sibling-relation');
+                const siblingInput = row.querySelector('.sibling-value');
+                const removeBtn = row.querySelector('.remove-sibling-btn');
+
+                siblingRelationSelect.value = data.relation || '';
+                siblingInput.value = data.value || '';
+
+                siblingRelationSelect.addEventListener('change', function () {
+                    syncSiblingsToHiddenInput();
+                    saveToLocalStorage();
+                });
+
+                siblingInput.addEventListener('input', function () {
+                    syncSiblingsToHiddenInput();
+                    saveToLocalStorage();
+                });
+
+                removeBtn.addEventListener('click', function () {
+                    row.remove();
+                    syncSiblingsToHiddenInput();
+                    saveToLocalStorage();
+                });
+
+                siblingsList.appendChild(row);
+                syncSiblingsToHiddenInput();
+            }
+
+            function hydrateRelativesFromHiddenInput() {
+                const existingRelatives = parseRelatives(relativesHiddenInput.value);
+                relativesList.innerHTML = '';
+
+                existingRelatives.forEach((item) => createRelativeRow(item));
+                syncRelativesToHiddenInput();
+            }
+
+            function hydrateSiblingsFromHiddenInput() {
+                const existingSiblings = parseSiblings(siblingsHiddenInput.value);
+                siblingsList.innerHTML = '';
+
+                existingSiblings.forEach((item) => createSiblingRow(item));
+                syncSiblingsToHiddenInput();
+            }
+
+            addRelativeBtn.addEventListener('click', function () {
+                createRelativeRow();
+                saveToLocalStorage();
+            });
+
+            addSiblingBtn.addEventListener('click', function () {
+                createSiblingRow();
+                saveToLocalStorage();
+            });
+
+            // Restore saved data on load (after all helpers/constants are initialized)
+            restoreFromLocalStorage();
+            hydrateRelativesFromHiddenInput();
+            hydrateSiblingsFromHiddenInput();
+
+            // Auto-save on any input change
+            document.getElementById('onboarding-form').addEventListener('input', saveToLocalStorage);
+            document.getElementById('onboarding-form').addEventListener('change', saveToLocalStorage);
+
+            // Clear localStorage on form submit
+            document.getElementById('onboarding-form').addEventListener('submit', clearLocalStorage);
 
             // ---- Photo preview ----
             window.previewPhoto = function (slot, input) {

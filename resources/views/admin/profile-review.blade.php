@@ -115,18 +115,86 @@
                 </div>
 
                 <div class="grid grid-cols-1 gap-y-4 mt-4">
+                    @php
+                        $siblingEntries = collect(json_decode($profile->siblings ?? '', true))->filter(function ($item) {
+                            return is_array($item);
+                        })->map(function ($item) {
+                            return [
+                                'relation' => trim((string) ($item['relation'] ?? '')),
+                                'value' => trim((string) ($item['value'] ?? '')),
+                            ];
+                        })->filter(function ($item) {
+                            return $item['relation'] !== '' || $item['value'] !== '';
+                        })->values();
+
+                        $relativeEntries = collect(json_decode($profile->uncles ?? '', true))->filter(function ($item) {
+                            return is_array($item);
+                        })->map(function ($item) {
+                            return [
+                                'relation' => trim((string) ($item['relation'] ?? '')),
+                                'value' => trim((string) ($item['value'] ?? '')),
+                            ];
+                        })->filter(function ($item) {
+                            return $item['relation'] !== '' || $item['value'] !== '';
+                        })->values();
+
+                        if ($relativeEntries->isEmpty()) {
+                            $relativeEntries = collect(json_decode($profile->naathe_relationships ?? '', true))->filter(function ($item) {
+                                return is_array($item);
+                            })->map(function ($item) {
+                                return [
+                                    'relation' => trim((string) ($item['relation'] ?? '')),
+                                    'value' => trim((string) ($item['value'] ?? '')),
+                                ];
+                            })->filter(function ($item) {
+                                return $item['relation'] !== '' || $item['value'] !== '';
+                            })->values();
+                        }
+                    @endphp
                     @foreach([
                         'Siblings' => $profile->siblings,
-                        'Uncles' => $profile->uncles,
-                        'Aunts' => $profile->aunts,
-                        'Naathe Relationships' => $profile->naathe_relationships,
-                        'Mumbai Address' => $profile->mumbai_address,
-                        'Village Address' => $profile->village_address,
+                        'Relatives' => null,
+                        'Residential Address' => $profile->address,
+                        'Native Address' => $profile->native_address,
                         'Village Farm' => $profile->village_farm,
                     ] as $label => $value)
                         <div>
                             <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $label }}</dt>
-                            <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $value ?? '—' }}</dd>
+                            <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">
+                                @if($label === 'Siblings')
+                                    @if($siblingEntries->isNotEmpty())
+                                        <ul class="space-y-1">
+                                            @foreach($siblingEntries as $siblingEntry)
+                                                <li>
+                                                    {{ $siblingEntry['relation'] !== '' ? $siblingEntry['relation'] : 'Sibling' }}
+                                                    @if($siblingEntry['value'] !== '')
+                                                        : {{ $siblingEntry['value'] }}
+                                                    @endif
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @else
+                                        {{ $value ?? '—' }}
+                                    @endif
+                                @elseif($label === 'Relatives')
+                                    @if($relativeEntries->isNotEmpty())
+                                        <ul class="space-y-1">
+                                            @foreach($relativeEntries as $relativeEntry)
+                                                <li>
+                                                    {{ $relativeEntry['relation'] !== '' ? $relativeEntry['relation'] : 'Relation' }}
+                                                    @if($relativeEntry['value'] !== '')
+                                                        : {{ $relativeEntry['value'] }}
+                                                    @endif
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @else
+                                        —
+                                    @endif
+                                @else
+                                    {{ $value ?? '—' }}
+                                @endif
+                            </dd>
                         </div>
                     @endforeach
                 </div>
