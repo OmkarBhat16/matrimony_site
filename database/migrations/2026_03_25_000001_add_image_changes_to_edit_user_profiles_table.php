@@ -8,16 +8,32 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('edit_user_profiles', function (Blueprint $table) {
-            $table->string('edit_type')->default('profile')->after('user_id');
-            $table->json('image_changes')->nullable()->after('naathe_relationships');
+            if (!Schema::hasColumn('edit_user_profiles', 'edit_type')) {
+                $table->string('edit_type')->default('profile');
+            }
+
+            if (!Schema::hasColumn('edit_user_profiles', 'image_changes')) {
+                $table->json('image_changes')->nullable();
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('edit_user_profiles', function (Blueprint $table) {
-            $table->dropColumn('edit_type');
-            $table->dropColumn('image_changes');
+            $columnsToDrop = [];
+
+            if (Schema::hasColumn('edit_user_profiles', 'edit_type')) {
+                $columnsToDrop[] = 'edit_type';
+            }
+
+            if (Schema::hasColumn('edit_user_profiles', 'image_changes')) {
+                $columnsToDrop[] = 'image_changes';
+            }
+
+            if ($columnsToDrop !== []) {
+                $table->dropColumn($columnsToDrop);
+            }
         });
     }
 };

@@ -12,6 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        $driver = Schema::getConnection()->getDriverName();
+
         DB::table('users')->select(['id', 'phone_number'])->orderBy('id')->chunkById(100, function ($users) {
             foreach ($users as $user) {
                 $normalizedPhoneNumber = preg_replace('/\D+/', '', (string) $user->phone_number);
@@ -37,7 +39,7 @@ return new class extends Migration
         }
 
         $invalidPhoneNumbers = DB::table('users')
-            ->whereRaw('CHAR_LENGTH(phone_number) != 10')
+            ->whereRaw(($driver === 'mysql' ? 'CHAR_LENGTH(phone_number)' : 'LENGTH(phone_number)').' != 10')
             ->pluck('phone_number');
 
         if ($invalidPhoneNumbers->isNotEmpty()) {
@@ -49,8 +51,6 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('phone_number', 10)->change();
         });
-
-        $driver = Schema::getConnection()->getDriverName();
 
         if ($driver === 'mysql') {
             DB::statement('ALTER TABLE users ADD CONSTRAINT users_phone_number_ten_digits CHECK (char_length(phone_number) = 10 AND phone_number REGEXP "^[0-9]{10}$")');

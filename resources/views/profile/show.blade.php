@@ -1,4 +1,4 @@
-mm<x-layout title="{{ $profile->full_name ?? 'Profile' }} - Profile">
+<x-layout title="{{ $profile->full_name ?? 'Profile' }} - Profile">
     {{-- PDF generation libraries --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
