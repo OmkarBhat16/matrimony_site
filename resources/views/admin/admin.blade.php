@@ -80,7 +80,7 @@
                             <p class="text-sm font-medium text-gray-900">{{ $user->name }}</p>
                             <p class="text-xs text-gray-500">{{ $user->phone_number }} &middot; Registered {{ $user->created_at->diffForHumans() }}</p>
                         </div>
-                        <form action="{{ route('admin.users.create-account', $user) }}" method="POST">
+                        <form action="{{ route('admin.users.create-account', $user) }}" method="POST" class="js-single-submit">
                             @csrf
                             <button type="submit" class="text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition">
                                 Create Account
@@ -94,4 +94,20 @@
             <p class="text-sm text-gray-500">No new registrations.</p>
         @endif
     </div>
+
+    <script>
+        document.querySelectorAll('.js-single-submit').forEach((form) => {
+            form.addEventListener('submit', () => {
+                const button = form.querySelector('button[type="submit"]');
+
+                if (!button) {
+                    return;
+                }
+
+                button.disabled = true;
+                button.classList.add('opacity-60', 'cursor-not-allowed');
+                button.textContent = 'Creating...';
+            });
+        });
+    </script>
 </x-admin-layout>

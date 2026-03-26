@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 
 class UserProfile extends Model
 {
     use HasFactory;
+
+    public const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
 
     protected $table = "user_profile";
 
@@ -56,15 +57,79 @@ class UserProfile extends Model
     }
 
     /**
-     * Folder inside storage/app/public where this profile's images live.
-     * e.g. "profiles/john@example.com"
+     * Absolute folder path for this profile's images under resources/assets.
      */
     public function imageFolder(): string
     {
-        $email = $this->user?->email ?? "user_" . $this->user_id;
-        // Sanitise so it's safe as a directory name
-        $safe = preg_replace("/[^a-zA-Z0-9@._\-]/", "_", $email);
-        return "profiles/" . $safe;
+        $phoneNumber = $this->user?->phone_number ?? "user_" . $this->user_id;
+        $safe = preg_replace("/[^a-zA-Z0-9._\-]/", "_", $phoneNumber);
+
+        return resource_path("assets/" . $safe);
+    }
+
+    /**
+     * Base filename for a given slot, with optional suffix for pending files.
+     */
+    public function imageBaseName(int $slot, ?string $suffix = null): string
+    {
+        return $slot . ($suffix ? "_" . $suffix : "");
+    }
+
+    /**
+     * Absolute path for a given slot and optional suffix/extension.
+     */
+    public function imagePath(int $slot, ?string $suffix = null, ?string $extension = null): ?string
+    {
+        $extension = $extension ? strtolower($extension) : null;
+
+        if ($extension !== null) {
+            return $this->imageFolder() . DIRECTORY_SEPARATOR . $this->imageBaseName($slot, $suffix) . "." . $extension;
+        }
+
+        foreach (self::IMAGE_EXTENSIONS as $ext) {
+            $path = $this->imageFolder() . DIRECTORY_SEPARATOR . $this->imageBaseName($slot, $suffix) . "." . $ext;
+            if (is_file($path)) {
+                return $path;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Return the stored extension for the current published image, if present.
+     */
+    public function imageExtension(int $slot): ?string
+    {
+        $path = $this->imagePath($slot);
+
+        return $path ? strtolower(pathinfo($path, PATHINFO_EXTENSION)) : null;
+    }
+
+    /**
+     * Return the stored extension for a pending replacement image, if present.
+     */
+    public function pendingImageExtension(int $slot): ?string
+    {
+        $path = $this->imagePath($slot, 'new');
+
+        return $path ? strtolower(pathinfo($path, PATHINFO_EXTENSION)) : null;
+    }
+
+    /**
+     * Return the absolute path for a pending replacement image, if present.
+     */
+    public function pendingImagePath(int $slot): ?string
+    {
+        return $this->imagePath($slot, 'new');
+    }
+
+    /**
+     * Return true when a pending replacement exists for the given slot.
+     */
+    public function hasPendingImageReplacement(int $slot): bool
+    {
+        return $this->pendingImagePath($slot) !== null;
     }
 
     /**
@@ -74,11 +139,15 @@ class UserProfile extends Model
     public function imageUrl(int $slot): ?string
     {
         foreach (["jpg", "png", "jpeg", "webp"] as $ext) {
-            $path = $this->imageFolder() . "/" . $slot . "." . $ext;
-            if (Storage::disk("public")->exists($path)) {
-                return Storage::disk("public")->url($path);
+            $path = $this->imageFolder() . DIRECTORY_SEPARATOR . $this->imageBaseName($slot) . "." . $ext;
+            if (is_file($path)) {
+                return route("profile.images.show", [
+                    "userProfile" => $this,
+                    "slot" => $slot,
+                ]);
             }
         }
+
         return null;
     }
 
@@ -88,6 +157,21 @@ class UserProfile extends Model
     public function primaryImageUrl(): ?string
     {
         return $this->imageUrl($this->primary_image ?? 1);
+    }
+
+    /**
+     * Return a public URL for a pending replacement image, if present.
+     */
+    public function pendingImageUrl(int $slot): ?string
+    {
+        if (!$this->hasPendingImageReplacement($slot)) {
+            return null;
+        }
+
+        return route("profile.images.pending.show", [
+            "userProfile" => $this,
+            "slot" => $slot,
+        ]);
     }
 
     /**

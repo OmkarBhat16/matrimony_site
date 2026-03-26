@@ -3,6 +3,8 @@
 
     @php
         $fields = \App\Models\EditUserProfile::DIFFABLE_FIELDS;
+        $allImgs = $profile->allImageUrls();
+        $pendingImageSlots = $pendingEdit?->image_changes ? array_map('intval', array_keys($pendingEdit->image_changes)) : [];
     @endphp
 
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -36,6 +38,75 @@
                         </ul>
                     </div>
                 @endif
+
+                <div class="mb-8 p-6 bg-gray-50 rounded-2xl border border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-1">Profile Photos</h2>
+                    <p class="text-sm text-gray-500 mb-5">Add missing photos here. Replacing an existing photo will go to admin review. Changing the primary photo stays immediate.</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                        @foreach ([1, 2, 3] as $slot)
+                            @php $imgUrl = $allImgs[$slot] ?? null; @endphp
+                            <div class="flex flex-col items-center gap-3">
+                                <form method="POST"
+                                      action="{{ route('profile.images.upload') }}"
+                                      enctype="multipart/form-data"
+                                      class="w-full">
+                                    @csrf
+                                    <div class="relative w-full aspect-square rounded-xl overflow-hidden border-2 cursor-pointer
+                                                {{ ($profile->primary_image ?? 1) == $slot ? 'border-pink-500 ring-2 ring-pink-300' : 'border-dashed border-gray-300 hover:border-pink-400' }}
+                                                transition"
+                                         onclick="document.getElementById('upload-input-{{ $slot }}').click()">
+                                        @if ($imgUrl)
+                                            <img src="{{ $imgUrl }}"
+                                                 alt="Photo {{ $slot }}"
+                                                 class="w-full h-full object-cover">
+                                            @if (($profile->primary_image ?? 1) == $slot)
+                                                <span class="absolute top-2 left-2 bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">
+                                                    Primary
+                                                </span>
+                                            @endif
+                                            @if (in_array($slot, $pendingImageSlots, true))
+                                                <span class="absolute top-2 right-2 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">
+                                                    Pending review
+                                                </span>
+                                            @endif
+                                        @else
+                                            <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-1 bg-white">
+                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                </svg>
+                                                <span class="text-xs font-medium">Photo {{ $slot }}</span>
+                                                <span class="text-xs">Click to upload</span>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <input type="file"
+                                           id="upload-input-{{ $slot }}"
+                                           name="images[{{ $slot }}]"
+                                           accept="image/jpeg,image/png,image/webp"
+                                           class="hidden"
+                                           onchange="this.closest('form').submit()">
+                                </form>
+
+                                @if ($imgUrl && ($profile->primary_image ?? 1) != $slot)
+                                    <form method="POST" action="{{ route('profile.images.primary') }}">
+                                        @csrf
+                                        <input type="hidden" name="slot" value="{{ $slot }}">
+                                        <button type="submit"
+                                                class="text-xs font-medium text-pink-600 hover:text-pink-800 border border-pink-300 hover:border-pink-500 rounded-lg px-3 py-1.5 transition">
+                                            Set as Primary
+                                        </button>
+                                    </form>
+                                @elseif ($imgUrl)
+                                    <span class="text-xs font-semibold text-pink-600 border border-pink-300 rounded-lg px-3 py-1.5 bg-pink-50">
+                                        ★ Primary Photo
+                                    </span>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
 
                 <form method="POST" action="{{ route('profile.update') }}" class="space-y-8">
                     @csrf

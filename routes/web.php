@@ -24,6 +24,20 @@ Route::view('/about', 'root.about')->name('root.about');
 Route::get('/matrimony', [MatrimonyController::class, 'index'])->name(
     'root.matrimony',
 );
+Route::get('/profile-images/{userProfile}/{slot}', [
+    UserProfileController::class,
+    'showImage',
+])
+    ->whereNumber('slot')
+    ->name('profile.images.show');
+
+Route::get('/profile-images/{userProfile}/{slot}/pending', [
+    UserProfileController::class,
+    'showPendingImage',
+])
+    ->middleware(['auth', 'admin'])
+    ->whereNumber('slot')
+    ->name('profile.images.pending.show');
 
 // AUTHENTICATION
 Route::view('/login', 'auth.login')->name('login')->middleware('guest');
@@ -104,6 +118,11 @@ Route::middleware(['auth'])->group(function () {
         AdminUserController::class,
         'createAccount',
     ])->name('admin.users.create-account');
+
+    Route::post('/admin/users/{user}/reset-password', [
+        AdminUserController::class,
+        'resetPassword',
+    ])->name('admin.users.reset-password');
 
     Route::get('/admin/users/{user}/profile', [
         AdminUserController::class,

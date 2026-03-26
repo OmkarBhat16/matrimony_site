@@ -4,12 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\EditUserProfile;
 use App\Models\UserProfile;
+use App\Services\ProfileImageManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class UserProfileController extends Controller
 {
+    public function __construct(private ProfileImageManager $images)
+    {
+    }
+
     /**
      * Show the logged-in user's own profile page.
      * Redirects to onboarding if no profile exists yet.
@@ -18,7 +24,17 @@ class UserProfileController extends Controller
     {
         $user = auth()->user();
 
+        Log::debug('User profile page requested.', [
+            'user_id' => $user->id,
+            'verification_step' => $user->verification_step,
+        ]);
+
         if (!$user->profile()->exists()) {
+            Log::info('User redirected to onboarding because no profile exists.', [
+                'user_id' => $user->id,
+                'verification_step' => $user->verification_step,
+            ]);
+
             return redirect()
                 ->route("onboarding.create")
                 ->with("info", "Please complete your profile to get started.");
@@ -38,6 +54,12 @@ class UserProfileController extends Controller
     {
         $user = auth()->user();
         $profile = $user->profile;
+
+        Log::debug('User opened profile edit page.', [
+            'user_id' => $user->id,
+            'verification_step' => $user->verification_step,
+            'has_profile' => (bool) $profile,
+        ]);
 
         if (!$profile) {
             return redirect()->route('onboarding.create');
@@ -90,15 +112,44 @@ class UserProfileController extends Controller
 
         $user = auth()->user();
 
-        // Delete any previous pending edit
-        EditUserProfile::where('user_id', $user->id)
+        Log::debug('User profile edit submission received.', [
+            'user_id' => $user->id,
+            'verification_step' => $user->verification_step,
+            'field_count' => count(array_filter($validated, fn ($value) => !is_null($value) && $value !== '')),
+        ]);
+
+        $existingPending = EditUserProfile::where('user_id', $user->id)
             ->where('status', 'pending')
-            ->delete();
+            ->first();
 
-        $validated['user_id'] = $user->id;
-        $validated['status'] = 'pending';
+        $imageChanges = $existingPending?->image_changes ?? [];
 
-        EditUserProfile::create($validated);
+        try {
+            if ($existingPending) {
+                $existingPending->delete();
+            }
+
+            $validated['user_id'] = $user->id;
+            $validated['edit_type'] = 'profile';
+            $validated['status'] = 'pending';
+            $validated['image_changes'] = empty($imageChanges) ? null : $imageChanges;
+
+            $edit = EditUserProfile::create($validated);
+        } catch (\Throwable $e) {
+            Log::error('User profile edit submission failed.', [
+                'user_id' => $user->id,
+                'verification_step' => $user->verification_step,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('profile')->with('error', 'Your profile edit could not be submitted.');
+        }
+
+        Log::info('User profile edit submitted for review.', [
+            'user_id' => $user->id,
+            'edit_id' => $edit->id,
+            'verification_step' => $user->verification_step,
+        ]);
 
         return redirect()->route('profile')->with('success', 'Your profile edit has been submitted for review.');
     }
@@ -110,6 +161,12 @@ class UserProfileController extends Controller
     public function create()
     {
         $user = auth()->user();
+
+        Log::debug('User opened onboarding page.', [
+            'user_id' => $user->id,
+            'verification_step' => $user->verification_step,
+            'has_profile' => $user->profile()->exists(),
+        ]);
 
         if ($user->profile()->exists()) {
             return redirect()->route("root.matrimony");
@@ -175,6 +232,12 @@ class UserProfileController extends Controller
         $user = Auth::user();
         $validated["user_id"] = $user->id;
 
+        Log::debug('User onboarding submission received.', [
+            'user_id' => $user->id,
+            'verification_step' => $user->verification_step,
+            'image_count' => count($request->file('images') ?? []),
+        ]);
+
         // Default primary image to 1
         $validated["primary_image"] = $validated["primary_image"] ?? 1;
 
@@ -182,13 +245,35 @@ class UserProfileController extends Controller
         $images = $request->file("images") ?? [];
         unset($validated["images"]);
 
-        $profile = UserProfile::create($validated);
+        try {
+            $profile = DB::transaction(function () use ($validated, $user) {
+                $profile = UserProfile::create($validated);
 
-        // Store uploaded images
-        $this->storeImages($profile, $images);
+                $user->forceFill([
+                    'verification_step' => 'step2_pending',
+                ])->save();
 
-        // Move to step2_pending — profile is now under review
-        $user->update(['verification_step' => 'step2_pending']);
+                return $profile;
+            }, 5);
+
+            // Store uploaded images after the DB transaction commits successfully.
+            $this->storeImages($profile, $images);
+        } catch (\Throwable $e) {
+            Log::error('User onboarding submission failed.', [
+                'user_id' => $user->id,
+                'verification_step' => $user->verification_step,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->withInput()->with('error', 'Profile submission failed. Please try again.');
+        }
+
+        Log::info('User onboarding submitted for admin review.', [
+            'user_id' => $user->id,
+            'profile_id' => $profile->id,
+            'verification_step' => $user->fresh()->verification_step,
+            'image_count' => count($images),
+        ]);
 
         return redirect("/pending-review");
     }
@@ -205,6 +290,12 @@ class UserProfileController extends Controller
         $user = auth()->user();
         $profile = $user->profile;
 
+        Log::debug('User primary image change requested.', [
+            'user_id' => $user->id,
+            'requested_slot' => (int) $request->input('slot'),
+            'has_profile' => (bool) $profile,
+        ]);
+
         if (!$profile) {
             abort(404);
         }
@@ -213,10 +304,30 @@ class UserProfileController extends Controller
 
         // Only allow setting a slot that actually has an uploaded image
         if ($profile->imageUrl($slot) === null) {
+            Log::info('User primary image change rejected because slot has no image.', [
+                'user_id' => $user->id,
+                'requested_slot' => $slot,
+            ]);
+
             return back()->with("error", "No image uploaded for that slot.");
         }
 
-        $profile->update(["primary_image" => $slot]);
+        try {
+            $profile->update(["primary_image" => $slot]);
+        } catch (\Throwable $e) {
+            Log::error('User primary image change failed.', [
+                'user_id' => $user->id,
+                'requested_slot' => $slot,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with("error", "Primary photo could not be updated.");
+        }
+
+        Log::info('User primary image updated.', [
+            'user_id' => $user->id,
+            'primary_image' => $slot,
+        ]);
 
         return back()->with("success", "Primary photo updated.");
     }
@@ -244,9 +355,92 @@ class UserProfileController extends Controller
             abort(404);
         }
 
-        $this->storeImages($profile, $request->file("images"));
+        $images = $request->file("images") ?? [];
+        $pendingEdit = EditUserProfile::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+        $imageChanges = $pendingEdit?->image_changes ?? [];
 
-        return back()->with("success", "Photos updated successfully.");
+        foreach ($images as $index => $file) {
+            if (!$file || !$file->isValid()) {
+                continue;
+            }
+
+            $slot = (int) $index;
+            if ($slot === 0) {
+                $slot = 1;
+            }
+
+            if ($slot < 1 || $slot > 3) {
+                continue;
+            }
+
+            $hasPublishedImage = $this->images->hasCurrentImage($profile, $slot);
+            $hasPendingReplacement = $this->images->hasPendingImage($profile, $slot);
+
+            if ($hasPublishedImage || $hasPendingReplacement) {
+                $this->images->storePendingImage($profile, $slot, $file);
+                $imageChanges[(string) $slot] = true;
+            } else {
+                $this->images->storeCurrentImage($profile, $slot, $file);
+                unset($imageChanges[(string) $slot]);
+            }
+        }
+
+        $hasPendingReplacements = !empty($imageChanges);
+
+        if ($hasPendingReplacements) {
+            if ($pendingEdit) {
+                $pendingEdit->update([
+                    'image_changes' => $imageChanges,
+                ]);
+            } else {
+                EditUserProfile::create([
+                    'user_id' => $user->id,
+                    'edit_type' => 'image',
+                    'status' => 'pending',
+                    'image_changes' => $imageChanges,
+                ]);
+            }
+        }
+
+        $message = $hasPendingReplacements
+            ? "Your replacement photo has been submitted for admin approval."
+            : "Photos updated successfully.";
+
+        return back()->with("success", $message);
+    }
+
+    /**
+     * Serve a stored profile image from resources/assets/<phone>/<slot>.<ext>.
+     */
+    public function showImage(UserProfile $userProfile, int $slot)
+    {
+        abort_unless(in_array($slot, [1, 2, 3], true), 404);
+
+        $path = $userProfile->imagePath($slot);
+
+        if ($path !== null) {
+            return response()->file($path);
+        }
+
+        abort(404);
+    }
+
+    /**
+     * Serve a pending replacement image for admin review.
+     */
+    public function showPendingImage(UserProfile $userProfile, int $slot)
+    {
+        abort_unless(in_array($slot, [1, 2, 3], true), 404);
+
+        $path = $userProfile->pendingImagePath($slot);
+
+        if ($path !== null && is_file($path)) {
+            return response()->file($path);
+        }
+
+        abort(404);
     }
 
     /**
@@ -275,7 +469,7 @@ class UserProfileController extends Controller
     // -------------------------------------------------------------------------
 
     /**
-     * Persist uploaded image files into storage/app/public/profiles/<email>/
+     * Persist uploaded image files into resources/assets/<phone>/
      * naming them 1.ext, 2.ext, 3.ext based on the array index (1-based).
      * Any pre-existing file in that slot is deleted first.
      *
@@ -287,11 +481,6 @@ class UserProfileController extends Controller
         if (empty($images)) {
             return;
         }
-
-        $folder = $profile->imageFolder();
-
-        // Ensure directory exists (Storage::makeDirectory is a no-op if already present)
-        Storage::disk("public")->makeDirectory($folder);
 
         foreach ($images as $index => $file) {
             if (!$file || !$file->isValid()) {
@@ -309,20 +498,7 @@ class UserProfileController extends Controller
                 continue;
             }
 
-            $ext = strtolower($file->getClientOriginalExtension());
-            if (!in_array($ext, ["jpg", "jpeg", "png", "webp"])) {
-                $ext = "jpg";
-            }
-
-            // Remove any old file for this slot (could be a different extension)
-            foreach (["jpg", "jpeg", "png", "webp"] as $oldExt) {
-                $oldPath = $folder . "/" . $slot . "." . $oldExt;
-                if (Storage::disk("public")->exists($oldPath)) {
-                    Storage::disk("public")->delete($oldPath);
-                }
-            }
-
-            $file->storeAs($folder, $slot . "." . $ext, "public");
+            $this->images->storeCurrentImage($profile, $slot, $file);
         }
     }
 }

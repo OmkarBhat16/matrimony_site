@@ -35,7 +35,9 @@
     {{-- Flash: generated password --}}
     @if(session('generated_password'))
         <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
-            <p class="text-sm font-medium text-green-800 mb-2">Account created! Share this password with the user:</p>
+            <p class="text-sm font-medium text-green-800 mb-2">
+                {{ session('success') ?? 'Password generated! Share this password with the user:' }}
+            </p>
             <div class="flex items-center gap-3">
                 <code id="generated-pw" class="flex-1 px-4 py-2.5 bg-white border border-green-300 rounded-lg text-lg font-mono tracking-wider text-gray-900 select-all">{{ session('generated_password') }}</code>
                 <button type="button" onclick="copyPassword()" id="copy-btn"
@@ -82,7 +84,7 @@
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $user->email ?? '—' }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-500">{{ $user->created_at->diffForHumans() }}</td>
                                     <td class="px-6 py-4">
-                                        <form action="{{ route('admin.users.create-account', $user) }}" method="POST">
+                                        <form action="{{ route('admin.users.create-account', $user) }}" method="POST" class="js-single-submit">
                                             @csrf
                                             <button type="submit" class="text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-lg transition">
                                                 Create Account
@@ -173,12 +175,19 @@
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $user->phone_number }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $user->email ?? '—' }}</td>
                                     <td class="px-6 py-4">
-                                        @if($user->profile)
-                                            <a href="{{ route('admin.users.profile', $user) }}"
-                                               class="text-sm text-pink-600 hover:text-pink-700 font-medium">View</a>
-                                        @else
-                                            <span class="text-xs text-gray-400">—</span>
-                                        @endif
+                                        <div class="flex items-center gap-3">
+                                            @if($user->profile)
+                                                <a href="{{ route('admin.users.profile', $user) }}"
+                                                   class="text-sm text-pink-600 hover:text-pink-700 font-medium">View</a>
+                                            @endif
+                                            <form action="{{ route('admin.users.reset-password', $user) }}" method="POST">
+                                                @csrf
+                                                <button type="submit"
+                                                        class="text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 px-4 py-1.5 rounded-lg transition">
+                                                    Reset Password
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -190,6 +199,20 @@
     @endif
 
     <script>
+        document.querySelectorAll('.js-single-submit').forEach((form) => {
+            form.addEventListener('submit', () => {
+                const button = form.querySelector('button[type="submit"]');
+
+                if (!button) {
+                    return;
+                }
+
+                button.disabled = true;
+                button.classList.add('opacity-60', 'cursor-not-allowed');
+                button.textContent = 'Creating...';
+            });
+        });
+
         function copyPassword() {
             const pw = document.getElementById('generated-pw').textContent;
             navigator.clipboard.writeText(pw).then(() => {

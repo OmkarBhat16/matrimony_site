@@ -43,6 +43,7 @@ class EditUserProfile extends Model
 
     protected $fillable = [
         'user_id',
+        'edit_type',
         'full_name',
         'navras_naav',
         'gender',
@@ -70,12 +71,14 @@ class EditUserProfile extends Model
         'village_address',
         'village_farm',
         'naathe_relationships',
+        'image_changes',
         'status',
     ];
 
     protected $casts = [
         'date_of_birth' => 'date',
         'annual_income' => 'decimal:2',
+        'image_changes' => 'array',
     ];
 
     public function user()
@@ -105,5 +108,23 @@ class EditUserProfile extends Model
         }
 
         return $changes;
+    }
+
+    /**
+     * Slots with pending image replacements, keyed by slot number.
+     */
+    public function pendingImageSlots(): array
+    {
+        $imageChanges = $this->image_changes ?? [];
+
+        return array_values(array_filter(array_map('intval', array_keys($imageChanges))));
+    }
+
+    /**
+     * True when this edit contains either field changes or image replacements.
+     */
+    public function hasPendingChanges(UserProfile $currentProfile): bool
+    {
+        return !empty($this->diff($currentProfile)) || !empty($this->pendingImageSlots());
     }
 }

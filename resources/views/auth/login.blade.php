@@ -50,6 +50,10 @@
                                 type="tel"
                                 autocomplete="tel"
                                 required
+                                inputmode="numeric"
+                                maxlength="10"
+                                minlength="10"
+                                pattern="[0-9]{10}"
                                 value="{{ old('phone_number') }}"
                                 class="block w-full px-3 py-3 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('phone_number') border-red-500 @enderror"
                                 placeholder="98765 43210"

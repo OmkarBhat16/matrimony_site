@@ -5,12 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\EditUserProfile;
 use App\Models\User;
 use App\Models\UserProfile;
+use App\Services\ProfileImageManager;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Hash;
 
 class AdminUserController extends Controller
 {
+    public function __construct(private ProfileImageManager $images)
+    {
+    }
+
     /**
      * Show users list with tabs based on verification_step.
      */
@@ -41,21 +47,127 @@ class AdminUserController extends Controller
      */
     public function createAccount(User $user)
     {
-        if ($user->verification_step !== 'unverified') {
+        Log::debug('Admin account creation requested.', [
+            'admin_id' => auth()->id(),
+            'target_user_id' => $user->id,
+            'target_step' => $user->verification_step,
+        ]);
+
+        try {
+            $result = DB::transaction(function () use ($user) {
+                // Lock the row so MySQL/InnoDB cannot process two approvals for
+                // the same user at the same time.
+                $lockedUser = User::whereKey($user->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                if ($lockedUser->verification_step !== 'unverified') {
+                    Log::info('Admin account creation skipped because user is no longer unverified.', [
+                        'admin_id' => auth()->id(),
+                        'target_user_id' => $lockedUser->id,
+                        'verification_step' => $lockedUser->verification_step,
+                    ]);
+
+                    return ['status' => 'already_created'];
+                }
+
+                $plainPassword = Str::random(12);
+
+                $lockedUser->forceFill([
+                    'password' => $plainPassword,
+                    'verification_step' => 'step1_complete',
+                ])->save();
+
+                $lockedUser->refresh();
+
+                if (! $lockedUser->needsOnboarding()) {
+                    throw new \RuntimeException('Account approval did not reach step1_complete.');
+                }
+
+                Log::info('Admin account creation completed.', [
+                    'admin_id' => auth()->id(),
+                    'target_user_id' => $lockedUser->id,
+                    'verification_step' => $lockedUser->verification_step,
+                ]);
+
+                return [
+                    'status' => 'created',
+                    'plain_password' => $plainPassword,
+                ];
+            }, 5);
+        } catch (\Throwable $e) {
+            Log::error('Failed to create matrimony account during admin approval.', [
+                'admin_id' => auth()->id(),
+                'user_id' => $user->id,
+                'verification_step' => $user->verification_step,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Account creation failed. No password was issued. Please try again.');
+        }
+
+        if ($result['status'] === 'already_created') {
             return redirect()->back()->with('error', 'Account has already been created for this user.');
         }
 
-        $plainPassword = Str::random(12);
+        return redirect()
+            ->back()
+            ->with('generated_password', $result['plain_password'])
+            ->with('generated_for_user', $user->id)
+            ->with('success', 'Password generated and account moved to onboarding.');
+    }
 
-        $user->update([
-            'password' => Hash::make($plainPassword),
-            'verification_step' => 'step1_complete',
+    /**
+     * Reset the password for an approved user and return the new plain password.
+     */
+    public function resetPassword(User $user)
+    {
+        Log::debug('Admin password reset requested.', [
+            'admin_id' => auth()->id(),
+            'target_user_id' => $user->id,
+            'verification_step' => $user->verification_step,
+        ]);
+
+        if ($user->verification_step !== 'approved') {
+            Log::info('Admin password reset denied because user is not approved.', [
+                'admin_id' => auth()->id(),
+                'target_user_id' => $user->id,
+                'verification_step' => $user->verification_step,
+            ]);
+
+            return redirect()->back()->with('error', 'Password reset is only available for approved users.');
+        }
+
+        try {
+            $plainPassword = Str::random(12);
+
+            $user->update([
+                'password' => $plainPassword,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Admin password reset failed.', [
+                'admin_id' => auth()->id(),
+                'target_user_id' => $user->id,
+                'verification_step' => $user->verification_step,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'Password reset failed. Please try again.');
+        }
+
+        Log::info('Admin password reset completed.', [
+            'admin_id' => auth()->id(),
+            'target_user_id' => $user->id,
+            'verification_step' => $user->verification_step,
         ]);
 
         return redirect()
             ->back()
             ->with('generated_password', $plainPassword)
-            ->with('generated_for_user', $user->id);
+            ->with('generated_for_user', $user->id)
+            ->with('success', 'Password reset successfully.');
     }
 
     /**
@@ -65,6 +177,13 @@ class AdminUserController extends Controller
     {
         $user->load('profile');
 
+        Log::debug('Admin viewed user profile.', [
+            'admin_id' => auth()->id(),
+            'target_user_id' => $user->id,
+            'verification_step' => $user->verification_step,
+            'has_profile' => (bool) $user->profile,
+        ]);
+
         return view('admin.profile-review', compact('user'));
     }
 
@@ -73,8 +192,31 @@ class AdminUserController extends Controller
      */
     public function approve(User $user)
     {
-        $user->update([
-            'verification_step' => 'approved',
+        Log::debug('Admin final approval requested.', [
+            'admin_id' => auth()->id(),
+            'target_user_id' => $user->id,
+            'from_step' => $user->verification_step,
+        ]);
+
+        try {
+            $user->update([
+                'verification_step' => 'approved',
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Admin final approval failed.', [
+                'admin_id' => auth()->id(),
+                'target_user_id' => $user->id,
+                'from_step' => $user->verification_step,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'User approval failed. Please try again.');
+        }
+
+        Log::info('Admin final approval completed.', [
+            'admin_id' => auth()->id(),
+            'target_user_id' => $user->id,
+            'verification_step' => $user->verification_step,
         ]);
 
         return redirect()->back()->with('success', 'User approved successfully.');
@@ -94,6 +236,11 @@ class AdminUserController extends Controller
             ->latest()
             ->get();
 
+        Log::debug('Admin viewed pending edit list.', [
+            'admin_id' => auth()->id(),
+            'pending_count' => $edits->count(),
+        ]);
+
         return view('admin.pending-edits', compact('edits'));
     }
 
@@ -105,8 +252,17 @@ class AdminUserController extends Controller
         $edit->load('user');
         $currentProfile = UserProfile::where('user_id', $edit->user_id)->firstOrFail();
         $diff = $edit->diff($currentProfile);
+        $pendingImageSlots = $edit->pendingImageSlots();
 
-        return view('admin.edit-review', compact('edit', 'currentProfile', 'diff'));
+        Log::debug('Admin reviewed pending edit.', [
+            'admin_id' => auth()->id(),
+            'edit_id' => $edit->id,
+            'user_id' => $edit->user_id,
+            'edit_type' => $edit->edit_type,
+            'pending_image_slots' => $pendingImageSlots,
+        ]);
+
+        return view('admin.edit-review', compact('edit', 'currentProfile', 'diff', 'pendingImageSlots'));
     }
 
     /**
@@ -114,16 +270,48 @@ class AdminUserController extends Controller
      */
     public function approveEdit(EditUserProfile $edit)
     {
+        Log::debug('Admin edit approval requested.', [
+            'admin_id' => auth()->id(),
+            'edit_id' => $edit->id,
+            'user_id' => $edit->user_id,
+            'edit_type' => $edit->edit_type,
+        ]);
+
         $profile = UserProfile::where('user_id', $edit->user_id)->firstOrFail();
 
-        // Copy all diffable fields from edit to the real profile
-        $data = [];
-        foreach (EditUserProfile::DIFFABLE_FIELDS as $field => $label) {
-            $data[$field] = $edit->{$field};
-        }
-        $profile->update($data);
+        try {
+            if ($edit->edit_type !== 'image') {
+                // Copy all diffable fields from edit to the real profile
+                $data = [];
+                foreach (EditUserProfile::DIFFABLE_FIELDS as $field => $label) {
+                    $data[$field] = $edit->{$field};
+                }
+                $profile->update($data);
+            }
 
-        $edit->delete();
+            foreach ($edit->pendingImageSlots() as $slot) {
+                $this->images->approvePendingImage($profile, $slot);
+            }
+
+            $edit->delete();
+        } catch (\Throwable $e) {
+            Log::error('Admin edit approval failed.', [
+                'admin_id' => auth()->id(),
+                'edit_id' => $edit->id,
+                'user_id' => $edit->user_id,
+                'edit_type' => $edit->edit_type,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('admin.pending-edits')->with('error', 'Profile edit approval failed.');
+        }
+
+        Log::info('Admin edit approval completed.', [
+            'admin_id' => auth()->id(),
+            'edit_id' => $edit->id,
+            'user_id' => $edit->user_id,
+            'edit_type' => $edit->edit_type,
+        ]);
 
         return redirect()->route('admin.pending-edits')->with('success', 'Profile edit approved and applied.');
     }
@@ -133,7 +321,39 @@ class AdminUserController extends Controller
      */
     public function rejectEdit(EditUserProfile $edit)
     {
-        $edit->delete();
+        Log::debug('Admin edit rejection requested.', [
+            'admin_id' => auth()->id(),
+            'edit_id' => $edit->id,
+            'user_id' => $edit->user_id,
+            'edit_type' => $edit->edit_type,
+        ]);
+
+        $profile = UserProfile::where('user_id', $edit->user_id)->firstOrFail();
+
+        try {
+            foreach ($edit->pendingImageSlots() as $slot) {
+                $this->images->rejectPendingImage($profile, $slot);
+            }
+
+            $edit->delete();
+        } catch (\Throwable $e) {
+            Log::error('Admin edit rejection failed.', [
+                'admin_id' => auth()->id(),
+                'edit_id' => $edit->id,
+                'user_id' => $edit->user_id,
+                'edit_type' => $edit->edit_type,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('admin.pending-edits')->with('error', 'Profile edit rejection failed.');
+        }
+
+        Log::info('Admin edit rejection completed.', [
+            'admin_id' => auth()->id(),
+            'edit_id' => $edit->id,
+            'user_id' => $edit->user_id,
+            'edit_type' => $edit->edit_type,
+        ]);
 
         return redirect()->route('admin.pending-edits')->with('success', 'Profile edit rejected.');
     }

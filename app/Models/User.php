@@ -49,6 +49,13 @@ class User extends Authenticatable
         ];
     }
 
+    public function setPhoneNumberAttribute($value): void
+    {
+        $this->attributes['phone_number'] = $value === null
+            ? null
+            : preg_replace('/\D+/', '', (string) $value);
+    }
+
     // -------------------------------------------------------------------------
     // Verification helpers
     // -------------------------------------------------------------------------

@@ -6,7 +6,7 @@
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100">
             <h2 class="text-lg font-semibold text-gray-900">Edit Requests</h2>
-            <p class="text-sm text-gray-500 mt-1">Users who have requested changes to their profiles.</p>
+            <p class="text-sm text-gray-500 mt-1">Users who have requested profile changes or photo replacements.</p>
         </div>
 
         @if($edits->isEmpty())
