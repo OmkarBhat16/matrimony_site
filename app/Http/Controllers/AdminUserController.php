@@ -23,6 +23,8 @@ class AdminUserController extends Controller
     public function index(Request $request)
     {
         $tab = $request->query('tab', 'registrations');
+        $stepFilter = $request->query('step', 'all');
+        $search = trim((string) $request->query('search', ''));
 
         $registrations = User::where('verification_step', 'unverified')
             ->where('role', 'user')
@@ -39,7 +41,36 @@ class AdminUserController extends Controller
             ->latest()
             ->get();
 
-        return view('admin.users', compact('tab', 'registrations', 'pendingReview', 'approved'));
+        $pendingEditsByUser = EditUserProfile::where('status', 'pending')
+            ->with('user')
+            ->latest()
+            ->get()
+            ->keyBy('user_id');
+
+        $allUsers = User::query()
+            ->where('role', 'user')
+            ->when($stepFilter !== 'all', fn ($query) => $query->where('verification_step', $stepFilter))
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($nestedQuery) use ($search) {
+                    $nestedQuery
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('phone_number', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->get();
+
+        return view('admin.users', compact(
+            'tab',
+            'stepFilter',
+            'search',
+            'registrations',
+            'pendingReview',
+            'approved',
+            'pendingEditsByUser',
+            'allUsers',
+        ));
     }
 
     /**
@@ -109,11 +140,13 @@ class AdminUserController extends Controller
         }
 
         if ($result['status'] === 'already_created') {
-            return redirect()->back()->with('error', 'Account has already been created for this user.');
+            return redirect()
+                ->route('admin.users', ['tab' => 'all', 'step' => 'step1_complete'])
+                ->with('error', 'Account has already been created for this user.');
         }
 
         return redirect()
-            ->back()
+            ->route('admin.users', ['tab' => 'all', 'step' => 'step1_complete'])
             ->with('generated_password', $result['plain_password'])
             ->with('generated_for_user', $user->id)
             ->with('success', 'Password generated and account moved to onboarding.');
@@ -130,14 +163,14 @@ class AdminUserController extends Controller
             'verification_step' => $user->verification_step,
         ]);
 
-        if ($user->verification_step !== 'approved') {
-            Log::info('Admin password reset denied because user is not approved.', [
+        if ($user->verification_step === 'unverified') {
+            Log::info('Admin password reset denied because user account is still unverified.', [
                 'admin_id' => auth()->id(),
                 'target_user_id' => $user->id,
                 'verification_step' => $user->verification_step,
             ]);
 
-            return redirect()->back()->with('error', 'Password reset is only available for approved users.');
+            return redirect()->back()->with('error', 'Password reset is only available after account creation.');
         }
 
         try {
@@ -164,7 +197,7 @@ class AdminUserController extends Controller
         ]);
 
         return redirect()
-            ->back()
+            ->route('admin.users', ['tab' => 'all', 'step' => $user->verification_step])
             ->with('generated_password', $plainPassword)
             ->with('generated_for_user', $user->id)
             ->with('success', 'Password reset successfully.');
@@ -280,16 +313,24 @@ class AdminUserController extends Controller
         $profile = UserProfile::where('user_id', $edit->user_id)->firstOrFail();
 
         try {
-            if ($edit->edit_type !== 'image') {
-                // Copy all diffable fields from edit to the real profile
-                $data = [];
-                foreach (EditUserProfile::DIFFABLE_FIELDS as $field => $label) {
-                    $data[$field] = $edit->{$field};
+            $pendingImageSlots = $edit->pendingImageSlots();
+            $shouldSkipLegacyBlankProfileUpdate = $edit->edit_type === 'profile'
+                && !$edit->hasProfileFieldValues()
+                && !empty($pendingImageSlots);
+
+            if ($edit->edit_type !== 'image' && !$shouldSkipLegacyBlankProfileUpdate) {
+                $profileDiff = $edit->diff($profile);
+
+                if (!empty($profileDiff)) {
+                    $data = [];
+                    foreach (array_keys($profileDiff) as $field) {
+                        $data[$field] = $edit->{$field};
+                    }
+                    $profile->update($data);
                 }
-                $profile->update($data);
             }
 
-            foreach ($edit->pendingImageSlots() as $slot) {
+            foreach ($pendingImageSlots as $slot) {
                 $this->images->approvePendingImage($profile, $slot);
             }
 

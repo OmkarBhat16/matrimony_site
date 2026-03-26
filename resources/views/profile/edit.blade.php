@@ -12,18 +12,18 @@
             <div class="px-6 sm:px-10 py-8">
                 <div class="flex items-center justify-between mb-8">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900">Edit Profile</h1>
-                        <p class="text-sm text-gray-500 mt-1">Changes will be submitted for admin review before going live.</p>
+                        <h1 class="lang-label text-2xl font-bold text-gray-900" data-en="Edit Profile" data-mr="प्रोफाइल संपादित करा">Edit Profile</h1>
+                        <p class="lang-label text-sm text-gray-500 mt-1" data-en="Changes will be submitted for admin review before going live." data-mr="बदल लाईव्ह होण्यापूर्वी अ‍ॅडमिनच्या मंजुरीसाठी सबमिट केले जातील.">Changes will be submitted for admin review before going live.</p>
                     </div>
                     <a href="{{ route('profile') }}" class="text-sm text-gray-500 hover:text-pink-600 transition flex items-center gap-1">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                        Back to Profile
+                        <span class="lang-label" data-en="Back to Profile" data-mr="प्रोफाइलवर परत जा">Back to Profile</span>
                     </a>
                 </div>
 
                 @if($pendingEdit)
                     <div class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                        <p class="text-sm text-amber-700">
+                        <p class="lang-label text-sm text-amber-700" data-en="Note: You already have a pending edit under review. Submitting again will replace it." data-mr="नोंद: तुमचा एक प्रलंबित बदल आधीच मंजुरीच्या प्रतीक्षेत आहे. पुन्हा सबमिट केल्यास जुना बदल नवीन बदलाने बदलला जाईल.">
                             <strong>Note:</strong> You already have a pending edit under review. Submitting again will replace it.
                         </p>
                     </div>

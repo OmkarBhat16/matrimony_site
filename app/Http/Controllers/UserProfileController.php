@@ -70,7 +70,14 @@ class UserProfileController extends Controller
             ->where('status', 'pending')
             ->first();
 
-        $values = $pendingEdit ?? $profile;
+        $hasLegacyImageOnlyDraft = $pendingEdit
+            && $pendingEdit->edit_type === 'profile'
+            && !$pendingEdit->hasProfileFieldValues()
+            && !empty($pendingEdit->pendingImageSlots());
+
+        $values = $pendingEdit && $pendingEdit->edit_type !== 'image' && !$hasLegacyImageOnlyDraft
+            ? $pendingEdit
+            : $profile;
 
         return view('profile.edit', compact('profile', 'values', 'pendingEdit'));
     }
@@ -111,6 +118,7 @@ class UserProfileController extends Controller
         ]);
 
         $user = auth()->user();
+        $profile = $user->profile;
 
         Log::debug('User profile edit submission received.', [
             'user_id' => $user->id,
@@ -129,12 +137,20 @@ class UserProfileController extends Controller
                 $existingPending->delete();
             }
 
-            $validated['user_id'] = $user->id;
-            $validated['edit_type'] = 'profile';
-            $validated['status'] = 'pending';
-            $validated['image_changes'] = empty($imageChanges) ? null : $imageChanges;
+            $editPayload = [
+                'user_id' => $user->id,
+                'edit_type' => 'profile',
+                'status' => 'pending',
+                'image_changes' => empty($imageChanges) ? null : $imageChanges,
+            ];
 
-            $edit = EditUserProfile::create($validated);
+            foreach (array_keys(EditUserProfile::DIFFABLE_FIELDS) as $field) {
+                $editPayload[$field] = $request->exists($field)
+                    ? ($validated[$field] ?? null)
+                    : $profile->{$field};
+            }
+
+            $edit = EditUserProfile::create($editPayload);
         } catch (\Throwable $e) {
             Log::error('User profile edit submission failed.', [
                 'user_id' => $user->id,
@@ -227,6 +243,13 @@ class UserProfileController extends Controller
                 "max:5120",
             ],
             "primary_image" => ["nullable", "integer", "in:1,2,3"],
+        ], [
+            'images.1.uploaded' => 'The first image failed to upload. It might be too large.',
+            'images.2.uploaded' => 'The second image failed to upload. It might be too large.',
+            'images.3.uploaded' => 'The third image failed to upload. It might be too large.',
+            'images.*.max' => 'Each image must not be greater than 5MB.',
+            'images.*.image' => 'The file must be an image.',
+            'images.*.mimes' => 'Images must be a file of type: jpg, jpeg, png, webp.',
         ]);
 
         $user = Auth::user();

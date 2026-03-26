@@ -120,6 +120,19 @@ class EditUserProfile extends Model
         return array_values(array_filter(array_map('intval', array_keys($imageChanges))));
     }
 
+    public function hasProfileFieldValues(): bool
+    {
+        foreach (array_keys(self::DIFFABLE_FIELDS) as $field) {
+            $value = $this->{$field};
+
+            if ($value !== null && $value !== '') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * True when this edit contains either field changes or image replacements.
      */
