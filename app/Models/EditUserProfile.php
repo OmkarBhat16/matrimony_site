@@ -120,6 +120,13 @@ class EditUserProfile extends Model
         return array_values(array_filter(array_map('intval', array_keys($imageChanges))));
     }
 
+    public function hasPendingKundliImage(): bool
+    {
+        $imageChanges = $this->image_changes ?? [];
+
+        return array_key_exists('kundli', $imageChanges);
+    }
+
     public function hasProfileFieldValues(): bool
     {
         foreach (array_keys(self::DIFFABLE_FIELDS) as $field) {
@@ -138,6 +145,6 @@ class EditUserProfile extends Model
      */
     public function hasPendingChanges(UserProfile $currentProfile): bool
     {
-        return ! empty($this->diff($currentProfile)) || ! empty($this->pendingImageSlots());
+        return ! empty($this->diff($currentProfile)) || ! empty($this->pendingImageSlots()) || $this->hasPendingKundliImage();
     }
 }

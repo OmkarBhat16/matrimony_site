@@ -56,6 +56,11 @@ class UserProfile extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function featuredProfile()
+    {
+        return $this->hasOne(FeaturedProfile::class);
+    }
+
     /**
      * Absolute folder path for this profile's images under resources/assets.
      */
@@ -65,6 +70,62 @@ class UserProfile extends Model
         $safe = preg_replace("/[^a-zA-Z0-9._\-]/", '_', $phoneNumber);
 
         return resource_path('assets/'.$safe);
+    }
+
+    /**
+     * Absolute folder path for this profile's kundli image.
+     */
+    public function kundliFolder(): string
+    {
+        return $this->imageFolder().DIRECTORY_SEPARATOR.'kundli';
+    }
+
+    /**
+     * Absolute path for the kundli image, if present.
+     */
+    public function kundliImagePath(): ?string
+    {
+        $path = $this->kundliFolder().DIRECTORY_SEPARATOR.'1.jpg';
+
+        return is_file($path) ? $path : null;
+    }
+
+    /**
+     * Public URL for the kundli image, if present.
+     */
+    public function kundliImageUrl(): ?string
+    {
+        if (! $this->kundliImagePath()) {
+            return null;
+        }
+
+        return route('profile.kundli.show', [
+            'userProfile' => $this,
+        ]);
+    }
+
+    /**
+     * Absolute path for the pending kundli image, if present.
+     */
+    public function pendingKundliImagePath(): ?string
+    {
+        $path = $this->kundliFolder().DIRECTORY_SEPARATOR.'1_new.jpg';
+
+        return is_file($path) ? $path : null;
+    }
+
+    /**
+     * Public URL for the pending kundli image, if present.
+     */
+    public function pendingKundliImageUrl(): ?string
+    {
+        if (! $this->pendingKundliImagePath()) {
+            return null;
+        }
+
+        return route('profile.kundli.pending.show', [
+            'userProfile' => $this,
+        ]);
     }
 
     /**

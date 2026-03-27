@@ -1,26 +1,49 @@
 <?php
 
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AdminFeaturedProfileController;
+use App\Http\Controllers\AdminContentController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\MatrimonyController;
+use App\Models\AboutPageContent;
+use App\Models\FeaturedProfile;
+use App\Models\HomePageContent;
 use App\Http\Controllers\UserProfileController;
 use App\Models\UserProfile;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    $featuredProfiles = UserProfile::query()
-        ->whereHas('user', fn ($q) => $q->where('verification_step', 'approved'))
-        ->inRandomOrder()
-        ->limit(4)
-        ->get();
+    $homePageContent = HomePageContent::query()->firstOrCreate([], [
+        'content' => HomePageContent::defaults(),
+    ]);
 
-    return view('welcome', ['featuredProfiles' => $featuredProfiles]);
+    $featuredProfiles = FeaturedProfile::query()
+        ->with(['userProfile.user'])
+        ->latest()
+        ->limit(4)
+        ->get()
+        ->pluck('userProfile')
+        ->filter(fn ($profile) => $profile?->user?->verification_step === 'approved')
+        ->values();
+
+    return view('welcome', [
+        'featuredProfiles' => $featuredProfiles,
+        'homePageContent' => $homePageContent->normalizedContent(),
+    ]);
 });
 
 // PUBLIC PAGES
-Route::view('/about', 'root.about')->name('root.about');
+Route::get('/about', function () {
+    $aboutPageContent = AboutPageContent::query()->firstOrCreate([], [
+        'content' => AboutPageContent::defaults(),
+    ]);
+
+    return view('root.about', [
+        'aboutPageContent' => $aboutPageContent->normalizedContent(),
+    ]);
+})->name('root.about');
 Route::get('/matrimony', [MatrimonyController::class, 'index'])->name(
     'root.matrimony',
 );
@@ -30,6 +53,19 @@ Route::get('/profile-images/{userProfile}/{slot}', [
 ])
     ->whereNumber('slot')
     ->name('profile.images.show');
+
+Route::get('/profile-images/{userProfile}/kundli', [
+    UserProfileController::class,
+    'showKundliImage',
+])
+    ->name('profile.kundli.show');
+
+Route::get('/profile-images/{userProfile}/kundli/pending', [
+    UserProfileController::class,
+    'showPendingKundliImage',
+])
+    ->middleware(['auth', 'admin'])
+    ->name('profile.kundli.pending.show');
 
 Route::get('/profile-images/{userProfile}/{slot}/pending', [
     UserProfileController::class,
@@ -77,83 +113,164 @@ Route::post('/onboarding/store', [UserProfileController::class, 'store'])
 
 // LOGGED IN USER PAGES (soft-blocked — require onboarding middleware)
 Route::middleware(['auth', 'onboarding'])->group(function () {
-    Route::get('/profile', [UserProfileController::class, 'myProfile'])->name(
-        'profile',
+    Route::get('/account', [UserProfileController::class, 'account'])->name(
+        'account',
     );
 
-    Route::get('/profile/edit', [UserProfileController::class, 'edit'])->name(
-        'profile.edit',
+    Route::get('/account/edit', [UserProfileController::class, 'edit'])->name(
+        'account.edit',
     );
 
-    Route::post('/profile/edit', [
+    Route::post('/account/edit', [
         UserProfileController::class,
         'update',
-    ])->name('profile.update');
+    ])->name('account.update');
 
-    Route::post('/profile/images/upload', [
+    Route::post('/account/edit/password', [
+        UserProfileController::class,
+        'updatePassword',
+    ])->name('account.password.update');
+
+    Route::post('/account/password', [
+        UserProfileController::class,
+        'updatePassword',
+    ])->name('account.password.update.legacy');
+
+    Route::post('/account/images/upload', [
         UserProfileController::class,
         'uploadImages',
-    ])->name('profile.images.upload');
+    ])->name('account.images.upload');
 
-    Route::post('/profile/images/primary', [
+    Route::post('/account/images/primary', [
         UserProfileController::class,
         'setPrimaryImage',
-    ])->name('profile.images.primary');
+    ])->name('account.images.primary');
 
-    Route::get('/profile/{userProfile}', [
+    Route::post('/account/kundli/upload', [
+        UserProfileController::class,
+        'uploadKundli',
+    ])->name('account.kundli.upload');
+
+    Route::get('/profile/{user:public_id}', [
         UserProfileController::class,
         'show',
     ])->name('profile.show');
 });
 
+Route::redirect('/profile', '/account');
+Route::redirect('/profile/edit', '/account/edit');
+
 // ADMIN PAGES
 Route::middleware(['auth'])->group(function () {
-    Route::view('/admin', 'admin.admin')->name('admin');
+    Route::get('/admin', function () {
+        $user = auth()->user();
 
-    Route::get('/admin/users', [AdminUserController::class, 'index'])->name(
-        'admin.users',
-    );
+        if ($user->canAccessContentManagement() && ! $user->canAccessProfileManagementPanel()) {
+            return redirect()->route('admin.content-management');
+        }
 
-    Route::post('/admin/users/{user}/create-account', [
-        AdminUserController::class,
-        'createAccount',
-    ])->name('admin.users.create-account');
+        if (! $user->canAccessProfileManagementPanel()) {
+            abort(403, 'Unauthorized');
+        }
 
-    Route::post('/admin/users/{user}/reset-password', [
-        AdminUserController::class,
-        'resetPassword',
-    ])->name('admin.users.reset-password');
+        return view('admin.admin');
+    })->name('admin');
 
-    Route::get('/admin/users/{user}/profile', [
-        AdminUserController::class,
-        'showProfile',
-    ])->name('admin.users.profile');
+    Route::middleware(['admin'])->group(function () {
+        Route::get('/admin/users', [AdminUserController::class, 'index'])->name(
+            'admin.users',
+        );
 
-    Route::post('/users/{user}/approve', [
-        AdminUserController::class,
-        'approve',
-    ])->name('users.approve');
+        Route::get('/admin/featured-profiles', [
+            AdminFeaturedProfileController::class,
+            'index',
+        ])->name('admin.featured-profiles');
 
-    Route::view('/admin/settings', 'admin.settings')->name('admin.settings');
+        Route::post('/admin/featured-profiles', [
+            AdminFeaturedProfileController::class,
+            'store',
+        ])->name('admin.featured-profiles.store');
 
-    // Profile Edit Approval
-    Route::get('/admin/pending-edits', [
-        AdminUserController::class,
-        'pendingEdits',
-    ])->name('admin.pending-edits');
+        Route::delete('/admin/featured-profiles/{featuredProfile}', [
+            AdminFeaturedProfileController::class,
+            'destroy',
+        ])->name('admin.featured-profiles.destroy');
 
-    Route::get('/admin/pending-edits/{edit}/review', [
-        AdminUserController::class,
-        'reviewEdit',
-    ])->name('admin.pending-edits.review');
+        Route::post('/admin/users/{user}/create-account', [
+            AdminUserController::class,
+            'createAccount',
+        ])->name('admin.users.create-account');
 
-    Route::post('/admin/pending-edits/{edit}/approve', [
-        AdminUserController::class,
-        'approveEdit',
-    ])->name('admin.pending-edits.approve');
+        Route::post('/admin/users/{user}/reset-password', [
+            AdminUserController::class,
+            'resetPassword',
+        ])->name('admin.users.reset-password');
 
-    Route::post('/admin/pending-edits/{edit}/reject', [
-        AdminUserController::class,
-        'rejectEdit',
-    ])->name('admin.pending-edits.reject');
+        Route::delete('/admin/users/{user}', [
+            AdminUserController::class,
+            'destroy',
+        ])->name('admin.users.destroy');
+
+        Route::get('/admin/users/{user}/profile', [
+            AdminUserController::class,
+            'showProfile',
+        ])->name('admin.users.profile');
+
+        Route::post('/users/{user}/approve', [
+            AdminUserController::class,
+            'approve',
+        ])->name('users.approve');
+
+        Route::view('/admin/settings', 'admin.settings')->name('admin.settings');
+
+        // Profile Edit Approval
+        Route::get('/admin/pending-edits', [
+            AdminUserController::class,
+            'pendingEdits',
+        ])->name('admin.pending-edits');
+
+        Route::get('/admin/pending-edits/{edit}/review', [
+            AdminUserController::class,
+            'reviewEdit',
+        ])->name('admin.pending-edits.review');
+
+        Route::post('/admin/pending-edits/{edit}/approve', [
+            AdminUserController::class,
+            'approveEdit',
+        ])->name('admin.pending-edits.approve');
+
+        Route::post('/admin/pending-edits/{edit}/reject', [
+            AdminUserController::class,
+            'rejectEdit',
+        ])->name('admin.pending-edits.reject');
+    });
+
+    Route::middleware(['superadmin'])->group(function () {
+        Route::get('/admin/deleted-accounts', [
+            AdminUserController::class,
+            'deletedAccounts',
+        ])->name('admin.deleted-accounts');
+
+        Route::post('/admin/deleted-accounts/{userId}/restore', [
+            AdminUserController::class,
+            'restoreDeletedAccount',
+        ])->name('admin.deleted-accounts.restore');
+
+        Route::delete('/admin/deleted-accounts/{userId}', [
+            AdminUserController::class,
+            'forceDeleteDeletedAccount',
+        ])->name('admin.deleted-accounts.force-delete');
+    });
+
+    Route::middleware(['content'])->group(function () {
+        Route::get('/admin/content-management', [
+            AdminContentController::class,
+            'index',
+        ])->name('admin.content-management');
+
+        Route::post('/admin/content-management', [
+            AdminContentController::class,
+            'update',
+        ])->name('admin.content-management.update');
+    });
 });

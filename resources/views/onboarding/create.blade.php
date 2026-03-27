@@ -81,19 +81,6 @@
                             </div>
 
                             <div>
-                                <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">
-                                    <span class="lang-label" data-en="Gender" data-mr="लिंग">Gender</span> <span class="text-red-500">*</span>
-                                </label>
-                                <select id="gender" name="gender" required
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 @error('gender') border-red-500 @enderror">
-                                    <option value="" class="lang-label" data-en="Select Gender" data-mr="लिंग निवडा">Select Gender</option>
-                                    <option value="male" class="lang-label" data-en="Male" data-mr="पुरुष" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
-                                    <option value="female" class="lang-label" data-en="Female" data-mr="स्त्री" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
-                                    <option value="other" class="lang-label" data-en="Other" data-mr="इतर" {{ old('gender') == 'other' ? 'selected' : '' }}>Other</option>
-                                </select>
-                            </div>
-
-                            <div>
                                 <label for="date_of_birth" class="block text-sm font-medium text-gray-700 mb-1">
                                     <span class="lang-label" data-en="Date of Birth" data-mr="जन्मतारीख">Date of Birth</span>
                                 </label>
@@ -265,6 +252,38 @@
                                 </label>
                                 <input type="number" step="0.01" id="annual_income" name="annual_income" value="{{ old('annual_income') }}"
                                     class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
+                            </div>
+                        </div>
+
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <h3 class="lang-label text-base font-semibold text-gray-900 mb-1" data-en="Kundli Image" data-mr="कुंडली प्रतिमा">Kundli Image</h3>
+                            <p class="lang-label text-sm text-gray-500 mb-4" data-en="Upload one kundli image. It will be saved separately for admin review." data-mr="एक कुंडली प्रतिमा अपलोड करा. ती अ‍ॅडमिन पुनरावलोकनासाठी वेगळ्या फोल्डरमध्ये जतन केली जाईल.">Upload one kundli image. It will be saved separately for admin review.</p>
+
+                            <div class="max-w-sm">
+                                <div class="flex flex-col items-center gap-2" id="kundli-slot">
+                                    <div class="relative w-full aspect-square rounded-xl border-2 border-dashed border-gray-300 overflow-hidden bg-gray-50 hover:border-pink-400 transition cursor-pointer"
+                                         id="preview-box-kundli"
+                                         onclick="document.getElementById('kundli-input').click()">
+                                        <img id="preview-img-kundli"
+                                             src=""
+                                             alt="Kundli"
+                                             class="hidden w-full h-full object-cover">
+                                        <div id="preview-placeholder-kundli" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-1">
+                                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                            <span class="lang-label text-xs font-medium" data-en="Kundli" data-mr="कुंडली">Kundli</span>
+                                            <span class="lang-label text-xs" data-en="Click to upload" data-mr="अपलोड करण्यासाठी क्लिक करा">Click to upload</span>
+                                        </div>
+                                    </div>
+
+                                    <input type="file"
+                                           id="kundli-input"
+                                           name="kundli"
+                                           accept="image/*"
+                                           class="hidden"
+                                           onchange="previewPhoto('kundli', this)">
+                                </div>
                             </div>
                         </div>
                     </div>

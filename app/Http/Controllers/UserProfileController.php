@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\EditUserProfile;
+use App\Models\User;
 use App\Models\UserProfile;
 use App\Services\ProfileImageManager;
 use Illuminate\Http\Request;
@@ -15,14 +16,14 @@ class UserProfileController extends Controller
     public function __construct(private ProfileImageManager $images) {}
 
     /**
-     * Show the logged-in user's own profile page.
+     * Show the logged-in user's account page.
      * Redirects to onboarding if no profile exists yet.
      */
-    public function myProfile()
+    public function account()
     {
         $user = auth()->user();
 
-        Log::debug('User profile page requested.', [
+        Log::debug('User account page requested.', [
             'user_id' => $user->id,
             'verification_step' => $user->verification_step,
         ]);
@@ -42,7 +43,7 @@ class UserProfileController extends Controller
             ->where('status', 'pending')
             ->first();
 
-        return view('profile.profile', compact('pendingEdit'));
+        return view('account.index', compact('pendingEdit'));
     }
 
     /**
@@ -53,7 +54,7 @@ class UserProfileController extends Controller
         $user = auth()->user();
         $profile = $user->profile;
 
-        Log::debug('User opened profile edit page.', [
+        Log::debug('User opened account edit page.', [
             'user_id' => $user->id,
             'verification_step' => $user->verification_step,
             'has_profile' => (bool) $profile,
@@ -77,7 +78,7 @@ class UserProfileController extends Controller
             ? $pendingEdit
             : $profile;
 
-        return view('profile.edit', compact('profile', 'values', 'pendingEdit'));
+        return view('account.edit', compact('profile', 'values', 'pendingEdit'));
     }
 
     /**
@@ -88,7 +89,6 @@ class UserProfileController extends Controller
         $validated = $request->validate([
             'full_name' => ['nullable', 'string', 'max:255'],
             'navras_naav' => ['nullable', 'string', 'max:255'],
-            'gender' => ['nullable', 'in:male,female,other'],
             'education' => ['nullable', 'string', 'max:255'],
             'occupation' => ['nullable', 'string', 'max:255'],
             'annual_income' => ['nullable', 'numeric'],
@@ -126,7 +126,7 @@ class UserProfileController extends Controller
         $user = auth()->user();
         $profile = $user->profile;
 
-        Log::debug('User profile edit submission received.', [
+        Log::debug('User account update submission received.', [
             'user_id' => $user->id,
             'verification_step' => $user->verification_step,
             'field_count' => count(array_filter($validated, fn ($value) => ! is_null($value) && $value !== '')),
@@ -158,22 +158,45 @@ class UserProfileController extends Controller
 
             $edit = EditUserProfile::create($editPayload);
         } catch (\Throwable $e) {
-            Log::error('User profile edit submission failed.', [
+            Log::error('User account update submission failed.', [
                 'user_id' => $user->id,
                 'verification_step' => $user->verification_step,
                 'error' => $e->getMessage(),
             ]);
 
-            return redirect()->route('profile')->with('error', 'Your profile edit could not be submitted.');
+            return redirect()->route('account')->with('error', 'Your account update could not be submitted.');
         }
 
-        Log::info('User profile edit submitted for review.', [
+        Log::info('User account update submitted for review.', [
             'user_id' => $user->id,
             'edit_id' => $edit->id,
             'verification_step' => $user->verification_step,
         ]);
 
-        return redirect()->route('profile')->with('success', 'Your profile edit has been submitted for review.');
+        return redirect()->route('account')->with('success', 'Your account update has been submitted for review.');
+    }
+
+    /**
+     * Update the logged-in user's password.
+     */
+    public function updatePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'string', 'min:8', 'confirmed', 'different:current_password'],
+        ]);
+
+        $user = Auth::user();
+
+        $user->forceFill([
+            'password' => $validated['password'],
+        ])->save();
+
+        Log::info('User password updated.', [
+            'user_id' => $user->id,
+        ]);
+
+        return back()->with('success', 'Your password has been updated.');
     }
 
     /**
@@ -249,6 +272,7 @@ class UserProfileController extends Controller
             'native_address' => ['nullable', 'string'],
             'village_farm' => ['nullable', 'string', 'max:255'],
             'naathe_relationships' => ['nullable', 'string'],
+            'kundli' => ['nullable', 'file', 'image', 'max:5120'],
             // Files: up to 4, each max 5 MB
             'images' => ['nullable', 'array', 'max:4'],
             'images.*' => [
@@ -268,6 +292,7 @@ class UserProfileController extends Controller
 
         $user = Auth::user();
         $validated['user_id'] = $user->id;
+        $validated['gender'] = $user->gender;
 
         Log::debug('User onboarding submission received.', [
             'user_id' => $user->id,
@@ -280,7 +305,9 @@ class UserProfileController extends Controller
 
         // Remove images from validated before creating the DB record
         $images = $request->file('images') ?? [];
+        $kundli = $request->file('kundli');
         unset($validated['images']);
+        unset($validated['kundli']);
 
         try {
             $profile = DB::transaction(function () use ($validated, $user) {
@@ -295,6 +322,10 @@ class UserProfileController extends Controller
 
             // Store uploaded images after the DB transaction commits successfully.
             $this->storeImages($profile, $images);
+
+            if ($kundli) {
+                $this->images->storeKundliImage($profile, $kundli);
+            }
         } catch (\Throwable $e) {
             Log::error('User onboarding submission failed.', [
                 'user_id' => $user->id,
@@ -418,16 +449,8 @@ class UserProfileController extends Controller
                 continue;
             }
 
-            $hasPublishedImage = $this->images->hasCurrentImage($profile, $slot);
-            $hasPendingReplacement = $this->images->hasPendingImage($profile, $slot);
-
-            if ($hasPublishedImage || $hasPendingReplacement) {
-                $this->images->storePendingImage($profile, $slot, $file);
-                $imageChanges[(string) $slot] = true;
-            } else {
-                $this->images->storeCurrentImage($profile, $slot, $file);
-                unset($imageChanges[(string) $slot]);
-            }
+            $this->images->storePendingImage($profile, $slot, $file);
+            $imageChanges[(string) $slot] = true;
         }
 
         $hasPendingReplacements = ! empty($imageChanges);
@@ -455,6 +478,51 @@ class UserProfileController extends Controller
     }
 
     /**
+     * Upload or replace the user's kundli image from the account edit page.
+     */
+    public function uploadKundli(Request $request)
+    {
+        $request->validate([
+            'kundli' => ['required', 'file', 'image', 'max:5120'],
+        ], [
+            'kundli.file' => 'The kundli image must be a valid file.',
+            'kundli.image' => 'The kundli image must be an image.',
+            'kundli.max' => 'The kundli image must not be greater than 5MB.',
+        ]);
+
+        $user = auth()->user();
+        $profile = $user->profile;
+
+        if (! $profile) {
+            abort(404);
+        }
+
+        $kundli = $request->file('kundli');
+        $pendingEdit = EditUserProfile::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->first();
+        $imageChanges = $pendingEdit?->image_changes ?? [];
+
+        $this->images->storePendingKundliImage($profile, $kundli);
+        $imageChanges['kundli'] = true;
+
+        if ($pendingEdit) {
+            $pendingEdit->update([
+                'image_changes' => $imageChanges,
+            ]);
+        } else {
+            EditUserProfile::create([
+                'user_id' => $user->id,
+                'edit_type' => 'image',
+                'status' => 'pending',
+                'image_changes' => $imageChanges,
+            ]);
+        }
+
+        return back()->with('success', 'Your kundli image has been submitted for admin approval.');
+    }
+
+    /**
      * Serve a stored profile image from resources/assets/<phone>/<slot>.<ext>.
      */
     public function showImage(UserProfile $userProfile, int $slot)
@@ -462,6 +530,34 @@ class UserProfileController extends Controller
         abort_unless(in_array($slot, [1, 2, 3, 4], true), 404);
 
         $path = $userProfile->imagePath($slot);
+
+        if ($path !== null) {
+            return response()->file($path);
+        }
+
+        abort(404);
+    }
+
+    /**
+     * Serve the onboarding kundli image from resources/assets/<phone>/kundli/1.jpg.
+     */
+    public function showKundliImage(UserProfile $userProfile)
+    {
+        $path = $userProfile->kundliImagePath();
+
+        if ($path !== null) {
+            return response()->file($path);
+        }
+
+        abort(404);
+    }
+
+    /**
+     * Serve a pending kundli image for admin review.
+     */
+    public function showPendingKundliImage(UserProfile $userProfile)
+    {
+        $path = $userProfile->pendingKundliImagePath();
 
         if ($path !== null) {
             return response()->file($path);
@@ -489,18 +585,18 @@ class UserProfileController extends Controller
     /**
      * Display the specified resource (public profile view).
      */
-    public function show(UserProfile $userProfile): \Illuminate\View\View
+    public function show(User $user): \Illuminate\View\View
     {
-        $user = auth()->user();
+        $authUser = auth()->user();
 
-        if (! $user->isApproved() || ! $user->profile()->exists()) {
+        if (! $authUser->isApproved() || ! $authUser->profile()->exists()) {
             abort(
                 403,
                 'You must be approved and have a profile to view other profiles.',
             );
         }
 
-        $userProfile->load('user');
+        $userProfile = $user->profile()->with('user')->firstOrFail();
 
         return view('profile.show', [
             'profile' => $userProfile,

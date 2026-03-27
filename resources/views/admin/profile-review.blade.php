@@ -10,6 +10,7 @@
                     <h2 class="text-xl font-bold text-gray-900">{{ $user->name }}</h2>
                     <p class="text-sm text-gray-500 mt-1">
                         Phone: {{ $user->phone_number }}
+                        &middot; ID: {{ $user->public_id ?? $user->id }}
                         @if($user->email) &middot; Email: {{ $user->email }} @endif
                     </p>
                     <span class="mt-2 inline-flex px-2 py-0.5 text-xs font-medium rounded-full
@@ -55,6 +56,17 @@
                 </div>
             @endif
 
+            @if($profile->kundliImageUrl())
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <h3 class="text-base font-semibold text-gray-900 mb-4">Kundli Image</h3>
+                    <div class="max-w-sm">
+                        <div class="aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+                            <img src="{{ $profile->kundliImageUrl() }}" alt="Kundli image" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Profile Details -->
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                 <h3 class="text-base font-semibold text-gray-900 mb-4">Personal Information</h3>
@@ -62,7 +74,7 @@
                     @foreach([
                         'Full Name' => $profile->full_name,
                         'Navras Naav' => $profile->navras_naav,
-                        'Gender' => $profile->gender ? ucfirst($profile->gender) : null,
+                        'Gender' => $user->gender ? ucfirst($user->gender) : ($profile->gender ? ucfirst($profile->gender) : null),
                         'Date of Birth' => $profile->date_of_birth?->format('d M Y'),
                         'Marital Status' => $profile->marital_status,
                         'Height (Oonchi)' => $profile->height_cm__Oonchi,

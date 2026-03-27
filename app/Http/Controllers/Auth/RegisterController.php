@@ -11,7 +11,7 @@ class RegisterController extends Controller
 {
     /**
      * Handle a registration request.
-     * Only collects name + phone_number (+ optional email). No password.
+     * Collects name, phone_number, gender, and optional email. No password.
      */
     public function __invoke(Request $request)
     {
@@ -22,6 +22,7 @@ class RegisterController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'phone_number' => ['required', 'digits:10', 'unique:users,phone_number'],
+            'gender' => ['required', 'in:male,female,other'],
             'email' => ['nullable', 'string', 'email', 'max:255', 'unique:users'],
         ]);
 
@@ -35,7 +36,9 @@ class RegisterController extends Controller
             $user = User::create([
                 'name' => $validated['name'],
                 'phone_number' => $validated['phone_number'],
+                'gender' => $validated['gender'],
                 'email' => $validated['email'] ?? null,
+                'public_id' => User::generatePublicId($validated['gender']),
                 'verification_step' => 'unverified',
             ]);
         } catch (\Throwable $e) {
@@ -51,7 +54,9 @@ class RegisterController extends Controller
 
         Log::info('Registration created.', [
             'user_id' => $user->id,
+            'public_id' => $user->public_id,
             'phone_number' => $user->phone_number,
+            'gender' => $user->gender,
             'verification_step' => $user->verification_step,
             'ip' => $request->ip(),
         ]);

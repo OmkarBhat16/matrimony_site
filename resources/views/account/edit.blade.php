@@ -1,10 +1,13 @@
 <x-layout>
-    <x-slot:title>Edit Profile - Matrimony</x-slot:title>
+    <x-slot:title>Edit Account - Matrimony</x-slot:title>
 
     @php
         $fields = \App\Models\EditUserProfile::DIFFABLE_FIELDS;
         $allImgs = $profile->allImageUrls();
         $pendingImageSlots = $pendingEdit?->image_changes ? array_map('intval', array_keys($pendingEdit->image_changes)) : [];
+        $kundliUrl = $profile->kundliImageUrl();
+        $kundliPendingUrl = $profile->pendingKundliImageUrl();
+        $hasKundliPending = $pendingEdit?->hasPendingKundliImage() ?? false;
     @endphp
 
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -12,12 +15,12 @@
             <div class="px-6 sm:px-10 py-8">
                 <div class="flex items-center justify-between mb-8">
                     <div>
-                        <h1 class="lang-label text-2xl font-bold text-gray-900" data-en="Edit Profile" data-mr="प्रोफाइल संपादित करा">Edit Profile</h1>
+                        <h1 class="lang-label text-2xl font-bold text-gray-900" data-en="Edit Account" data-mr="खाते संपादित करा">Edit Account</h1>
                         <p class="lang-label text-sm text-gray-500 mt-1" data-en="Changes will be submitted for admin review before going live." data-mr="बदल लाईव्ह होण्यापूर्वी अ‍ॅडमिनच्या मंजुरीसाठी सबमिट केले जातील.">Changes will be submitted for admin review before going live.</p>
                     </div>
-                    <a href="{{ route('profile') }}" class="text-sm text-gray-500 hover:text-pink-600 transition flex items-center gap-1">
+                    <a href="{{ route('account') }}" class="text-sm text-gray-500 hover:text-pink-600 transition flex items-center gap-1">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                        <span class="lang-label" data-en="Back to Profile" data-mr="प्रोफाइलवर परत जा">Back to Profile</span>
+                        <span class="lang-label" data-en="Back to Account" data-mr="खात्यावर परत जा">Back to Account</span>
                     </a>
                 </div>
 
@@ -40,7 +43,7 @@
                 @endif
 
                 <div class="mb-8 p-6 bg-gray-50 rounded-2xl border border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-1">Profile Photos</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-1">Account Photos</h2>
                     <p class="text-sm text-gray-500 mb-5">Add missing photos here. Replacing an existing photo will go to admin review. Changing the primary photo stays immediate.</p>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -48,7 +51,7 @@
                             @php $imgUrl = $allImgs[$slot] ?? null; @endphp
                             <div class="flex flex-col items-center gap-3">
                                 <form method="POST"
-                                      action="{{ route('profile.images.upload') }}"
+                                      action="{{ route('account.images.upload') }}"
                                       enctype="multipart/form-data"
                                       class="w-full">
                                     @csrf
@@ -72,11 +75,19 @@
                                             @endif
                                         @else
                                             <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-1 bg-white">
-                                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                                </svg>
-                                                <span class="text-xs font-medium">Photo {{ $slot }}</span>
-                                                <span class="text-xs">Click to upload</span>
+                                                @if (in_array($slot, $pendingImageSlots, true))
+                                                    <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                    </svg>
+                                                    <span class="text-xs font-medium text-amber-600">Photo {{ $slot }}</span>
+                                                    <span class="text-xs text-amber-600">Pending review</span>
+                                                @else
+                                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                    </svg>
+                                                    <span class="text-xs font-medium">Photo {{ $slot }}</span>
+                                                    <span class="text-xs">Click to upload</span>
+                                                @endif
                                             </div>
                                         @endif
                                     </div>
@@ -90,7 +101,7 @@
                                 </form>
 
                                 @if ($imgUrl && ($profile->primary_image ?? 1) != $slot)
-                                    <form method="POST" action="{{ route('profile.images.primary') }}">
+                                    <form method="POST" action="{{ route('account.images.primary') }}">
                                         @csrf
                                         <input type="hidden" name="slot" value="{{ $slot }}">
                                         <button type="submit"
@@ -108,7 +119,117 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('profile.update') }}" class="space-y-8">
+                <div class="mb-8 p-6 bg-gray-50 rounded-2xl border border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-1">Kundli</h2>
+                    <p class="text-sm text-gray-500 mb-5">Upload or replace your kundli image here. Changes go to admin review before going live.</p>
+
+                    <div class="max-w-sm">
+                        <form method="POST"
+                              action="{{ route('account.kundli.upload') }}"
+                              enctype="multipart/form-data"
+                              class="w-full">
+                            @csrf
+                            <div class="relative w-full aspect-square rounded-xl overflow-hidden border-2 cursor-pointer
+                                        {{ $kundliUrl ? 'border-gray-300' : 'border-dashed border-gray-300 hover:border-pink-400' }}
+                                        transition"
+                                 onclick="document.getElementById('kundli-input').click()">
+                                @if ($kundliUrl)
+                                    <img src="{{ $kundliUrl }}"
+                                         alt="Kundli"
+                                         class="w-full h-full object-cover">
+                                    @if ($hasKundliPending)
+                                        <span class="absolute top-2 right-2 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">
+                                            Pending review
+                                        </span>
+                                    @endif
+                                @elseif ($hasKundliPending)
+                                    <img src="{{ $kundliPendingUrl }}"
+                                         alt="Pending Kundli"
+                                         class="w-full h-full object-cover">
+                                    <span class="absolute top-2 right-2 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">
+                                        Pending review
+                                    </span>
+                                @else
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-1 bg-white">
+                                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        <span class="text-xs font-medium">Kundli</span>
+                                        <span class="text-xs">Click to upload</span>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <input type="file"
+                                   id="kundli-input"
+                                   name="kundli"
+                                   accept="image/*"
+                                   class="hidden"
+                                   onchange="this.closest('form').submit()">
+                        </form>
+                    </div>
+                </div>
+
+                <div class="mb-8 p-6 bg-gray-50 rounded-2xl border border-gray-200">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-5">
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-900">Change Password</h2>
+                            <p class="text-sm text-gray-500">Enter your current password, then type the new password twice.</p>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ route('account.password.update') }}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @csrf
+                        <div class="md:col-span-2">
+                            <label for="current_password" class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                            <input
+                                type="password"
+                                id="current_password"
+                                name="current_password"
+                                required
+                                autocomplete="current-password"
+                                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition"
+                            >
+                            @error('current_password')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                required
+                                minlength="8"
+                                autocomplete="new-password"
+                                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition"
+                            >
+                            @error('password')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                            <input
+                                type="password"
+                                id="password_confirmation"
+                                name="password_confirmation"
+                                required
+                                minlength="8"
+                                autocomplete="new-password"
+                                class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition"
+                            >
+                        </div>
+                        <div class="md:col-span-2 flex justify-end">
+                            <button type="submit" class="px-6 py-3 bg-pink-600 text-white rounded-lg text-sm font-medium hover:bg-pink-700 transition shadow-sm">
+                                Update Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <form method="POST" action="{{ route('account.update') }}" class="space-y-8">
                     @csrf
 
                     {{-- Personal Information --}}
@@ -202,7 +323,7 @@
                     </section>
 
                     <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                        <a href="{{ route('profile') }}" class="px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition">Cancel</a>
+                        <a href="{{ route('account') }}" class="px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition">Cancel</a>
                         <button type="submit" class="px-6 py-3 bg-pink-600 text-white rounded-lg text-sm font-medium hover:bg-pink-700 transition shadow-sm">
                             Submit for Review
                         </button>

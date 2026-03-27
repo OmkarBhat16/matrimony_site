@@ -4,6 +4,7 @@
 
     @php
         $hasImageChanges = !empty($pendingImageSlots);
+        $hasKundliChange = $edit->hasPendingKundliImage();
     @endphp
 
     <div class="max-w-4xl mx-auto">
@@ -23,7 +24,7 @@
             </div>
         </div>
 
-        @if(empty($diff) && ! $hasImageChanges)
+        @if(empty($diff) && ! $hasImageChanges && ! $hasKundliChange)
             <div class="bg-white rounded-xl shadow-sm p-6 text-center">
                 <p class="text-sm text-gray-500">No changes detected — the edit is identical to the current profile.</p>
                 <form action="{{ route('admin.pending-edits.reject', $edit) }}" method="POST" class="mt-4 inline">
@@ -105,6 +106,36 @@
                                 </div>
                             </div>
                         @endforeach
+                    </div>
+                </div>
+            @endif
+
+            @if($hasKundliChange)
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+                    <div class="px-6 py-4 border-b border-gray-100">
+                        <h3 class="text-base font-semibold text-gray-900">Kundli image pending approval</h3>
+                    </div>
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <p class="text-xs font-medium text-gray-500 mb-2">Current</p>
+                            <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                                @if($currentProfile->kundliImageUrl())
+                                    <img src="{{ $currentProfile->kundliImageUrl() }}" alt="Current kundli" class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">No current kundli</div>
+                                @endif
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-medium text-gray-500 mb-2">Proposed</p>
+                            <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                                @if($currentProfile->pendingKundliImageUrl())
+                                    <img src="{{ $currentProfile->pendingKundliImageUrl() }}" alt="Pending kundli" class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">No pending kundli file</div>
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
             @endif

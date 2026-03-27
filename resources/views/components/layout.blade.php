@@ -52,12 +52,17 @@
                             Register
                         </a>
                     @else
-                        @if (in_array(auth()->user()->role, ['admin', 'superadmin']))
+                        @if (auth()->user()->canAccessProfileManagementPanel())
                             <a href="{{ route('admin') }}" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-pink-600 transition">
                                 Admin
                             </a>
                         @endif
-                        <a href="{{ route('profile') }}" class="px-3 py-2 text-sm font-medium {{ request()->routeIs('profile') ? 'text-pink-600' : 'text-gray-600 hover:text-pink-600' }} transition">
+                        @if (auth()->user()->canAccessContentManagement())
+                            <a href="{{ route('admin.content-management') }}" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-pink-600 transition">
+                                Content Management
+                            </a>
+                        @endif
+                        <a href="{{ route('account') }}" class="px-3 py-2 text-sm font-medium {{ request()->routeIs('account*') ? 'text-pink-600' : 'text-gray-600 hover:text-pink-600' }} transition">
                             My Account
                         </a>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
@@ -112,10 +117,13 @@
                     </div>
                 @else
                     <div class="pt-2 border-t border-gray-100 space-y-1">
-                        @if (in_array(auth()->user()->role, ['admin', 'superadmin']))
+                        @if (auth()->user()->canAccessProfileManagementPanel())
                             <a href="{{ route('admin') }}" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-pink-600 hover:bg-pink-50">Admin</a>
                         @endif
-                        <a href="{{ route('profile') }}" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-pink-600 hover:bg-pink-50">Profile</a>
+                        @if (auth()->user()->canAccessContentManagement())
+                            <a href="{{ route('admin.content-management') }}" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-pink-600 hover:bg-pink-50">Content Management</a>
+                        @endif
+                        <a href="{{ route('account') }}" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-pink-600 hover:bg-pink-50">My Account</a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-pink-600 hover:bg-pink-50">Logout</button>

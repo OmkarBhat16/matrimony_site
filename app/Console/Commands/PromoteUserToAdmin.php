@@ -18,7 +18,7 @@ class PromoteUserToAdmin extends Command
      *
      * @var string
      */
-    protected $description = 'Finds user by email and promotes them to admin role';
+    protected $description = 'Finds user by email and promotes them to profile_manager role';
 
     /**
      * Execute the console command.
@@ -26,14 +26,14 @@ class PromoteUserToAdmin extends Command
     public function handle()
     {
         //
-        $user = \App\Models\User::where('email', $this->ask('Enter the email of the user to promote to admin'))->first();
+        $user = \App\Models\User::where('email', $this->ask('Enter the email of the user to promote to profile manager'))->first();
         if (!$user) {
             $this->error('User not found');
             return;
         }
         $user->update([
-            'role' => 'admin',
+            'role' => 'profile_manager',
         ]);
-        $this->info('User promoted to admin successfully');
+        $this->info('User promoted to profile manager successfully');
     }
 }

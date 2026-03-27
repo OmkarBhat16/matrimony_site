@@ -1,5 +1,10 @@
 @props(['profile', 'mode' => 'normal'])
 
+@php
+    $profileUser = $profile->user;
+    $profileUrl = $profileUser ? route('profile.show', ['user' => $profileUser->public_id]) : '#';
+@endphp
+
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition duration-300">
     <!-- Image Section -->
     <div class="relative h-64 bg-gray-200 overflow-hidden">
@@ -24,7 +29,7 @@
                 </span>
             </div>
         @else
-            <a href="{{ route('profile.show', $profile) }}" class="block w-full h-full">
+            <a href="{{ $profileUrl }}" class="block w-full h-full">
                 @php $primaryUrl = $profile->primaryImageUrl(); @endphp
                 @if ($primaryUrl)
                     <img src="{{ $primaryUrl }}"
@@ -71,7 +76,7 @@
             </div>
         @else
             <div class="flex justify-between items-start mb-3">
-                <a href="{{ route('profile.show', $profile) }}">
+                <a href="{{ $profileUrl }}">
                     <h3 class="text-lg font-semibold text-gray-900 hover:text-pink-600 transition">
                         {{ $profile->full_name ?? 'N/A' }}
                     </h3>
@@ -109,7 +114,7 @@
             </div>
 
             <div class="pt-4 border-t border-gray-100 flex items-center justify-between">
-                <a href="{{ route('profile.show', $profile) }}" class="text-sm font-medium text-pink-600 hover:text-pink-700 flex items-center transition">
+                <a href="{{ $profileUrl }}" class="text-sm font-medium text-pink-600 hover:text-pink-700 flex items-center transition">
                     View Full Profile
                     <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>

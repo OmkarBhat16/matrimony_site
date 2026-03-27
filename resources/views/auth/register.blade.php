@@ -83,6 +83,24 @@
                         </div>
                     </div>
 
+                    <!-- Gender Field -->
+                    <div>
+                        <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">
+                            <span class="lang-label" data-en="Gender" data-mr="लिंग">Gender</span> <span class="text-red-500">*</span>
+                        </label>
+                        <select
+                            id="gender"
+                            name="gender"
+                            required
+                            class="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('gender') border-red-500 @enderror"
+                        >
+                            <option value="">Select Gender</option>
+                            <option value="male" {{ old('gender') === 'male' ? 'selected' : '' }}>Male</option>
+                            <option value="female" {{ old('gender') === 'female' ? 'selected' : '' }}>Female</option>
+                            <option value="other" {{ old('gender') === 'other' ? 'selected' : '' }}>Other</option>
+                        </select>
+                    </div>
+
                     <!-- Email Field (Optional) -->
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-1">

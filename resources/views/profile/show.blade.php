@@ -43,6 +43,7 @@
                     $primaryUrl  = $profile->primaryImageUrl();
                     $allImgs     = $profile->allImageUrls();          // [slot => url]
                     $otherImgs   = array_filter($allImgs, fn($url, $slot) => $slot !== ($profile->primary_image ?? 1), ARRAY_FILTER_USE_BOTH);
+                    $kundliUrl   = $profile->kundliImageUrl();
                 @endphp
                 <div class="relative flex flex-col sm:flex-row items-center sm:items-end -mt-16 sm:-mt-12 mb-8 gap-4">
                     <div class="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-200 shrink-0">
@@ -72,6 +73,11 @@
                             <span class="flex items-center gap-1.5">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                                 {{ ucfirst($profile->gender ?? 'N/A') }}
+                            </span>
+                            <span class="text-gray-300">•</span>
+                            <span class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 014-4h2m-3-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z"/></svg>
+                                ID: {{ $profile->user?->public_id ?? $profile->user?->id ?? 'N/A' }}
                             </span>
                             <span class="text-gray-300">•</span>
                             <span class="flex items-center gap-1.5">
@@ -106,6 +112,17 @@
                     @endif
                 </div>
 
+
+                @if($kundliUrl)
+                    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                        <h3 class="text-base font-semibold text-gray-900 mb-4">Kundli</h3>
+                        <div class="max-w-sm">
+                            <div class="aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+                                <img src="{{ $kundliUrl }}" alt="Kundli image" class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                    </div>
+                @endif
 
                 <!-- Profile Details Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 mt-10">

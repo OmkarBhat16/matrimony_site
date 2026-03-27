@@ -20,9 +20,9 @@ class EnsureOnboardingComplete
 
         $user = auth()->user();
 
-        // Admins and superadmins bypass this middleware
-        if (in_array($user->role, ['admin', 'superadmin'])) {
-            Log::debug('Onboarding middleware bypassed for admin user.', [
+        // Profile managers and superadmins bypass this middleware
+        if ($user->canAccessProfileManagementPanel() || $user->canAccessContentManagement()) {
+            Log::debug('Onboarding middleware bypassed for staff user.', [
                 'user_id' => $user->id,
                 'role' => $user->role,
                 'path' => $request->path(),

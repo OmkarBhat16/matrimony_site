@@ -65,7 +65,7 @@
                         <tbody class="divide-y divide-gray-100">
                             @foreach ($registrations as $user)
                                 <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-6 py-4 text-sm text-gray-400">#{{ $user->id }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-400">#{{ $user->public_id ?? $user->id }}</td>
                                     <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $user->name }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $user->phone_number }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $user->email ?? '—' }}</td>
@@ -129,7 +129,7 @@
                         <tbody class="divide-y divide-gray-100">
                             @foreach ($pendingReview as $user)
                                 <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-6 py-4 text-sm text-gray-400">#{{ $user->id }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-400">#{{ $user->public_id ?? $user->id }}</td>
                                     <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $user->name }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $user->phone_number }}</td>
                                     <td class="px-6 py-4 flex items-center gap-2">
@@ -195,12 +195,12 @@
                         <tbody class="divide-y divide-gray-100">
                             @foreach ($approved as $user)
                                 <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-6 py-4 text-sm text-gray-400">#{{ $user->id }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-400">#{{ $user->public_id ?? $user->id }}</td>
                                     <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $user->name }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $user->phone_number }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $user->email ?? '—' }}</td>
                                     <td class="px-6 py-4">
-                                        <div class="flex items-center gap-3">
+                                        <div class="flex items-center gap-3 flex-wrap">
                                             @if($user->profile)
                                                 <a href="{{ route('admin.users.profile', $user) }}"
                                                    class="text-sm text-pink-600 hover:text-pink-700 font-medium">View</a>
@@ -209,7 +209,15 @@
                                                 @csrf
                                                 <button type="submit"
                                                         class="text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 px-4 py-1.5 rounded-lg transition">
-                                                    Reset Password
+                                                        Reset Password
+                                                    </button>
+                                            </form>
+                                            <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Delete this user account?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                        class="text-sm font-medium text-white bg-red-600 hover:bg-red-700 px-4 py-1.5 rounded-lg transition">
+                                                    Delete
                                                 </button>
                                             </form>
                                             @php $pendingEdit = $pendingEditsByUser[$user->id] ?? null; @endphp
@@ -312,7 +320,7 @@
                         <tbody class="divide-y divide-gray-100">
                             @foreach ($allUsers as $user)
                                 <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-6 py-4 text-sm text-gray-400">#{{ $user->id }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-400">#{{ $user->public_id ?? $user->id }}</td>
                                     <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $user->name }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $user->phone_number }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $user->email ?? '—' }}</td>
@@ -341,6 +349,13 @@
                                                     @csrf
                                                     <button type="submit" class="text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 px-4 py-1.5 rounded-lg transition">
                                                         Reset Password
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Delete this user account?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-sm font-medium text-white bg-red-600 hover:bg-red-700 px-4 py-1.5 rounded-lg transition">
+                                                        Delete
                                                     </button>
                                                 </form>
                                             @endif

@@ -16,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'onboarding' => \App\Http\Middleware\EnsureOnboardingComplete::class,
             'admin' => \App\Http\Middleware\CheckIfAdmin::class,
+            'superadmin' => \App\Http\Middleware\CheckIfSuperAdmin::class,
+            'content' => \App\Http\Middleware\CheckIfContentEditor::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

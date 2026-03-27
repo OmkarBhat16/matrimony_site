@@ -17,7 +17,7 @@ class MatrimonyController extends Controller
 
         $showFilters = $user && $user->isApproved();
 
-        $query = UserProfile::query()->whereHas(
+        $query = UserProfile::query()->with('user')->whereHas(
             'user',
             fn ($q) => $q->where('verification_step', 'approved'),
         );
@@ -71,6 +71,7 @@ class MatrimonyController extends Controller
         $profiles = $query->latest()->paginate(12)->withQueryString();
 
         $cities = UserProfile::query()
+            ->with('user')
             ->whereHas('user', fn ($q) => $q->where('verification_step', 'approved'))
             ->whereNotNull('place_of_birth')
             ->distinct()
@@ -78,6 +79,7 @@ class MatrimonyController extends Controller
             ->pluck('place_of_birth');
 
         $jaaths = UserProfile::query()
+            ->with('user')
             ->whereHas('user', fn ($q) => $q->where('verification_step', 'approved'))
             ->whereNotNull('jaath')
             ->distinct()

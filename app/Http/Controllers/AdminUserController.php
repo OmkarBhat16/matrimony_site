@@ -75,6 +75,50 @@ class AdminUserController extends Controller
     }
 
     /**
+     * Soft-delete a user account. Only profile managers and superadmins may use this.
+     */
+    public function destroy(User $user)
+    {
+        $actor = auth()->user();
+
+        if (! $actor?->canAccessProfileManagementPanel()) {
+            abort(403, 'Unauthorized');
+        }
+
+        if ($user->trashed()) {
+            return redirect()->back()->with('error', 'This account is already deleted.');
+        }
+
+        if ($user->isSuperAdmin() && ! $actor->isSuperAdmin()) {
+            abort(403, 'Unauthorized');
+        }
+
+        try {
+            DB::transaction(function () use ($user): void {
+                $profile = $user->profile()->with('featuredProfile')->first();
+
+                if ($profile?->featuredProfile) {
+                    $profile->featuredProfile->delete();
+                }
+
+                EditUserProfile::where('user_id', $user->id)->delete();
+
+                $user->delete();
+            });
+        } catch (\Throwable $e) {
+            Log::error('User soft delete failed.', [
+                'admin_id' => auth()->id(),
+                'target_user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'Could not delete this account. Please try again.');
+        }
+
+        return redirect()->route('admin.users', ['tab' => 'all'])->with('success', 'User account deleted successfully.');
+    }
+
+    /**
      * Generate a random password for a registered user (Step 1 verification).
      */
     public function createAccount(User $user)
@@ -266,6 +310,7 @@ class AdminUserController extends Controller
     public function pendingEdits()
     {
         $edits = EditUserProfile::where('status', 'pending')
+            ->whereHas('user')
             ->with('user')
             ->latest()
             ->get();
@@ -284,6 +329,7 @@ class AdminUserController extends Controller
     public function reviewEdit(EditUserProfile $edit)
     {
         $edit->load('user');
+        abort_if($edit->user === null, 404);
         $currentProfile = UserProfile::where('user_id', $edit->user_id)->firstOrFail();
         $diff = $edit->diff($currentProfile);
         $pendingImageSlots = $edit->pendingImageSlots();
@@ -315,9 +361,11 @@ class AdminUserController extends Controller
 
         try {
             $pendingImageSlots = $edit->pendingImageSlots();
+            $hasKundliChange = $edit->hasPendingKundliImage();
             $shouldSkipLegacyBlankProfileUpdate = $edit->edit_type === 'profile'
                 && ! $edit->hasProfileFieldValues()
-                && ! empty($pendingImageSlots);
+                && ! empty($pendingImageSlots)
+                && ! $hasKundliChange;
 
             if ($edit->edit_type !== 'image' && ! $shouldSkipLegacyBlankProfileUpdate) {
                 $profileDiff = $edit->diff($profile);
@@ -333,6 +381,10 @@ class AdminUserController extends Controller
 
             foreach ($pendingImageSlots as $slot) {
                 $this->images->approvePendingImage($profile, $slot);
+            }
+
+            if ($hasKundliChange) {
+                $this->images->approvePendingKundliImage($profile);
             }
 
             $edit->delete();
@@ -377,6 +429,10 @@ class AdminUserController extends Controller
                 $this->images->rejectPendingImage($profile, $slot);
             }
 
+            if ($edit->hasPendingKundliImage()) {
+                $this->images->rejectPendingKundliImage($profile);
+            }
+
             $edit->delete();
         } catch (\Throwable $e) {
             Log::error('Admin edit rejection failed.', [
@@ -398,5 +454,68 @@ class AdminUserController extends Controller
         ]);
 
         return redirect()->route('admin.pending-edits')->with('success', 'Profile edit rejected.');
+    }
+
+    /**
+     * List soft-deleted accounts for superadmin recovery.
+     */
+    public function deletedAccounts()
+    {
+        $deletedUsers = User::onlyTrashed()
+            ->with('profile')
+            ->latest('deleted_at')
+            ->get();
+
+        return view('admin.deleted-accounts', compact('deletedUsers'));
+    }
+
+    /**
+     * Restore a soft-deleted account.
+     */
+    public function restoreDeletedAccount(string $userId)
+    {
+        $user = User::withTrashed()->findOrFail($userId);
+
+        if (! $user->trashed()) {
+            return redirect()->back()->with('error', 'This account is not deleted.');
+        }
+
+        $user->restore();
+
+        return redirect()->route('admin.deleted-accounts')->with('success', 'Account restored successfully.');
+    }
+
+    /**
+     * Permanently delete a soft-deleted account.
+     */
+    public function forceDeleteDeletedAccount(string $userId)
+    {
+        $user = User::withTrashed()->findOrFail($userId);
+
+        if (! $user->trashed()) {
+            return redirect()->back()->with('error', 'Only deleted accounts can be permanently removed.');
+        }
+
+        try {
+            DB::transaction(function () use ($user): void {
+                $profile = $user->profile;
+
+                if ($profile) {
+                    $this->images->deleteAllAssets($profile);
+                }
+
+                $user->forceDelete();
+            });
+        } catch (\Throwable $e) {
+            Log::error('Permanent account deletion failed.', [
+                'admin_id' => auth()->id(),
+                'target_user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'Could not permanently delete the account.');
+        }
+
+        return redirect()->route('admin.deleted-accounts')->with('success', 'Account permanently deleted.');
     }
 }

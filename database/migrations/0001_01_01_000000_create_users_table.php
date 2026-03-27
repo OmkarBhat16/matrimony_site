@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->rememberToken();
             $table->timestamps();
-            $table->enum('role', ['superadmin','admin', 'user'])->default('user');
+            $table->enum('role', ['superadmin', 'profile_manager', 'content_editor', 'user'])->default('user');
             $table->enum('verification_step', ['unverified', 'step1_complete', 'step2_pending', 'approved'])->default('unverified');
             $table->string("profile_picture")->nullable();
         });

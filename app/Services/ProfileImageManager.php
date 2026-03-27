@@ -35,6 +35,48 @@ class ProfileImageManager
     }
 
     /**
+     * Store a kundli image as kundli/1.jpg.
+     */
+    public function storeKundliImage(UserProfile $profile, UploadedFile $file): void
+    {
+        $folder = $profile->kundliFolder();
+        File::ensureDirectoryExists($folder);
+
+        $this->deleteKundliImage($profile);
+
+        $file->move($folder, '1.jpg');
+    }
+
+    /**
+     * Store a pending kundli replacement as kundli/1_new.jpg.
+     */
+    public function storePendingKundliImage(UserProfile $profile, UploadedFile $file): void
+    {
+        $folder = $profile->kundliFolder();
+        File::ensureDirectoryExists($folder);
+
+        $this->deletePendingKundliImage($profile);
+
+        $file->move($folder, '1_new.jpg');
+    }
+
+    /**
+     * Move the pending kundli image into the published slot.
+     */
+    public function approvePendingKundliImage(UserProfile $profile): void
+    {
+        $pendingPath = $profile->pendingKundliImagePath();
+
+        if ($pendingPath === null || ! File::exists($pendingPath)) {
+            return;
+        }
+
+        $this->deleteKundliImage($profile);
+
+        File::move($pendingPath, $profile->kundliFolder().DIRECTORY_SEPARATOR.'1.jpg');
+    }
+
+    /**
      * Move a pending image into the published slot, deleting the old current file first.
      */
     public function approvePendingImage(UserProfile $profile, int $slot): void
@@ -56,6 +98,41 @@ class ProfileImageManager
     public function rejectPendingImage(UserProfile $profile, int $slot): void
     {
         $this->deletePendingImageVariants($profile, $slot);
+    }
+
+    public function deleteKundliImage(UserProfile $profile): void
+    {
+        $path = $profile->kundliFolder().DIRECTORY_SEPARATOR.'1.jpg';
+
+        if (File::exists($path)) {
+            File::delete($path);
+        }
+    }
+
+    public function deletePendingKundliImage(UserProfile $profile): void
+    {
+        $path = $profile->kundliFolder().DIRECTORY_SEPARATOR.'1_new.jpg';
+
+        if (File::exists($path)) {
+            File::delete($path);
+        }
+    }
+
+    public function rejectPendingKundliImage(UserProfile $profile): void
+    {
+        $this->deletePendingKundliImage($profile);
+    }
+
+    /**
+     * Remove every stored file for a profile, including kundli assets.
+     */
+    public function deleteAllAssets(UserProfile $profile): void
+    {
+        $folder = $profile->imageFolder();
+
+        if (File::exists($folder)) {
+            File::deleteDirectory($folder);
+        }
     }
 
     public function hasCurrentImage(UserProfile $profile, int $slot): bool
