@@ -2,6 +2,26 @@
     <x-slot:title>Users</x-slot:title>
     <x-slot:header>User Administration</x-slot:header>
 
+    @if (session('reset_password_plain'))
+        <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 shadow-sm">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-amber-900">
+                        Standard password pattern generated for {{ session('reset_password_user_name', 'this user') }}
+                    </p>
+                    <p class="mt-1 text-sm text-amber-800">
+                        <span class="font-mono font-semibold tracking-wider" id="reset-password-value">{{ session('reset_password_plain') }}</span>
+                    </p>
+                </div>
+                <button type="button"
+                        data-copy-reset-password
+                        class="inline-flex items-center justify-center rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700">
+                    Copy Password
+                </button>
+            </div>
+        </div>
+    @endif
+
     <!-- Tab Navigation -->
     <div class="mb-6 border-b border-gray-200">
         <nav class="-mb-px flex space-x-8">
@@ -79,25 +99,6 @@
                                         </form>
                                     </td>
                                 </tr>
-                                @if((int) session('generated_for_user') === $user->id && session('generated_password'))
-                                    <tr class="bg-green-50/70">
-                                        <td colspan="6" class="px-6 py-4">
-                                            <div class="rounded-xl border border-green-200 bg-green-50 p-4">
-                                                <p class="text-sm font-medium text-green-800">
-                                                    Share this password with {{ $user->name }} now. It will only be shown once.
-                                                </p>
-                                                <div class="mt-3 flex items-center gap-3">
-                                                    <code id="generated-pw-{{ $user->id }}" class="flex-1 rounded-lg border border-green-300 bg-white px-4 py-2.5 text-lg tracking-wider text-gray-900">{{ session('generated_password') }}</code>
-                                                    <button type="button"
-                                                            data-password-target="generated-pw-{{ $user->id }}"
-                                                            class="js-copy-password rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-green-700">
-                                                        <span>Copy</span>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endif
                             @endforeach
                         </tbody>
                     </table>
@@ -145,25 +146,6 @@
                                         </form>
                                     </td>
                                 </tr>
-                                @if((int) session('generated_for_user') === $user->id && session('generated_password'))
-                                    <tr class="bg-green-50/70">
-                                        <td colspan="4" class="px-6 py-4">
-                                            <div class="rounded-xl border border-green-200 bg-green-50 p-4">
-                                                <p class="text-sm font-medium text-green-800">
-                                                    Share this password with {{ $user->name }} now. It will only be shown once.
-                                                </p>
-                                                <div class="mt-3 flex items-center gap-3">
-                                                    <code id="generated-pw-{{ $user->id }}" class="flex-1 rounded-lg border border-green-300 bg-white px-4 py-2.5 text-lg tracking-wider text-gray-900">{{ session('generated_password') }}</code>
-                                                    <button type="button"
-                                                            data-password-target="generated-pw-{{ $user->id }}"
-                                                            class="js-copy-password rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-green-700">
-                                                        <span>Copy</span>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endif
                             @endforeach
                         </tbody>
                     </table>
@@ -237,25 +219,6 @@
                                         @endif
                                     </td>
                                 </tr>
-                                @if((int) session('generated_for_user') === $user->id && session('generated_password'))
-                                    <tr class="bg-green-50/70">
-                                        <td colspan="5" class="px-6 py-4">
-                                            <div class="rounded-xl border border-green-200 bg-green-50 p-4">
-                                                <p class="text-sm font-medium text-green-800">
-                                                    Share this password with {{ $user->name }} now. It will only be shown once.
-                                                </p>
-                                                <div class="mt-3 flex items-center gap-3">
-                                                    <code id="generated-pw-{{ $user->id }}" class="flex-1 rounded-lg border border-green-300 bg-white px-4 py-2.5 text-lg tracking-wider text-gray-900">{{ session('generated_password') }}</code>
-                                                    <button type="button"
-                                                            data-password-target="generated-pw-{{ $user->id }}"
-                                                            class="js-copy-password rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-green-700">
-                                                        <span>Copy</span>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endif
                             @endforeach
                         </tbody>
                     </table>
@@ -263,6 +226,34 @@
             @endif
         </div>
     @endif
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const copyButton = document.querySelector('[data-copy-reset-password]');
+            const passwordValue = document.getElementById('reset-password-value');
+
+            if (!copyButton || !passwordValue) {
+                return;
+            }
+
+            copyButton.addEventListener('click', async function () {
+                const value = passwordValue.textContent.trim();
+
+                try {
+                    await navigator.clipboard.writeText(value);
+                    copyButton.textContent = 'Copied';
+                    setTimeout(() => {
+                        copyButton.textContent = 'Copy Password';
+                    }, 1500);
+                } catch (error) {
+                    console.error('[admin-users] copy password failed', {
+                        error: error?.message || error,
+                        value,
+                    });
+                }
+            });
+        });
+    </script>
 
     {{-- ========== ALL USERS TAB ========== --}}
     @if($tab === 'all')
@@ -393,25 +384,6 @@
                                         @endif
                                     </td>
                                 </tr>
-                                @if((int) session('generated_for_user') === $user->id && session('generated_password'))
-                                    <tr class="bg-green-50/70">
-                                        <td colspan="6" class="px-6 py-4">
-                                            <div class="rounded-xl border border-green-200 bg-green-50 p-4">
-                                                <p class="text-sm font-medium text-green-800">
-                                                    Share this password with {{ $user->name }} now. It will only be shown once.
-                                                </p>
-                                                <div class="mt-3 flex items-center gap-3">
-                                                    <code id="generated-pw-{{ $user->id }}" class="flex-1 rounded-lg border border-green-300 bg-white px-4 py-2.5 text-lg tracking-wider text-gray-900">{{ session('generated_password') }}</code>
-                                                    <button type="button"
-                                                            data-password-target="generated-pw-{{ $user->id }}"
-                                                            class="js-copy-password rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-green-700">
-                                                        <span>Copy</span>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endif
                             @endforeach
                         </tbody>
                     </table>
@@ -432,29 +404,6 @@
                 button.disabled = true;
                 button.classList.add('opacity-60', 'cursor-not-allowed');
                 button.textContent = 'Creating...';
-            });
-        });
-
-        document.querySelectorAll('.js-copy-password').forEach((button) => {
-            button.addEventListener('click', async () => {
-                const targetId = button.dataset.passwordTarget;
-                const passwordField = document.getElementById(targetId);
-
-                if (!passwordField) {
-                    return;
-                }
-
-                await navigator.clipboard.writeText(passwordField.textContent);
-
-                const label = button.querySelector('span');
-                if (!label) {
-                    return;
-                }
-
-                label.textContent = 'Copied!';
-                setTimeout(() => {
-                    label.textContent = 'Copy';
-                }, 2000);
             });
         });
     </script>

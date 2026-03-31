@@ -13,8 +13,8 @@
 
                 <h2 class="text-2xl font-bold text-gray-900 mb-2">Registration Submitted!</h2>
                 <p class="text-gray-600 mb-6">
-                    Your registration has been received. An admin will review your details and create your account.
-                    You will receive a password to log in once your account is ready.
+                    Your registration has been received. An admin will review your details and activate your account.
+                    Once activated, you can sign in with the password you created.
                 </p>
 
                 <a href="/" class="inline-flex items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 transition">

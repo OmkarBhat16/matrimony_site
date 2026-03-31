@@ -2,7 +2,7 @@
     <x-slot:header>Dashboard</x-slot:header>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-xl shadow-sm p-6">
+        <a href="{{ route('admin.users', ['tab' => 'all']) }}" class="bg-white rounded-xl shadow-sm p-6 block hover:shadow-md hover:ring-2 hover:ring-pink-100 transition">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -14,8 +14,8 @@
                     <p class="text-sm text-gray-500">Total Users</p>
                 </div>
             </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm p-6">
+        </a>
+        <a href="{{ route('admin.users', ['tab' => 'registrations']) }}" class="bg-white rounded-xl shadow-sm p-6 block hover:shadow-md hover:ring-2 hover:ring-pink-100 transition">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -27,8 +27,8 @@
                     <p class="text-sm text-gray-500">New Registrations</p>
                 </div>
             </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm p-6">
+        </a>
+        <a href="{{ route('admin.users', ['tab' => 'pending']) }}" class="bg-white rounded-xl shadow-sm p-6 block hover:shadow-md hover:ring-2 hover:ring-pink-100 transition">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,8 +40,8 @@
                     <p class="text-sm text-gray-500">Pending Review</p>
                 </div>
             </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm p-6">
+        </a>
+        <a href="{{ route('admin.users', ['tab' => 'approved']) }}" class="bg-white rounded-xl shadow-sm p-6 block hover:shadow-md hover:ring-2 hover:ring-pink-100 transition">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,8 +53,8 @@
                     <p class="text-sm text-gray-500">Approved</p>
                 </div>
             </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm p-6">
+        </a>
+        <a href="{{ route('admin.pending-edits') }}" class="bg-white rounded-xl shadow-sm p-6 block hover:shadow-md hover:ring-2 hover:ring-pink-100 transition">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +66,7 @@
                     <p class="text-sm text-gray-500">Pending Edits</p>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
     <div class="bg-white rounded-xl shadow-sm p-6">

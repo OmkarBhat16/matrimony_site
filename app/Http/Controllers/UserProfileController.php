@@ -92,7 +92,6 @@ class UserProfileController extends Controller
             'education' => ['nullable', 'string', 'max:255'],
             'occupation' => ['nullable', 'string', 'max:255'],
             'annual_income' => ['nullable', 'numeric'],
-            'date_of_birth' => ['nullable', 'date'],
             'day_and_time_of_birth' => ['nullable', 'string', 'max:255'],
             'place_of_birth' => ['nullable', 'string', 'max:255'],
             'jaath' => ['nullable', 'string', 'max:255'],
@@ -116,7 +115,6 @@ class UserProfileController extends Controller
                 },
             ],
             'uncles' => ['nullable', 'string'],
-            'aunts' => ['nullable', 'string'],
             'address' => ['nullable', 'string'],
             'native_address' => ['nullable', 'string'],
             'village_farm' => ['nullable', 'string', 'max:255'],
@@ -150,7 +148,7 @@ class UserProfileController extends Controller
                 'image_changes' => empty($imageChanges) ? null : $imageChanges,
             ];
 
-            foreach (array_keys(EditUserProfile::DIFFABLE_FIELDS) as $field) {
+            foreach (array_keys(EditUserProfile::EDITABLE_FIELDS) as $field) {
                 $editPayload[$field] = $request->exists($field)
                     ? ($validated[$field] ?? null)
                     : $profile->{$field};
@@ -237,7 +235,7 @@ class UserProfileController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'full_name' => ['nullable', 'string', 'max:255'],
+            'full_name' => ['required', 'string', 'max:255'],
             'navras_naav' => ['nullable', 'string', 'max:255'],
             'gender' => ['nullable', 'in:male,female,other'],
             'education' => ['nullable', 'string', 'max:255'],
@@ -267,20 +265,20 @@ class UserProfileController extends Controller
                 },
             ],
             'uncles' => ['nullable', 'string'],
-            'aunts' => ['nullable', 'string'],
             'address' => ['nullable', 'string'],
             'native_address' => ['nullable', 'string'],
             'village_farm' => ['nullable', 'string', 'max:255'],
             'naathe_relationships' => ['nullable', 'string'],
-            'kundli' => ['nullable', 'file', 'image', 'max:5120'],
-            // Files: up to 4, each max 5 MB
-            'images' => ['nullable', 'array', 'max:4'],
+            'kundli' => ['required', 'file', 'image', 'max:5120'],
+            // Files: up to 4, at least 1, each max 5 MB
+            'images' => ['required', 'array', 'min:1', 'max:4'],
             'images.*' => [
-                'nullable',
+                'required',
                 'file',
+                'image',
                 'max:5120',
             ],
-            'primary_image' => ['nullable', 'integer', 'in:1,2,3,4'],
+            'primary_image' => ['required', 'integer', 'in:1,2,3,4'],
         ], [
             'images.1.uploaded' => 'The first image failed to upload. It might be too large.',
             'images.2.uploaded' => 'The second image failed to upload. It might be too large.',
@@ -300,11 +298,20 @@ class UserProfileController extends Controller
             'image_count' => count($request->file('images') ?? []),
         ]);
 
-        // Default primary image to 1
-        $validated['primary_image'] = $validated['primary_image'] ?? 1;
+        $images = $request->file('images') ?? [];
+        $uploadedSlots = array_map('intval', array_keys($images));
+        $primaryImage = (int) ($validated['primary_image'] ?? 0);
+
+        if (! in_array($primaryImage, $uploadedSlots, true)) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors([
+                    'primary_image' => 'Please choose a primary photo from the images you uploaded.',
+                ]);
+        }
 
         // Remove images from validated before creating the DB record
-        $images = $request->file('images') ?? [];
         $kundli = $request->file('kundli');
         unset($validated['images']);
         unset($validated['kundli']);
@@ -336,12 +343,12 @@ class UserProfileController extends Controller
             return redirect()->back()->withInput()->with('error', 'Profile submission failed. Please try again.');
         }
 
-        Log::info('User onboarding submitted for admin review.', [
-            'user_id' => $user->id,
-            'profile_id' => $profile->id,
-            'verification_step' => $user->fresh()->verification_step,
-            'image_count' => count($images),
-        ]);
+            Log::info('User onboarding submitted for admin review.', [
+                'user_id' => $user->id,
+                'profile_id' => $profile->id,
+                'verification_step' => $user->fresh()->verification_step,
+                'image_count' => count($images),
+            ]);
 
         return redirect('/pending-review');
     }

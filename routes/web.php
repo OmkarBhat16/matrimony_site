@@ -13,35 +13,42 @@ use App\Models\HomePageContent;
 use App\Http\Controllers\UserProfileController;
 use App\Models\UserProfile;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 
 Route::get('/', function () {
-    $homePageContent = HomePageContent::query()->firstOrCreate([], [
-        'content' => HomePageContent::defaults(),
-    ]);
+    $homePageContent = Schema::hasTable('home_page_contents')
+        ? HomePageContent::query()->firstOrCreate([], [
+            'content' => HomePageContent::defaults(),
+        ])->normalizedContent()
+        : HomePageContent::defaults();
 
-    $featuredProfiles = FeaturedProfile::query()
-        ->with(['userProfile.user'])
-        ->latest()
-        ->limit(4)
-        ->get()
-        ->pluck('userProfile')
-        ->filter(fn ($profile) => $profile?->user?->verification_step === 'approved')
-        ->values();
+    $featuredProfiles = Schema::hasTable('featured_profiles') && Schema::hasTable('user_profile')
+        ? FeaturedProfile::query()
+            ->with(['userProfile.user'])
+            ->latest()
+            ->limit(4)
+            ->get()
+            ->pluck('userProfile')
+            ->filter(fn ($profile) => $profile?->user?->verification_step === 'approved')
+            ->values()
+        : collect();
 
     return view('welcome', [
         'featuredProfiles' => $featuredProfiles,
-        'homePageContent' => $homePageContent->normalizedContent(),
+        'homePageContent' => $homePageContent,
     ]);
 });
 
 // PUBLIC PAGES
 Route::get('/about', function () {
-    $aboutPageContent = AboutPageContent::query()->firstOrCreate([], [
-        'content' => AboutPageContent::defaults(),
-    ]);
+    $aboutPageContent = Schema::hasTable('about_page_contents')
+        ? AboutPageContent::query()->firstOrCreate([], [
+            'content' => AboutPageContent::defaults(),
+        ])->normalizedContent()
+        : AboutPageContent::defaults();
 
     return view('root.about', [
-        'aboutPageContent' => $aboutPageContent->normalizedContent(),
+        'aboutPageContent' => $aboutPageContent,
     ]);
 })->name('root.about');
 Route::get('/matrimony', [MatrimonyController::class, 'index'])->name(
@@ -130,11 +137,6 @@ Route::middleware(['auth', 'onboarding'])->group(function () {
         UserProfileController::class,
         'updatePassword',
     ])->name('account.password.update');
-
-    Route::post('/account/password', [
-        UserProfileController::class,
-        'updatePassword',
-    ])->name('account.password.update.legacy');
 
     Route::post('/account/images/upload', [
         UserProfileController::class,

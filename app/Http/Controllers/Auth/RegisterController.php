@@ -11,7 +11,7 @@ class RegisterController extends Controller
 {
     /**
      * Handle a registration request.
-     * Collects name, phone_number, gender, and optional email. No password.
+     * Collects name, phone_number, gender, optional email, and password.
      */
     public function __invoke(Request $request)
     {
@@ -24,6 +24,7 @@ class RegisterController extends Controller
             'phone_number' => ['required', 'digits:10', 'unique:users,phone_number'],
             'gender' => ['required', 'in:male,female,other'],
             'email' => ['nullable', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
         Log::debug('Registration submission received.', [
@@ -38,6 +39,7 @@ class RegisterController extends Controller
                 'phone_number' => $validated['phone_number'],
                 'gender' => $validated['gender'],
                 'email' => $validated['email'] ?? null,
+                'password' => $validated['password'],
                 'public_id' => User::generatePublicId($validated['gender']),
                 'verification_step' => 'unverified',
             ]);

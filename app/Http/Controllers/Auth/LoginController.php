@@ -36,6 +36,20 @@ class LoginController extends Controller
             'ip' => $request->ip(),
         ]);
 
+        if ($candidateUser?->verification_step === 'unverified') {
+            Log::info('Login rejected because account has not been activated yet.', [
+                'phone_number' => $credentials['phone_number'],
+                'user_exists' => true,
+                'user_id' => $candidateUser->id,
+                'verification_step' => $candidateUser->verification_step,
+                'ip' => $request->ip(),
+            ]);
+
+            throw ValidationException::withMessages([
+                'phone_number' => 'Your account is awaiting admin activation.',
+            ]);
+        }
+
         if (Auth::attempt($credentials, $request->boolean("remember"))) {
             $request->session()->regenerate();
 

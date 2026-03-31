@@ -8,6 +8,67 @@
         $kundliUrl = $profile->kundliImageUrl();
         $kundliPendingUrl = $profile->pendingKundliImageUrl();
         $hasKundliPending = $pendingEdit?->hasPendingKundliImage() ?? false;
+        $parseRelationRows = function (?string $raw, string $fallbackRelation) {
+            $raw = trim((string) $raw);
+
+            if ($raw === '') {
+                return [];
+            }
+
+            $decoded = json_decode($raw, true);
+
+            if (is_array($decoded)) {
+                return collect($decoded)
+                    ->filter(fn ($item) => is_array($item))
+                    ->map(function ($item) {
+                        return [
+                            'relation' => trim((string) ($item['relation'] ?? '')),
+                            'value' => trim((string) ($item['value'] ?? '')),
+                        ];
+                    })
+                    ->filter(fn ($item) => $item['relation'] !== '' || $item['value'] !== '')
+                    ->values()
+                    ->all();
+            }
+
+            return [[
+                'relation' => $fallbackRelation,
+                'value' => $raw,
+            ]];
+        };
+
+        $formatJsonField = function (?string $raw): string {
+            $raw = trim((string) $raw);
+
+            if ($raw === '') {
+                return '';
+            }
+
+            $decoded = json_decode($raw, true);
+
+            if (! is_array($decoded)) {
+                return $raw;
+            }
+
+            return collect($decoded)
+                ->filter(fn ($item) => is_array($item))
+                ->map(function ($item) {
+                    $relation = trim((string) ($item['relation'] ?? ''));
+                    $value = trim((string) ($item['value'] ?? ''));
+
+                    if ($relation !== '' && $value !== '') {
+                        return $relation.': '.$value;
+                    }
+
+                    return $relation !== '' ? $relation : $value;
+                })
+                ->filter()
+                ->implode("\n");
+        };
+
+        $siblingsRows = $parseRelationRows($values->siblings ?? '', 'Sibling');
+        $relativeRows = $parseRelationRows($values->uncles ?? '', 'Relative');
+        $naatheValue = old('naathe_relationships', $formatJsonField($values->naathe_relationships ?? ''));
     @endphp
 
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -121,7 +182,7 @@
 
                 <div class="mb-8 p-6 bg-gray-50 rounded-2xl border border-gray-200">
                     <h2 class="text-lg font-semibold text-gray-900 mb-1">Kundli</h2>
-                    <p class="text-sm text-gray-500 mb-5">Upload or replace your kundli image here. Changes go to admin review before going live.</p>
+                    <p class="text-sm text-gray-500 mb-5">Upload or replace your kundli image here. It is required for a complete profile and changes go to admin review before going live.</p>
 
                     <div class="max-w-sm">
                         <form method="POST"
@@ -163,6 +224,7 @@
                             <input type="file"
                                    id="kundli-input"
                                    name="kundli"
+                                   required
                                    accept="image/*"
                                    class="hidden"
                                    onchange="this.closest('form').submit()">
@@ -236,21 +298,10 @@
                     <section>
                         <h2 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">Personal Information</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                            @foreach(['full_name', 'navras_naav', 'gender', 'date_of_birth', 'day_and_time_of_birth', 'place_of_birth', 'marital_status', 'height_cm__Oonchi', 'skin_complexion__Rang'] as $field)
+                            @foreach(['full_name', 'navras_naav', 'marital_status', 'height_cm__Oonchi', 'skin_complexion__Rang'] as $field)
                                 <div>
                                     <label for="{{ $field }}" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields[$field] }}</label>
-                                    @if($field === 'gender')
-                                        <select id="{{ $field }}" name="{{ $field }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
-                                            <option value="">Select</option>
-                                            <option value="male" {{ ($values->{$field} ?? '') === 'male' ? 'selected' : '' }}>Male</option>
-                                            <option value="female" {{ ($values->{$field} ?? '') === 'female' ? 'selected' : '' }}>Female</option>
-                                            <option value="other" {{ ($values->{$field} ?? '') === 'other' ? 'selected' : '' }}>Other</option>
-                                        </select>
-                                    @elseif($field === 'date_of_birth')
-                                        <input type="date" id="{{ $field }}" name="{{ $field }}" value="{{ old($field, ($values->{$field} ?? '') instanceof \Carbon\Carbon ? $values->{$field}->format('Y-m-d') : ($values->{$field} ?? '')) }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
-                                    @else
-                                        <input type="text" id="{{ $field }}" name="{{ $field }}" value="{{ old($field, $values->{$field} ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
-                                    @endif
+                                    <input type="text" id="{{ $field }}" name="{{ $field }}" value="{{ old($field, $values->{$field} ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
                                 </div>
                             @endforeach
                         </div>
@@ -260,7 +311,7 @@
                     <section>
                         <h2 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">Horoscope & Community</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                            @foreach(['jaath', 'zodiac_sign__Raas', 'naadi', 'gann', 'devak', 'kul_devata'] as $field)
+                            @foreach(['day_and_time_of_birth', 'place_of_birth', 'jaath', 'zodiac_sign__Raas', 'naadi', 'gann', 'devak', 'kul_devata'] as $field)
                                 <div>
                                     <label for="{{ $field }}" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields[$field] }}</label>
                                     <input type="text" id="{{ $field }}" name="{{ $field }}" value="{{ old($field, $values->{$field} ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
@@ -285,7 +336,7 @@
                     {{-- Family --}}
                     <section>
                         <h2 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">Family Details</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mb-6">
                             @foreach(['fathers_name', 'mothers_name'] as $field)
                                 <div>
                                     <label for="{{ $field }}" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields[$field] }}</label>
@@ -293,14 +344,87 @@
                                 </div>
                             @endforeach
                         </div>
-                        <div class="grid grid-cols-1 gap-y-4 mt-4">
-                            @foreach(['siblings', 'uncles', 'aunts', 'naathe_relationships'] as $field)
-                                <div>
-                                    <label for="{{ $field }}" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields[$field] }}</label>
-                                    <textarea id="{{ $field }}" name="{{ $field }}" rows="2" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">{{ old($field, $values->{$field} ?? '') }}</textarea>
+
+                        <div class="grid grid-cols-1 gap-6">
+                            <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                                <div class="flex items-center justify-between gap-3 mb-4">
+                                    <div>
+                                        <h3 class="text-base font-semibold text-gray-900">Siblings</h3>
+                                        <p class="text-xs text-gray-500">Add one or more sibling entries in a clean, guided format.</p>
+                                    </div>
+                                    <button type="button" id="add-sibling-btn" class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md border border-pink-300 text-pink-700 bg-pink-50 hover:bg-pink-100 transition">
+                                        Add Sibling
+                                    </button>
                                 </div>
-                            @endforeach
+
+                                <div id="siblings-list" class="space-y-3">
+                                    @forelse($siblingsRows as $index => $row)
+                                        <div class="sibling-row grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_auto] gap-2 items-center">
+                                            <div>
+                                                <select class="sibling-relation block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 text-sm">
+                                                    <option value="" data-en="Select sibling" data-mr="भावंड निवडा">Select sibling</option>
+                                                    <option value="Brother" data-en="Brother" data-mr="भाऊ" {{ $row['relation'] === 'Brother' ? 'selected' : '' }}>Brother</option>
+                                                    <option value="Sister" data-en="Sister" data-mr="बहीण" {{ $row['relation'] === 'Sister' ? 'selected' : '' }}>Sister</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <input type="text" class="sibling-value block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 text-sm" placeholder="Sibling details" value="{{ $row['value'] }}">
+                                            </div>
+                                            <div class="justify-self-end">
+                                                <button type="button" class="remove-sibling-btn inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 text-gray-500 hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition" aria-label="Remove sibling">&times;</button>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <p class="text-sm text-gray-500" data-placeholder="siblings">No sibling details added yet.</p>
+                                    @endforelse
+                                </div>
+
+                                <input type="hidden" id="siblings" name="siblings" value="{{ old('siblings', $values->siblings ?? '') }}">
+                            </div>
+
+                            <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                                <div class="flex items-center justify-between gap-3 mb-4">
+                                    <div>
+                                        <h3 class="text-base font-semibold text-gray-900">Relatives</h3>
+                                        <p class="text-xs text-gray-500">Keep uncles and other relatives grouped in one structured list.</p>
+                                    </div>
+                                    <button type="button" id="add-relative-btn" class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md border border-pink-300 text-pink-700 bg-pink-50 hover:bg-pink-100 transition">
+                                        Add Relative
+                                    </button>
+                                </div>
+
+                                <div id="relatives-list" class="space-y-3">
+                                    @forelse($relativeRows as $index => $row)
+                                        <div class="relative-row grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_auto] gap-2 items-center">
+                                            <div>
+                                                <select class="relative-relation block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 text-sm">
+                                                    <option value="" data-en="Select relation" data-mr="नातं निवडा">Select relation</option>
+                                                    <option value="Uncle" data-en="Uncle" data-mr="काका" {{ $row['relation'] === 'Uncle' ? 'selected' : '' }}>Uncle</option>
+                                                    <option value="Aunt" data-en="Aunt" data-mr="मावशी / आत्या" {{ $row['relation'] === 'Aunt' ? 'selected' : '' }}>Aunt</option>
+                                                    <option value="Mama" data-en="Mama" data-mr="मामा" {{ $row['relation'] === 'Mama' ? 'selected' : '' }}>Mama</option>
+                                                    <option value="Other" data-en="Other" data-mr="इतर" {{ $row['relation'] === 'Other' ? 'selected' : '' }}>Other</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <input type="text" class="relative-value block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 text-sm" placeholder="Relative details" value="{{ $row['value'] }}">
+                                            </div>
+                                            <div class="justify-self-end">
+                                                <button type="button" class="remove-relative-btn inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 text-gray-500 hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition" aria-label="Remove relative">&times;</button>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <p class="text-sm text-gray-500" data-placeholder="relatives">No relative details added yet.</p>
+                                    @endforelse
+                                </div>
+
+                                <input type="hidden" id="uncles" name="uncles" value="{{ old('uncles', $values->uncles ?? '') }}">
+                            </div>
                         </div>
+
+                    <div class="mt-6">
+                        <label for="naathe_relationships" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['naathe_relationships'] }}</label>
+                        <textarea id="naathe_relationships" name="naathe_relationships" rows="3" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">{{ $naatheValue }}</textarea>
+                    </div>
                     </section>
 
                     {{-- Address --}}
@@ -332,4 +456,187 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('form[action="{{ route('account.update') }}"]');
+            const siblingsList = document.getElementById('siblings-list');
+            const relativesList = document.getElementById('relatives-list');
+            const siblingsHidden = document.getElementById('siblings');
+            const relativesHidden = document.getElementById('uncles');
+            const addSiblingBtn = document.getElementById('add-sibling-btn');
+            const addRelativeBtn = document.getElementById('add-relative-btn');
+
+            function collectRows(listElement, rowClass, relationSelector, valueSelector) {
+                return Array.from(listElement.querySelectorAll(`.${rowClass}`))
+                    .map((row) => {
+                        const relation = row.querySelector(relationSelector)?.value?.trim() || '';
+                        const value = row.querySelector(valueSelector)?.value?.trim() || '';
+
+                        return { relation, value };
+                    })
+                    .filter((item) => item.relation || item.value);
+            }
+
+            function syncRows(listElement, hiddenInput, rowClass, relationSelector, valueSelector) {
+                hiddenInput.value = JSON.stringify(collectRows(listElement, rowClass, relationSelector, valueSelector));
+            }
+
+            function removePlaceholder(listElement) {
+                const placeholder = listElement.querySelector('[data-placeholder]');
+                if (placeholder) {
+                    placeholder.remove();
+                }
+            }
+
+            function createSiblingRow(data = {}) {
+                removePlaceholder(siblingsList);
+
+                const row = document.createElement('div');
+                row.className = 'sibling-row grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_auto] gap-2 items-center';
+                row.innerHTML = `
+                    <div>
+                        <select class="sibling-relation block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 text-sm">
+                            <option value="" data-en="Select sibling" data-mr="भावंड निवडा">Select sibling</option>
+                            <option value="Brother" data-en="Brother" data-mr="भाऊ">Brother</option>
+                            <option value="Sister" data-en="Sister" data-mr="बहीण">Sister</option>
+                        </select>
+                    </div>
+                    <div>
+                        <input type="text" class="sibling-value block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 text-sm" placeholder="Sibling details">
+                    </div>
+                    <div class="justify-self-end">
+                        <button type="button" class="remove-sibling-btn inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 text-gray-500 hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition" aria-label="Remove sibling">&times;</button>
+                    </div>
+                `;
+
+                row.querySelector('.sibling-relation').value = data.relation || '';
+                row.querySelector('.sibling-value').value = data.value || '';
+
+                row.querySelector('.sibling-relation').addEventListener('change', function () {
+                    syncRows(siblingsList, siblingsHidden, 'sibling-row', '.sibling-relation', '.sibling-value');
+                });
+
+                row.querySelector('.sibling-value').addEventListener('input', function () {
+                    syncRows(siblingsList, siblingsHidden, 'sibling-row', '.sibling-relation', '.sibling-value');
+                });
+
+                siblingsList.appendChild(row);
+                syncRows(siblingsList, siblingsHidden, 'sibling-row', '.sibling-relation', '.sibling-value');
+            }
+
+            function createRelativeRow(data = {}) {
+                removePlaceholder(relativesList);
+
+                const row = document.createElement('div');
+                row.className = 'relative-row grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_auto] gap-2 items-center';
+                row.innerHTML = `
+                    <div>
+                        <select class="relative-relation block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 text-sm">
+                            <option value="" data-en="Select relation" data-mr="नातं निवडा">Select relation</option>
+                            <option value="Uncle" data-en="Uncle" data-mr="काका">Uncle</option>
+                            <option value="Aunt" data-en="Aunt" data-mr="मावशी / आत्या">Aunt</option>
+                            <option value="Mama" data-en="Mama" data-mr="मामा">Mama</option>
+                            <option value="Other" data-en="Other" data-mr="इतर">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <input type="text" class="relative-value block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 text-sm" placeholder="Relative details">
+                    </div>
+                    <div class="justify-self-end">
+                        <button type="button" class="remove-relative-btn inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 text-gray-500 hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition" aria-label="Remove relative">&times;</button>
+                    </div>
+                `;
+
+                row.querySelector('.relative-relation').value = data.relation || '';
+                row.querySelector('.relative-value').value = data.value || '';
+
+                row.querySelector('.relative-relation').addEventListener('change', function () {
+                    syncRows(relativesList, relativesHidden, 'relative-row', '.relative-relation', '.relative-value');
+                });
+
+                row.querySelector('.relative-value').addEventListener('input', function () {
+                    syncRows(relativesList, relativesHidden, 'relative-row', '.relative-relation', '.relative-value');
+                });
+
+                relativesList.appendChild(row);
+                syncRows(relativesList, relativesHidden, 'relative-row', '.relative-relation', '.relative-value');
+            }
+
+            function wireRepeater(listElement, hiddenInput, rowClass, relationSelector, valueSelector, placeholderText, createRowFn) {
+                listElement.addEventListener('click', function (event) {
+                    const removeButton = event.target.closest(`.${rowClass === 'sibling-row' ? 'remove-sibling-btn' : 'remove-relative-btn'}`);
+
+                    if (!removeButton) {
+                        return;
+                    }
+
+                    const row = removeButton.closest(`.${rowClass}`);
+                    if (!row) {
+                        return;
+                    }
+
+                    row.remove();
+                    syncRows(listElement, hiddenInput, rowClass, relationSelector, valueSelector);
+
+                    if (!listElement.querySelector(`.${rowClass}`)) {
+                        listElement.insertAdjacentHTML('afterbegin', `<p class="text-sm text-gray-500" data-placeholder="${placeholderText}">No ${placeholderText.slice(0, -1)} details added yet.</p>`);
+                    }
+                });
+
+                listElement.addEventListener('change', function (event) {
+                    if (event.target.closest(`.${rowClass}`)) {
+                        syncRows(listElement, hiddenInput, rowClass, relationSelector, valueSelector);
+                    }
+                });
+
+                listElement.addEventListener('input', function (event) {
+                    if (event.target.closest(`.${rowClass}`)) {
+                        syncRows(listElement, hiddenInput, rowClass, relationSelector, valueSelector);
+                    }
+                });
+
+                return createRowFn;
+            }
+
+            const addSiblingRow = wireRepeater(
+                siblingsList,
+                siblingsHidden,
+                'sibling-row',
+                '.sibling-relation',
+                '.sibling-value',
+                'siblings',
+                createSiblingRow
+            );
+
+            const addRelativeRow = wireRepeater(
+                relativesList,
+                relativesHidden,
+                'relative-row',
+                '.relative-relation',
+                '.relative-value',
+                'relatives',
+                createRelativeRow
+            );
+
+            if (addSiblingBtn) {
+                addSiblingBtn.addEventListener('click', function () {
+                    addSiblingRow();
+                });
+            }
+
+            if (addRelativeBtn) {
+                addRelativeBtn.addEventListener('click', function () {
+                    addRelativeRow();
+                });
+            }
+
+            if (form) {
+                form.addEventListener('submit', function () {
+                    syncRows(siblingsList, siblingsHidden, 'sibling-row', '.sibling-relation', '.sibling-value');
+                    syncRows(relativesList, relativesHidden, 'relative-row', '.relative-relation', '.relative-value');
+                });
+            }
+        });
+    </script>
 </x-layout>

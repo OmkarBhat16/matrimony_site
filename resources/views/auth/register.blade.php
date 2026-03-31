@@ -9,7 +9,7 @@
                     Register Your Interest
                 </h2>
                 <p class="lang-label mt-2 text-sm text-gray-600" data-en="Submit your details and an admin will create your account" data-mr="तुमची माहिती सबमिट करा आणि प्रशासक तुमचे खाते तयार करतील">
-                    Submit your details and an admin will create your account
+                    Submit your details and wait for admin activation
                 </p>
             </div>
 
@@ -94,10 +94,10 @@
                             required
                             class="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('gender') border-red-500 @enderror"
                         >
-                            <option value="">Select Gender</option>
-                            <option value="male" {{ old('gender') === 'male' ? 'selected' : '' }}>Male</option>
-                            <option value="female" {{ old('gender') === 'female' ? 'selected' : '' }}>Female</option>
-                            <option value="other" {{ old('gender') === 'other' ? 'selected' : '' }}>Other</option>
+                            <option value="" data-en="Select Gender" data-mr="लिंग निवडा">Select Gender</option>
+                            <option value="male" data-en="Male" data-mr="पुरुष" {{ old('gender') === 'male' ? 'selected' : '' }}>Male</option>
+                            <option value="female" data-en="Female" data-mr="स्त्री" {{ old('gender') === 'female' ? 'selected' : '' }}>Female</option>
+                            <option value="other" data-en="Other" data-mr="इतर" {{ old('gender') === 'other' ? 'selected' : '' }}>Other</option>
                         </select>
                     </div>
 
@@ -125,6 +125,44 @@
                                 data-placeholder-mr="you@example.com"
                             >
                         </div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                            <span class="lang-label" data-en="Password" data-mr="पासवर्ड">Password</span> <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            id="password"
+                            name="password"
+                            type="password"
+                            autocomplete="new-password"
+                            required
+                            minlength="8"
+                            class="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition @error('password') border-red-500 @enderror"
+                            placeholder="Create a password"
+                            data-placeholder-en="Create a password"
+                            data-placeholder-mr="पासवर्ड तयार करा"
+                        >
+                    </div>
+
+                    <!-- Confirm Password Field -->
+                    <div>
+                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">
+                            <span class="lang-label" data-en="Confirm Password" data-mr="पासवर्ड पुन्हा लिहा">Confirm Password</span> <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            id="password_confirmation"
+                            name="password_confirmation"
+                            type="password"
+                            autocomplete="new-password"
+                            required
+                            minlength="8"
+                            class="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition"
+                            placeholder="Confirm your password"
+                            data-placeholder-en="Confirm your password"
+                            data-placeholder-mr="तुमचा पासवर्ड पुन्हा लिहा"
+                        >
                     </div>
 
                     <!-- Submit Button -->

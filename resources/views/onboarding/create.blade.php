@@ -122,7 +122,7 @@
                         <!-- Photo Upload -->
                         <div class="mt-8 pt-6 border-t border-gray-200">
                             <h3 class="lang-label text-base font-semibold text-gray-900 mb-1" data-en="Profile Photos" data-mr="प्रोफाइल फोटो">Profile Photos</h3>
-                            <p class="lang-label text-sm text-gray-500 mb-4" data-en="Upload up to 4 photos. The one you mark as primary will be shown on your card. Photo 1 is primary by default." data-mr="जास्तीत जास्त 4 फोटो अपलोड करा. तुम्ही प्राथमिक म्हणून निवडलेला फोटो तुमच्या कार्डवर दिसेल. फोटो 1 डीफॉल्टने प्राथमिक आहे.">Upload up to 4 photos. The one you mark as primary will be shown on your card. Photo 1 is primary by default.</p>
+                            <p class="lang-label text-sm text-gray-500 mb-4" data-en="Upload up to 4 photos. At least one photo is required. The one you mark as primary will be shown on your card." data-mr="जास्तीत जास्त 4 फोटो अपलोड करा. किमान एक फोटो आवश्यक आहे. तुम्ही प्राथमिक म्हणून निवडलेला फोटो तुमच्या कार्डवर दिसेल.">Upload up to 4 photos. At least one photo is required. The one you mark as primary will be shown on your card.</p>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="photo-upload-grid">
                                 @foreach ([1, 2, 3, 4] as $slot)
@@ -257,7 +257,7 @@
 
                         <div class="mt-8 pt-6 border-t border-gray-200">
                             <h3 class="lang-label text-base font-semibold text-gray-900 mb-1" data-en="Kundli Image" data-mr="कुंडली प्रतिमा">Kundli Image</h3>
-                            <p class="lang-label text-sm text-gray-500 mb-4" data-en="Upload one kundli image. It will be saved separately for admin review." data-mr="एक कुंडली प्रतिमा अपलोड करा. ती अ‍ॅडमिन पुनरावलोकनासाठी वेगळ्या फोल्डरमध्ये जतन केली जाईल.">Upload one kundli image. It will be saved separately for admin review.</p>
+                            <p class="lang-label text-sm text-gray-500 mb-4" data-en="Upload one kundli image. It is required and will be saved separately for admin review." data-mr="एक कुंडली प्रतिमा अपलोड करा. ती आवश्यक आहे आणि अ‍ॅडमिन पुनरावलोकनासाठी वेगळ्या फोल्डरमध्ये जतन केली जाईल.">Upload one kundli image. It is required and will be saved separately for admin review.</p>
 
                             <div class="max-w-sm">
                                 <div class="flex flex-col items-center gap-2" id="kundli-slot">
@@ -277,14 +277,18 @@
                                         </div>
                                     </div>
 
-                                    <input type="file"
+                                   <input type="file"
                                            id="kundli-input"
                                            name="kundli"
+                                           required
                                            accept="image/*"
                                            class="hidden"
                                            onchange="previewPhoto('kundli', this)">
                                 </div>
                             </div>
+                            <p id="kundli-upload-error" class="hidden mt-3 text-sm font-medium text-red-600">
+                                Please upload your kundli image before continuing.
+                            </p>
                         </div>
                     </div>
 
@@ -319,6 +323,8 @@
                                     </button>
                                 </div>
 
+                                <p class="lang-label mt-2 text-xs text-gray-500" data-en="Use the sibling dropdown and add details in the text box." data-mr="भावंड निवडा आणि उजवीकडे तपशील लिहा.">Use the sibling dropdown and add details in the text box.</p>
+
                                 <div id="siblings-list" class="space-y-3"></div>
 
                                 <input type="hidden" id="siblings" name="siblings" value="{{ old('siblings') }}">
@@ -338,7 +344,6 @@
                                 <div id="relatives-list" class="space-y-3"></div>
 
                                 <input type="hidden" id="uncles" name="uncles" value="{{ old('uncles') }}">
-                                <input type="hidden" name="aunts" value="">
                                 <input type="hidden" name="naathe_relationships" value="">
 
                                 <p class="lang-label mt-2 text-xs text-gray-500" data-en="Use the relation dropdown and add details in the text box." data-mr="नात्याचा प्रकार निवडा आणि उजवीकडे तपशील लिहा.">Use the relation dropdown and add details in the text box.</p>
@@ -391,11 +396,15 @@
                             class="hidden px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition">
                             <span class="lang-label" data-en="Submit for Review" data-mr="परीक्षणासाठी सबमिट करा">Submit for Review</span>
                         </button>
+                            </div>
+                        </div>
+
+                        <p id="photo-upload-error" class="hidden mt-3 text-sm font-medium text-red-600">
+                            Please upload at least one profile photo before continuing.
+                        </p>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -495,12 +504,78 @@
             const nextBtn    = document.getElementById('next-btn');
             const submitBtn  = document.getElementById('submit-btn');
             const progressLine = document.getElementById('progress-line');
+            const photoUploadError = document.getElementById('photo-upload-error');
+            const kundliInput = document.getElementById('kundli-input');
+            const kundliUploadError = document.getElementById('kundli-upload-error');
             const relativesList = document.getElementById('relatives-list');
             const addRelativeBtn = document.getElementById('add-relative-btn');
             const relativesHiddenInput = document.getElementById('uncles');
             const siblingsList = document.getElementById('siblings-list');
             const addSiblingBtn = document.getElementById('add-sibling-btn');
             const siblingsHiddenInput = document.getElementById('siblings');
+
+            function selectedPhotoSlots() {
+                return Array.from(document.querySelectorAll('input[type="file"][id^="image-input-"]'))
+                    .filter((input) => input.files && input.files.length > 0)
+                    .map((input) => parseInt((input.id.match(/(\d+)$/) || [0])[1], 10))
+                    .filter((slot) => Number.isInteger(slot) && slot > 0);
+            }
+
+            function describeFile(file) {
+                if (!file) {
+                    return null;
+                }
+
+                return {
+                    name: file.name,
+                    size_bytes: file.size,
+                    size_kb: Math.round((file.size / 1024) * 100) / 100,
+                    type: file.type,
+                    last_modified: file.lastModified ? new Date(file.lastModified).toISOString() : null,
+                };
+            }
+
+            function logUploadDebug(message, payload = {}) {
+                console.log(`[onboarding] ${message}`, payload);
+            }
+
+            function clearPhotoError() {
+                if (!photoUploadError) {
+                    return;
+                }
+
+                photoUploadError.classList.add('hidden');
+                photoUploadError.textContent = 'Please upload at least one profile photo before continuing.';
+            }
+
+            function clearKundliError() {
+                if (!kundliUploadError) {
+                    return;
+                }
+
+                kundliUploadError.classList.add('hidden');
+                kundliUploadError.textContent = 'Please upload your kundli image before continuing.';
+            }
+
+            function showKundliError(message) {
+                if (!kundliUploadError) {
+                    return;
+                }
+
+                kundliUploadError.textContent = message;
+                kundliUploadError.classList.remove('hidden');
+                kundliUploadError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            function showPhotoError(message) {
+                if (!photoUploadError) {
+                    return;
+                }
+
+                photoUploadError.textContent = message;
+                photoUploadError.classList.remove('hidden');
+                photoUploadError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
 
             function parseRelatives(rawValue) {
                 if (!rawValue || typeof rawValue !== 'string') {
@@ -697,12 +772,40 @@
             document.getElementById('onboarding-form').addEventListener('change', saveToLocalStorage);
 
             // Clear localStorage on form submit
-            document.getElementById('onboarding-form').addEventListener('submit', clearLocalStorage);
+            document.getElementById('onboarding-form').addEventListener('submit', function () {
+                logUploadDebug('form submit', {
+                    current_step: currentStep,
+                    selected_photo_slots: selectedPhotoSlots(),
+                    primary_image: document.querySelector('input[name=primary_image]:checked')?.value ?? null,
+                    kundli_selected: !!(kundliInput && kundliInput.files && kundliInput.files[0]),
+                    kundli_file: describeFile(kundliInput?.files?.[0] ?? null),
+                });
+
+                clearLocalStorage();
+            });
 
             // ---- Photo preview ----
             window.previewPhoto = function (slot, input) {
                 if (!input.files || !input.files[0]) return;
                 const file = input.files[0];
+                const fileInfo = describeFile(file);
+
+                logUploadDebug('photo selected', {
+                    slot,
+                    input_id: input.id,
+                    file: fileInfo,
+                    file_count: input.files.length,
+                });
+
+                if (file.size > 5 * 1024 * 1024) {
+                    console.warn('[onboarding] photo may exceed upload limit', {
+                        slot,
+                        input_id: input.id,
+                        file: fileInfo,
+                        limit_bytes: 5 * 1024 * 1024,
+                    });
+                }
+
                 const reader = new FileReader();
                 reader.onload = function (e) {
                     const img = document.getElementById('preview-img-' + slot);
@@ -710,6 +813,11 @@
                     img.src = e.target.result;
                     img.classList.remove('hidden');
                     placeholder.classList.add('hidden');
+                    if (slot === 'kundli') {
+                        clearKundliError();
+                    } else {
+                        clearPhotoError();
+                    }
                 };
                 reader.readAsDataURL(file);
             };
@@ -803,10 +911,37 @@
                     }
                 }
 
+                if (valid && currentStep === 1) {
+                    const photoSlots = selectedPhotoSlots();
+
+                    if (photoSlots.length === 0) {
+                        showPhotoError('Please upload at least one profile photo before continuing.');
+                        return false;
+                    }
+
+                    clearPhotoError();
+                }
+
+                if (valid && currentStep === 2) {
+                    if (!kundliInput || !kundliInput.files || !kundliInput.files[0]) {
+                        showKundliError('Please upload your kundli image before continuing.');
+                        return false;
+                    }
+
+                    clearKundliError();
+                }
+
                 return valid;
             }
 
             function advanceStep() {
+                logUploadDebug('advance step requested', {
+                    current_step: currentStep,
+                    total_steps: totalSteps,
+                    selected_photo_slots: selectedPhotoSlots(),
+                    primary_image: document.querySelector('input[name=primary_image]:checked')?.value ?? null,
+                });
+
                 if (currentStep < totalSteps && validateCurrentStep()) {
                     currentStep++;
                     updateUI();

@@ -54,7 +54,6 @@ class DatabaseSeeder extends Seeder
         // Create tester user with profile
         $tester = User::factory()->create([
             'name' => 'tester',
-            'username' => 'tester',
             'email' => 'test@example.com',
             'phone_number' => '9876543210',
             'gender' => 'male',
@@ -69,7 +68,6 @@ class DatabaseSeeder extends Seeder
         // Create profile manager user with profile
         $profileManager = User::factory()->create([
             'name' => 'profile_manager',
-            'username' => 'profile_manager',
             'email' => 'profile_manager@admin.com',
             'phone_number' => '9999999999',
             'gender' => 'male',
@@ -84,7 +82,6 @@ class DatabaseSeeder extends Seeder
         // Create content editor user with profile
         $contentEditor = User::factory()->create([
             'name' => 'content_editor',
-            'username' => 'content_editor',
             'email' => 'content_editor@admin.com',
             'phone_number' => '9988776655',
             'gender' => 'female',
@@ -99,7 +96,6 @@ class DatabaseSeeder extends Seeder
         // Create superadmin user with profile
         $superadmin = User::factory()->create([
             'name' => 'superadmin',
-            'username' => 'superadmin',
             'email' => 'superadmin@admin.com',
             'phone_number' => '9977886655',
             'gender' => 'male',

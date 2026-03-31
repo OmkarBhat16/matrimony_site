@@ -251,6 +251,13 @@
                     if (typeof text !== 'undefined') el.setAttribute('alt', text);
                 });
 
+                document.querySelectorAll('select option[data-en][data-mr]').forEach(option => {
+                    const text = normalized === 'mr' ? option.dataset.mr : option.dataset.en;
+                    if (typeof text !== 'undefined') {
+                        option.textContent = text;
+                    }
+                });
+
                 updateToggleStates(normalized);
             }
 

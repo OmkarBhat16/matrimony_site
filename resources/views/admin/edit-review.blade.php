@@ -5,6 +5,47 @@
     @php
         $hasImageChanges = !empty($pendingImageSlots);
         $hasKundliChange = $edit->hasPendingKundliImage();
+
+        $formatRelationValue = function (?string $value): string {
+            $value = trim((string) $value);
+
+            if ($value === '' || $value === '[]') {
+                return '—';
+            }
+
+            $decoded = json_decode($value, true);
+
+            if (! is_array($decoded)) {
+                return $value;
+            }
+
+            $lines = collect($decoded)
+                ->filter(fn ($item) => is_array($item))
+                ->map(function ($item) {
+                    $relation = trim((string) ($item['relation'] ?? ''));
+                    $detail = trim((string) ($item['value'] ?? ''));
+
+                    if ($relation !== '' && $detail !== '') {
+                        return $relation.': '.$detail;
+                    }
+
+                    return $relation !== '' ? $relation : $detail;
+                })
+                ->filter()
+                ->values();
+
+            return $lines->isNotEmpty() ? $lines->implode("\n") : '—';
+        };
+
+        $formatDiffValue = function (string $field, mixed $value) use ($formatRelationValue): string {
+            $stringValue = is_null($value) ? '' : (string) $value;
+
+            if (in_array($field, ['siblings', 'uncles'], true)) {
+                return $formatRelationValue($stringValue);
+            }
+
+            return $stringValue !== '' ? $stringValue : '—';
+        };
     @endphp
 
     <div class="max-w-4xl mx-auto">
@@ -53,10 +94,10 @@
                                     <tr>
                                         <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $change['label'] }}</td>
                                         <td class="px-6 py-4 text-sm text-gray-600">
-                                            <span class="bg-red-50 text-red-700 px-2 py-1 rounded-md whitespace-pre-line">{{ $change['old'] }}</span>
+                                            <span class="bg-red-50 text-red-700 px-2 py-1 rounded-md whitespace-pre-line">{{ $formatDiffValue($field, $change['old']) }}</span>
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-600">
-                                            <span class="bg-green-50 text-green-700 px-2 py-1 rounded-md whitespace-pre-line">{{ $change['new'] }}</span>
+                                            <span class="bg-green-50 text-green-700 px-2 py-1 rounded-md whitespace-pre-line">{{ $formatDiffValue($field, $change['new']) }}</span>
                                         </td>
                                     </tr>
                                 @endforeach

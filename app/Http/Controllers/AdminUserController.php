@@ -9,7 +9,7 @@ use App\Services\ProfileImageManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
 class AdminUserController extends Controller
 {
@@ -43,6 +43,7 @@ class AdminUserController extends Controller
             ->with('user')
             ->latest()
             ->get()
+            ->unique('user_id')
             ->keyBy('user_id');
 
         $totalUsersCount = User::where('role', 'user')->count();
@@ -119,7 +120,7 @@ class AdminUserController extends Controller
     }
 
     /**
-     * Generate a random password for a registered user (Step 1 verification).
+     * Activate a registered user for onboarding (Step 1 verification).
      */
     public function createAccount(User $user)
     {
@@ -147,10 +148,7 @@ class AdminUserController extends Controller
                     return ['status' => 'already_created'];
                 }
 
-                $plainPassword = Str::random(12);
-
                 $lockedUser->forceFill([
-                    'password' => $plainPassword,
                     'verification_step' => 'step1_complete',
                 ])->save();
 
@@ -168,7 +166,6 @@ class AdminUserController extends Controller
 
                 return [
                     'status' => 'created',
-                    'plain_password' => $plainPassword,
                 ];
             }, 5);
         } catch (\Throwable $e) {
@@ -181,7 +178,7 @@ class AdminUserController extends Controller
 
             return redirect()
                 ->back()
-                ->with('error', 'Account creation failed. No password was issued. Please try again.');
+                ->with('error', 'Account creation failed. Please try again.');
         }
 
         if ($result['status'] === 'already_created') {
@@ -192,9 +189,7 @@ class AdminUserController extends Controller
 
         return redirect()
             ->route('admin.users', ['tab' => 'all', 'step' => 'step1_complete'])
-            ->with('generated_password', $result['plain_password'])
-            ->with('generated_for_user', $user->id)
-            ->with('success', 'Password generated and account moved to onboarding.');
+            ->with('success', 'Account created and moved to onboarding.');
     }
 
     /**
@@ -219,10 +214,10 @@ class AdminUserController extends Controller
         }
 
         try {
-            $plainPassword = Str::random(12);
+            $plainPassword = $this->deterministicPasswordFor($user);
 
             $user->update([
-                'password' => $plainPassword,
+                'password' => Hash::make($plainPassword),
             ]);
         } catch (\Throwable $e) {
             Log::error('Admin password reset failed.', [
@@ -243,9 +238,10 @@ class AdminUserController extends Controller
 
         return redirect()
             ->route('admin.users', ['tab' => 'all', 'step' => $user->verification_step])
-            ->with('generated_password', $plainPassword)
-            ->with('generated_for_user', $user->id)
-            ->with('success', 'Password reset successfully.');
+            ->with('success', 'Password reset successfully.')
+            ->with('reset_password_plain', $plainPassword)
+            ->with('reset_password_user_id', $user->id)
+            ->with('reset_password_user_name', $user->name);
     }
 
     /**
@@ -314,6 +310,8 @@ class AdminUserController extends Controller
             ->with('user')
             ->latest()
             ->get();
+
+        $edits = $edits->unique('user_id')->values();
 
         Log::debug('Admin viewed pending edit list.', [
             'admin_id' => auth()->id(),
@@ -517,5 +515,29 @@ class AdminUserController extends Controller
         }
 
         return redirect()->route('admin.deleted-accounts')->with('success', 'Account permanently deleted.');
+    }
+
+    private function deterministicPasswordFor(User $user): string
+    {
+        $name = trim((string) $user->name);
+        $phone = preg_replace('/\D+/', '', (string) $user->phone_number);
+
+        $tokens = preg_split('/\s+/', $name, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $initials = '';
+
+        if (count($tokens) >= 2) {
+            $initials = mb_substr((string) $tokens[0], 0, 1).mb_substr((string) $tokens[1], 0, 1);
+        } elseif (count($tokens) === 1) {
+            $letters = preg_replace('/[^\pL]/u', '', $tokens[0]);
+            $initials = mb_substr((string) $letters, 0, 2);
+        }
+
+        $initials = mb_strtoupper($initials);
+
+        if ($initials === '') {
+            $initials = 'XX';
+        }
+
+        return $initials.$phone;
     }
 }

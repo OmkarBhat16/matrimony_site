@@ -1,10 +1,6 @@
 <x-layout title="{{ $profile->full_name ?? 'Profile' }} - Profile">
-    {{-- PDF generation libraries --}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {{-- Navigation Bar with Back Button and Download PDF --}}
+        {{-- Navigation Bar with Back Button --}}
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
             <a href="{{ route('root.matrimony') }}" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-pink-600 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -24,12 +20,6 @@
                     </button>
                 </div>
 
-                <button onclick="downloadProfilePDF()" class="inline-flex items-center gap-2 px-4 py-2 bg-pink-50 text-pink-600 rounded-lg text-sm font-medium hover:bg-pink-100 transition border border-pink-200 shadow-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                    </svg>
-                    Download Profile
-                </button>
             </div>
         </div>
 
@@ -42,7 +32,6 @@
                 @php
                     $primaryUrl  = $profile->primaryImageUrl();
                     $allImgs     = $profile->allImageUrls();          // [slot => url]
-                    $otherImgs   = array_filter($allImgs, fn($url, $slot) => $slot !== ($profile->primary_image ?? 1), ARRAY_FILTER_USE_BOTH);
                     $kundliUrl   = $profile->kundliImageUrl();
                 @endphp
                 <div class="relative flex flex-col sm:flex-row items-center sm:items-end -mt-16 sm:-mt-12 mb-8 gap-4">
@@ -363,79 +352,5 @@
             }
         }
 
-        async function downloadProfilePDF() {
-            try {
-                const element = document.getElementById('profile-card');
-
-                // Provide user feedback
-                const btn = document.querySelector('button[onclick="downloadProfilePDF()"]');
-                const originalText = btn ? btn.innerHTML : '';
-                if (btn) {
-                    btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Generating...`;
-                    btn.disabled = true;
-                }
-
-                // Wait a moment for DOM updates
-                await new Promise(r => setTimeout(r, 100));
-
-                // html-to-image is much better at modern CSS features than html2canvas
-                const dataUrl = await window.htmlToImage.toJpeg(element, {
-                    quality: 0.95,
-                    backgroundColor: '#ffffff',
-                    pixelRatio: 2 // High res
-                });
-
-                // Get element dimensions to calculate PDF size
-                const img = new Image();
-                img.src = dataUrl;
-
-                img.onload = function() {
-                    const pdf = new window.jspdf.jsPDF({
-                        orientation: 'portrait',
-                        unit: 'mm',
-                        format: 'a4'
-                    });
-
-                    const pdfWidth = pdf.internal.pageSize.getWidth();
-                    const pdfHeight = (img.height * pdfWidth) / img.width;
-
-                    // Add image to PDF
-                    pdf.addImage(dataUrl, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-
-                    // If height is larger than one page, add more pages
-                    let heightLeft = pdfHeight - pdf.internal.pageSize.getHeight();
-                    let position = -pdf.internal.pageSize.getHeight();
-
-                    while (heightLeft >= 0) {
-                        position = position - pdf.internal.pageSize.getHeight();
-                        pdf.addPage();
-                        pdf.addImage(dataUrl, 'JPEG', 0, position, pdfWidth, pdfHeight);
-                        heightLeft -= pdf.internal.pageSize.getHeight();
-                    }
-
-                    // Save the PDF
-                    pdf.save(`Profile_{{ str_replace(' ', '_', $profile->full_name ?? 'Matrimony') }}.pdf`);
-
-                    // Reset button
-                    if (btn) {
-                        btn.innerHTML = originalText;
-                        btn.disabled = false;
-                    }
-                };
-
-            } catch (error) {
-                console.error('Error generating PDF:', error);
-                alert('There was an error generating the PDF. Please try again.');
-                const btn = document.querySelector('button[onclick="downloadProfilePDF()"]');
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = `
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                    </svg>
-                    Download Profile`;
-                }
-            }
-        }
     </script>
 </x-layout>
