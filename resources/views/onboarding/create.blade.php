@@ -191,6 +191,13 @@
                                     class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
                             </div>
                             <div>
+                                <label for="blood_group" class="block text-sm font-medium text-gray-700 mb-1">
+                                    <span class="lang-label" data-en="Blood Group" data-mr="रक्तगट">Blood Group</span>
+                                </label>
+                                <input type="text" id="blood_group" name="blood_group" value="{{ old('blood_group') }}"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
+                            </div>
+                            <div>
                                 <label for="zodiac_sign__Raas" class="block text-sm font-medium text-gray-700 mb-1">
                                     <span class="lang-label" data-en="Zodiac Sign (Raas)" data-mr="रास">Zodiac Sign (Raas)</span>
                                 </label>

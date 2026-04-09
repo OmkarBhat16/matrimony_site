@@ -76,6 +76,7 @@
                         'Navras Naav' => $profile->navras_naav,
                         'Gender' => $user->gender ? ucfirst($user->gender) : ($profile->gender ? ucfirst($profile->gender) : null),
                         'Date of Birth' => $profile->date_of_birth?->format('d M Y'),
+                        'Blood Group' => $profile->blood_group,
                         'Marital Status' => $profile->marital_status,
                         'Height (Oonchi)' => $profile->height_cm__Oonchi,
                         'Skin Complexion (Rang)' => $profile->skin_complexion__Rang,

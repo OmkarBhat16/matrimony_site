@@ -32,6 +32,16 @@ class UserProfileFactory extends Factory
             'date_of_birth' => $this->faker
                 ->dateTimeBetween('-40 years', '-18 years')
                 ->format('Y-m-d'),
+            'blood_group' => $this->faker->randomElement([
+                'A+',
+                'A-',
+                'B+',
+                'B-',
+                'AB+',
+                'AB-',
+                'O+',
+                'O-',
+            ]),
             'day_and_time_of_birth' => $this->faker->dayOfWeek().' '.$this->faker->time(),
             'place_of_birth' => $this->faker->city(),
             'jaath' => $this->faker->word(),

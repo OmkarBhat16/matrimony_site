@@ -130,6 +130,10 @@
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->date_of_birth ? \Carbon\Carbon::parse($profile->date_of_birth)->format('d M Y') : 'Not provided' }}</dd>
                                 </div>
                                 <div>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Blood Group" data-mr="रक्तगट">Blood Group</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ $profile->blood_group ?? 'Not provided' }}</dd>
+                                </div>
+                                <div>
                                     <dt class="lang-label text-sm font-medium text-gray-500" data-en="Time of Birth" data-mr="जन्मदिवस आणि वेळ">Time of Birth</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->day_and_time_of_birth ?? 'Not provided' }}</dd>
                                 </div>

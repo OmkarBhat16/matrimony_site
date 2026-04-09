@@ -54,14 +54,21 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             $user = auth()->user();
-            $destination = '/matrimony';
+            $isProfileStaff = $user->canAccessProfileManagementPanel();
+            $isContentStaff = $user->canAccessContentManagement() && ! $isProfileStaff;
 
-            if ($user->isApproved()) {
+            if ($isProfileStaff) {
+                $destination = route('admin');
+            } elseif ($isContentStaff) {
+                $destination = route('admin.content-management');
+            } elseif ($user->isApproved()) {
                 $destination = '/matrimony';
             } elseif ($user->needsOnboarding()) {
                 $destination = '/onboarding/create';
             } elseif ($user->isPendingReview()) {
                 $destination = '/pending-review';
+            } else {
+                $destination = '/matrimony';
             }
 
             Log::info('Login successful.', [
@@ -72,7 +79,9 @@ class LoginController extends Controller
                 'ip' => $request->ip(),
             ]);
 
-            return redirect()->intended($destination);
+            return ($isProfileStaff || $isContentStaff)
+                ? redirect()->to($destination)
+                : redirect()->intended($destination);
         }
 
         Log::info('Login rejected.', [

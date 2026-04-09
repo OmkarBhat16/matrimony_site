@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('occupation')->nullable();
             $table->decimal('annual_income', 15, 2)->nullable();
             $table->date('date_of_birth')->nullable();
+            $table->string('blood_group')->nullable();
             $table->string('day_and_time_of_birth')->nullable();
             $table->string('place_of_birth')->nullable();
             $table->string('jaath')->nullable();

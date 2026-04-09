@@ -298,7 +298,7 @@
                     <section>
                         <h2 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">Personal Information</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                            @foreach(['full_name', 'navras_naav', 'marital_status', 'height_cm__Oonchi', 'skin_complexion__Rang'] as $field)
+                            @foreach(['full_name', 'navras_naav', 'marital_status', 'height_cm__Oonchi', 'skin_complexion__Rang', 'blood_group'] as $field)
                                 <div>
                                     <label for="{{ $field }}" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields[$field] }}</label>
                                     <input type="text" id="{{ $field }}" name="{{ $field }}" value="{{ old($field, $values->{$field} ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
@@ -489,6 +489,16 @@
                 }
             }
 
+            function currentLanguage() {
+                return document.documentElement.getAttribute('lang') === 'mr' ? 'mr' : 'en';
+            }
+
+            function localizeOptions(root) {
+                root.querySelectorAll('option[data-en][data-mr]').forEach(function (option) {
+                    option.textContent = currentLanguage() === 'mr' ? option.dataset.mr : option.dataset.en;
+                });
+            }
+
             function createSiblingRow(data = {}) {
                 removePlaceholder(siblingsList);
 
@@ -512,6 +522,7 @@
 
                 row.querySelector('.sibling-relation').value = data.relation || '';
                 row.querySelector('.sibling-value').value = data.value || '';
+                localizeOptions(row);
 
                 row.querySelector('.sibling-relation').addEventListener('change', function () {
                     syncRows(siblingsList, siblingsHidden, 'sibling-row', '.sibling-relation', '.sibling-value');
@@ -550,6 +561,7 @@
 
                 row.querySelector('.relative-relation').value = data.relation || '';
                 row.querySelector('.relative-value').value = data.value || '';
+                localizeOptions(row);
 
                 row.querySelector('.relative-relation').addEventListener('change', function () {
                     syncRows(relativesList, relativesHidden, 'relative-row', '.relative-relation', '.relative-value');

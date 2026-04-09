@@ -14,6 +14,7 @@ class EditUserProfile extends Model
     public const DIFFABLE_FIELDS = [
         'full_name' => 'Full Name',
         'navras_naav' => 'Navras Naav',
+        'blood_group' => 'Blood Group',
         'education' => 'Education',
         'occupation' => 'Occupation',
         'annual_income' => 'Annual Income',
@@ -41,6 +42,7 @@ class EditUserProfile extends Model
     public const EDITABLE_FIELDS = [
         'full_name' => 'Full Name',
         'navras_naav' => 'Navras Naav',
+        'blood_group' => 'Blood Group',
         'education' => 'Education',
         'occupation' => 'Occupation',
         'annual_income' => 'Annual Income',
@@ -75,6 +77,7 @@ class EditUserProfile extends Model
         'occupation',
         'annual_income',
         'date_of_birth',
+        'blood_group',
         'day_and_time_of_birth',
         'place_of_birth',
         'jaath',

@@ -186,6 +186,10 @@
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->date_of_birth ? \Carbon\Carbon::parse($profile->date_of_birth)->format('d M Y') : 'Not provided' }}</dd>
                                 </div>
                                 <div>
+                                    <dt class="text-sm font-medium text-gray-500">Blood Group</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ $profile->blood_group ?? 'Not provided' }}</dd>
+                                </div>
+                                <div>
                                     <dt class="text-sm font-medium text-gray-500">Day and Time of Birth</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->day_and_time_of_birth ?? 'Not provided' }}</dd>
                                 </div>

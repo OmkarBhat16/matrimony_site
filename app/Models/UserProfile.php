@@ -22,6 +22,7 @@ class UserProfile extends Model
         'occupation',
         'annual_income',
         'date_of_birth',
+        'blood_group',
         'day_and_time_of_birth',
         'place_of_birth',
         'jaath',
