@@ -324,6 +324,15 @@
                     <section>
                         <h2 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">Education & Career</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                            <div>
+                                <label for="education_type" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['education_type'] }}</label>
+                                <select id="education_type" name="education_type" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition bg-white">
+                                    <option value="">Select education type</option>
+                                    @foreach(\App\Models\UserProfile::EDUCATION_TYPES as $educationType)
+                                        <option value="{{ $educationType }}" @selected(old('education_type', $values->education_type ?? '') === $educationType)>{{ $educationType }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             @foreach(['education', 'occupation', 'annual_income'] as $field)
                                 <div>
                                     <label for="{{ $field }}" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields[$field] }}</label>

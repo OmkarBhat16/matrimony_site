@@ -89,6 +89,7 @@ class UserProfileController extends Controller
         $validated = $request->validate([
             'full_name' => ['nullable', 'string', 'max:255'],
             'navras_naav' => ['nullable', 'string', 'max:255'],
+            'education_type' => ['nullable', 'in:'.implode(',', UserProfile::EDUCATION_TYPES)],
             'education' => ['nullable', 'string', 'max:255'],
             'occupation' => ['nullable', 'string', 'max:255'],
             'annual_income' => ['nullable', 'numeric'],
@@ -239,6 +240,7 @@ class UserProfileController extends Controller
             'full_name' => ['required', 'string', 'max:255'],
             'navras_naav' => ['nullable', 'string', 'max:255'],
             'gender' => ['nullable', 'in:male,female,other'],
+            'education_type' => ['nullable', 'in:'.implode(',', UserProfile::EDUCATION_TYPES)],
             'education' => ['nullable', 'string', 'max:255'],
             'occupation' => ['nullable', 'string', 'max:255'],
             'annual_income' => ['nullable', 'numeric'],

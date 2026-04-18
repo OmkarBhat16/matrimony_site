@@ -240,6 +240,17 @@
                                     class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">
                             </div>
                             <div>
+                                <label for="education_type" class="block text-sm font-medium text-gray-700 mb-1">
+                                    <span class="lang-label" data-en="Education Type" data-mr="शिक्षण प्रकार">Education Type</span>
+                                </label>
+                                <select id="education_type" name="education_type" class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 bg-white">
+                                    <option value="" @selected(old('education_type') === null || old('education_type') === '')>Select education type</option>
+                                    @foreach(\App\Models\UserProfile::EDUCATION_TYPES as $educationType)
+                                        <option value="{{ $educationType }}" @selected(old('education_type') === $educationType)>{{ $educationType }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
                                 <label for="education" class="block text-sm font-medium text-gray-700 mb-1">
                                     <span class="lang-label" data-en="Education" data-mr="शिक्षण">Education</span>
                                 </label>

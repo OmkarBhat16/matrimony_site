@@ -186,6 +186,10 @@
                             <h3 class="lang-label text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4" data-en="Education & Career" data-mr="शिक्षण आणि व्यवसाय">Education & Career</h3>
                             <dl class="space-y-4">
                                 <div>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Education Type" data-mr="शिक्षण प्रकार">Education Type</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ $profile->education_type ?? 'Not provided' }}</dd>
+                                </div>
+                                <div>
                                     <dt class="lang-label text-sm font-medium text-gray-500" data-en="Education" data-mr="शिक्षण">Education</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->education ?? 'Not provided' }}</dd>
                                 </div>

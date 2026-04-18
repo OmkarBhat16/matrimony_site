@@ -101,6 +101,7 @@
                         'Jaath' => $profile->jaath,
                         'Devak' => $profile->devak,
                         'Kul Devata' => $profile->kul_devata,
+                        'Education Type' => $profile->education_type,
                         'Education' => $profile->education,
                         'Occupation' => $profile->occupation,
                         'Annual Income' => $profile->annual_income ? '₹' . number_format($profile->annual_income) : null,

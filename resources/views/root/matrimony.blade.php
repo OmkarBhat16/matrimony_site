@@ -1,6 +1,7 @@
 <x-layout title="Matrimony">
     @php
         $showFilters = auth()->check() && auth()->user()->isApproved();
+        $filters = $filters ?? [];
     @endphp
     {{-- Pending Approval Banner --}}
     @auth
@@ -36,7 +37,7 @@
                         <h2 class="text-sm font-semibold text-gray-900">Filter Profiles</h2>
                     </div>
                     <div class="flex items-center gap-3">
-                        @if (request()->hasAny(['gender', 'jaath', 'city', 'age_min', 'age_max']))
+                        @if (request()->hasAny(['gender', 'blood_group', 'education_type', 'zodiac_sign__Raas', 'gann', 'year_from', 'year_to']))
                             <a href="{{ route('root.matrimony') }}" class="text-xs text-pink-600 hover:text-pink-700 font-medium flex items-center gap-1">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                 Clear all
@@ -52,9 +53,9 @@
                 </div>
 
                 <div class="p-6" x-show="!filtersCollapsed" x-transition.opacity.duration.200ms>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {{-- Gender Dropdown --}}
-                        <div x-data="{ open: false, selected: '{{ request('gender', '') }}' }" class="relative">
+                        <div x-data="{ open: false, selected: '{{ $filters['gender'] ?? '' }}' }" class="relative">
                             <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Gender</label>
                             <input type="hidden" name="gender" :value="selected">
                             <button type="button" @click="open = !open" @click.outside="open = false" class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-left hover:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-400 transition">
@@ -68,55 +69,92 @@
                             </div>
                         </div>
 
-                        {{-- Religion / Jaath Dropdown --}}
-                        <div x-data="{ open: false, selected: '{{ request('jaath', '') }}', search: '' }" class="relative">
-                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Religion / Jaath</label>
-                            <input type="hidden" name="jaath" :value="selected">
-                            <button type="button" @click="open = !open; $nextTick(() => $refs.jaathSearch?.focus())" @click.outside="open = false" class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-left hover:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-400 transition">
-                                <span :class="selected ? 'text-gray-900' : 'text-gray-400'" x-text="selected || 'Any jaath'" class="truncate"></span>
+                        {{-- Blood Group Dropdown --}}
+                        <div x-data="{ open: false, selected: '{{ $filters['blood_group'] ?? '' }}', search: '' }" class="relative">
+                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Blood Group</label>
+                            <input type="hidden" name="blood_group" :value="selected">
+                            <button type="button" @click="open = !open; $nextTick(() => $refs.bloodSearch?.focus())" @click.outside="open = false" class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-left hover:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-400 transition">
+                                <span :class="selected ? 'text-gray-900' : 'text-gray-400'" x-text="selected || 'Any blood group'" class="truncate"></span>
                                 <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </button>
                             <div x-show="open" x-transition.opacity.duration.150ms class="absolute z-20 mt-1.5 w-full bg-white border border-gray-200 rounded-lg shadow-lg py-1">
                                 <div class="px-3 py-1.5">
-                                    <input x-ref="jaathSearch" x-model="search" type="text" placeholder="Search..." class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-pink-400">
+                                    <input x-ref="bloodSearch" x-model="search" type="text" placeholder="Search..." class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-pink-400">
                                 </div>
                                 <div class="max-h-40 overflow-y-auto">
-                                    <button type="button" @click="selected = ''; open = false; search = ''" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="!selected && 'text-pink-600 font-medium'">Any jaath</button>
-                                    @foreach ($jaaths as $jaath)
-                                        <button type="button" x-show="!search || '{{ strtolower($jaath) }}'.includes(search.toLowerCase())" @click="selected = '{{ addslashes($jaath) }}'; open = false; search = ''" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="selected === '{{ addslashes($jaath) }}' && 'text-pink-600 font-medium'">{{ ucfirst($jaath) }}</button>
+                                    <button type="button" @click="selected = ''; open = false; search = ''" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="!selected && 'text-pink-600 font-medium'">Any blood group</button>
+                                    @foreach ($filterOptions['blood_groups'] as $bloodGroup)
+                                        <button type="button" x-show="!search || '{{ strtolower($bloodGroup) }}'.includes(search.toLowerCase())" @click="selected = '{{ addslashes($bloodGroup) }}'; open = false; search = ''" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="selected === '{{ addslashes($bloodGroup) }}' && 'text-pink-600 font-medium'">{{ $bloodGroup }}</button>
                                     @endforeach
                                 </div>
                             </div>
                         </div>
 
-                        {{-- City Dropdown --}}
-                        <div x-data="{ open: false, selected: '{{ request('city', '') }}', search: '' }" class="relative">
-                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">City</label>
-                            <input type="hidden" name="city" :value="selected">
-                            <button type="button" @click="open = !open; $nextTick(() => $refs.citySearch?.focus())" @click.outside="open = false" class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-left hover:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-400 transition">
-                                <span :class="selected ? 'text-gray-900' : 'text-gray-400'" x-text="selected || 'Any city'" class="truncate"></span>
+                        {{-- Education Type Dropdown --}}
+                        <div x-data="{ open: false, selected: '{{ $filters['education_type'] ?? '' }}', search: '' }" class="relative">
+                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Education Type</label>
+                            <input type="hidden" name="education_type" :value="selected">
+                            <button type="button" @click="open = !open; $nextTick(() => $refs.educationSearch?.focus())" @click.outside="open = false" class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-left hover:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-400 transition">
+                                <span :class="selected ? 'text-gray-900' : 'text-gray-400'" x-text="selected || 'Any education type'" class="truncate"></span>
                                 <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </button>
                             <div x-show="open" x-transition.opacity.duration.150ms class="absolute z-20 mt-1.5 w-full bg-white border border-gray-200 rounded-lg shadow-lg py-1">
                                 <div class="px-3 py-1.5">
-                                    <input x-ref="citySearch" x-model="search" type="text" placeholder="Search..." class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-pink-400">
+                                    <input x-ref="educationSearch" x-model="search" type="text" placeholder="Search..." class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-pink-400">
                                 </div>
                                 <div class="max-h-40 overflow-y-auto">
-                                    <button type="button" @click="selected = ''; open = false; search = ''" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="!selected && 'text-pink-600 font-medium'">Any city</button>
-                                    @foreach ($cities as $city)
-                                        <button type="button" x-show="!search || '{{ strtolower($city) }}'.includes(search.toLowerCase())" @click="selected = '{{ addslashes($city) }}'; open = false; search = ''" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="selected === '{{ addslashes($city) }}' && 'text-pink-600 font-medium'">{{ $city }}</button>
+                                    <button type="button" @click="selected = ''; open = false; search = ''" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="!selected && 'text-pink-600 font-medium'">Any education type</button>
+                                    @foreach ($filterOptions['education_types'] as $educationType)
+                                        <button type="button" x-show="!search || '{{ strtolower($educationType) }}'.includes(search.toLowerCase())" @click="selected = '{{ addslashes($educationType) }}'; open = false; search = ''" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="selected === '{{ addslashes($educationType) }}' && 'text-pink-600 font-medium'">{{ $educationType }}</button>
                                     @endforeach
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Age Range --}}
+                        {{-- Raas Dropdown --}}
+                        <div x-data="{ open: false, selected: '{{ $filters['zodiac_sign__Raas'] ?? '' }}', search: '' }" class="relative">
+                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Raas</label>
+                            <input type="hidden" name="zodiac_sign__Raas" :value="selected">
+                            <button type="button" @click="open = !open; $nextTick(() => $refs.raasSearch?.focus())" @click.outside="open = false" class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-left hover:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-400 transition">
+                                <span :class="selected ? 'text-gray-900' : 'text-gray-400'" x-text="selected || 'Any raas'" class="truncate"></span>
+                                <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div x-show="open" x-transition.opacity.duration.150ms class="absolute z-20 mt-1.5 w-full bg-white border border-gray-200 rounded-lg shadow-lg py-1">
+                                <div class="px-3 py-1.5">
+                                    <input x-ref="raasSearch" x-model="search" type="text" placeholder="Search..." class="w-full px-2.5 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:border-pink-400">
+                                </div>
+                                <div class="max-h-40 overflow-y-auto">
+                                    <button type="button" @click="selected = ''; open = false; search = ''" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="!selected && 'text-pink-600 font-medium'">Any raas</button>
+                                    @foreach ($filterOptions['raas'] as $raas)
+                                        <button type="button" x-show="!search || '{{ strtolower($raas) }}'.includes(search.toLowerCase())" @click="selected = '{{ addslashes($raas) }}'; open = false; search = ''" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="selected === '{{ addslashes($raas) }}' && 'text-pink-600 font-medium'">{{ $raas }}</button>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Gann Dropdown --}}
+                        <div x-data="{ open: false, selected: '{{ $filters['gann'] ?? '' }}' }" class="relative">
+                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Gann</label>
+                            <input type="hidden" name="gann" :value="selected">
+                            <button type="button" @click="open = !open" @click.outside="open = false" class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-left hover:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-400 transition">
+                                <span :class="selected ? 'text-gray-900' : 'text-gray-400'" x-text="selected || 'Any gann'"></span>
+                                <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </button>
+                            <div x-show="open" x-transition.opacity.duration.150ms class="absolute z-20 mt-1.5 w-full bg-white border border-gray-200 rounded-lg shadow-lg py-1">
+                                <button type="button" @click="selected = ''; open = false" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="!selected && 'text-pink-600 font-medium'">Any gann</button>
+                                @foreach ($filterOptions['gann'] as $gann)
+                                    <button type="button" @click="selected = '{{ $gann }}'; open = false" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="selected === '{{ $gann }}' && 'text-pink-600 font-medium'">{{ $gann }}</button>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        {{-- Year Range --}}
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Age Range</label>
+                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Year Range</label>
                             <div class="flex gap-2">
-                                <input type="number" name="age_min" value="{{ request('age_min') }}" placeholder="Min" min="18" max="100" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm hover:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-400 transition placeholder:text-gray-400">
+                                <input type="number" name="year_from" value="{{ $filters['year_from'] ?? '' }}" placeholder="From" min="{{ $filterOptions['year_min'] }}" max="{{ $filterOptions['year_max'] }}" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm hover:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-400 transition placeholder:text-gray-400">
                                 <span class="self-center text-gray-300">&ndash;</span>
-                                <input type="number" name="age_max" value="{{ request('age_max') }}" placeholder="Max" min="18" max="100" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm hover:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-400 transition placeholder:text-gray-400">
+                                <input type="number" name="year_to" value="{{ $filters['year_to'] ?? '' }}" placeholder="To" min="{{ $filterOptions['year_min'] }}" max="{{ $filterOptions['year_max'] }}" class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm hover:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-400 transition placeholder:text-gray-400">
                             </div>
                         </div>
 

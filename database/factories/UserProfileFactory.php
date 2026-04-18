@@ -26,6 +26,7 @@ class UserProfileFactory extends Factory
                 'female',
                 'other',
             ]),
+            'education_type' => $this->faker->randomElement(\App\Models\UserProfile::EDUCATION_TYPES),
             'education' => $this->faker->word(),
             'occupation' => $this->faker->jobTitle(),
             'annual_income' => $this->faker->randomFloat(2, 100000, 5000000),

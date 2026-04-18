@@ -10,6 +10,16 @@ class UserProfile extends Model
     use HasFactory;
 
     public const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
+    public const EDUCATION_TYPES = [
+        'SSC',
+        'HSC',
+        'Graduation',
+        'Post-Graduation',
+        'Masters',
+        'Diploma',
+        'Doctorate',
+        'Other',
+    ];
 
     protected $table = 'user_profile';
 
@@ -18,6 +28,7 @@ class UserProfile extends Model
         'full_name',
         'navras_naav',
         'gender',
+        'education_type',
         'education',
         'occupation',
         'annual_income',
