@@ -271,7 +271,7 @@ class UserProfileController extends Controller
             'native_address' => ['nullable', 'string'],
             'village_farm' => ['nullable', 'string', 'max:255'],
             'naathe_relationships' => ['nullable', 'string'],
-            'kundli' => ['required', 'file', 'image', 'max:5120'],
+            'kundli' => ['nullable', 'file', 'image', 'max:5120'],
             // Files: up to 4, at least 1, each max 5 MB
             'images' => ['required', 'array', 'min:1', 'max:4'],
             'images.*' => [

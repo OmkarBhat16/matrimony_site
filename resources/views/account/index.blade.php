@@ -26,7 +26,7 @@
                     <div class="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-200 shrink-0">
                         @if ($primaryUrl)
                             <img src="{{ $primaryUrl }}" alt="{{ $profile->full_name }}"
-                                 class="w-full h-full object-cover">
+                                 class="w-full h-full object-contain">
                         @else
                             <div class="w-full h-full flex items-center justify-center bg-pink-100">
                                 <svg class="w-16 h-16 text-pink-400" fill="currentColor" viewBox="0 0 24 24">
@@ -135,30 +135,30 @@
                 </div>
 
                 <div class="mb-10 p-6 bg-gray-50 rounded-2xl border border-gray-200">
-                    <h3 class="text-base font-semibold text-gray-900 mb-1">Your Kundli</h3>
-                    <p class="text-sm text-gray-500 mb-5">Your kundli image is stored separately for review and can be updated from Edit Account.</p>
+                    <h3 class="text-base font-semibold text-gray-900 mb-1">Your Biodata</h3>
+                    <p class="text-sm text-gray-500 mb-5">Your biodata image is stored separately for review and can be updated from Edit Account.</p>
 
-                    <div class="max-w-sm">
-                        <div class="relative aspect-square rounded-xl overflow-hidden border-2 {{ $kundliUrl ? 'border-gray-200' : 'border-dashed border-gray-300' }} bg-white">
+                    <div class="max-w-xs">
+                        <div class="relative rounded-xl overflow-hidden border-2 {{ $kundliUrl ? 'border-gray-200' : 'border-dashed border-gray-300' }} bg-white">
                             @if ($kundliUrl)
-                                <img src="{{ $kundliUrl }}" alt="Kundli image" class="w-full h-full object-cover">
+                                <img src="{{ $kundliUrl }}" alt="Biodata image" class="w-full h-auto object-contain">
                                 @if ($hasKundliPending)
                                     <span class="absolute top-2 right-2 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">
                                         Pending review
                                     </span>
                                 @endif
                             @elseif ($hasKundliPending)
-                                <img src="{{ $kundliPendingUrl }}" alt="Pending kundli image" class="w-full h-full object-cover">
+                                <img src="{{ $kundliPendingUrl }}" alt="Pending biodata image" class="w-full h-auto object-contain">
                                 <span class="absolute top-2 right-2 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">
                                     Pending review
                                 </span>
                             @else
-                                <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-1">
+                                <div class="w-40 h-40 flex flex-col items-center justify-center text-gray-400 gap-1">
                                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                     </svg>
-                                    <span class="text-xs font-medium">Kundli</span>
-                                    <span class="text-xs">No kundli uploaded</span>
+                                    <span class="text-xs font-medium">Biodata</span>
+                                    <span class="text-xs">No biodata uploaded</span>
                                 </div>
                             @endif
                         </div>

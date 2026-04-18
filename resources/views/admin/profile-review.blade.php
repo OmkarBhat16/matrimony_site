@@ -58,10 +58,10 @@
 
             @if($profile->kundliImageUrl())
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                    <h3 class="text-base font-semibold text-gray-900 mb-4">Kundli Image</h3>
-                    <div class="max-w-sm">
-                        <div class="aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
-                            <img src="{{ $profile->kundliImageUrl() }}" alt="Kundli image" class="w-full h-full object-cover">
+                    <h3 class="text-base font-semibold text-gray-900 mb-4">Biodata Image</h3>
+                    <div class="max-w-xs">
+                        <div class="rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+                            <img src="{{ $profile->kundliImageUrl() }}" alt="Biodata image" class="w-full h-auto object-contain">
                         </div>
                     </div>
                 </div>

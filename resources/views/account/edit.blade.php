@@ -181,23 +181,23 @@
                 </div>
 
                 <div class="mb-8 p-6 bg-gray-50 rounded-2xl border border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-1">Kundli</h2>
-                    <p class="text-sm text-gray-500 mb-5">Upload or replace your kundli image here. It is required for a complete profile and changes go to admin review before going live.</p>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-1">Biodata</h2>
+                    <p class="text-sm text-gray-500 mb-5">Upload or replace your biodata image here. It is required for a complete profile and changes go to admin review before going live.</p>
 
-                    <div class="max-w-sm">
+                    <div class="max-w-xs">
                         <form method="POST"
                               action="{{ route('account.kundli.upload') }}"
                               enctype="multipart/form-data"
                               class="w-full">
                             @csrf
-                            <div class="relative w-full aspect-square rounded-xl overflow-hidden border-2 cursor-pointer
+                            <div class="relative w-40 rounded-xl overflow-hidden border-2 cursor-pointer
                                         {{ $kundliUrl ? 'border-gray-300' : 'border-dashed border-gray-300 hover:border-pink-400' }}
                                         transition"
                                  onclick="document.getElementById('kundli-input').click()">
                                 @if ($kundliUrl)
                                     <img src="{{ $kundliUrl }}"
-                                         alt="Kundli"
-                                         class="w-full h-full object-cover">
+                                         alt="Biodata"
+                                         class="w-full h-auto object-contain">
                                     @if ($hasKundliPending)
                                         <span class="absolute top-2 right-2 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">
                                             Pending review
@@ -205,17 +205,17 @@
                                     @endif
                                 @elseif ($hasKundliPending)
                                     <img src="{{ $kundliPendingUrl }}"
-                                         alt="Pending Kundli"
-                                         class="w-full h-full object-cover">
+                                         alt="Pending Biodata"
+                                         class="w-full h-auto object-contain">
                                     <span class="absolute top-2 right-2 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">
                                         Pending review
                                     </span>
                                 @else
-                                    <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-1 bg-white">
+                                    <div class="h-40 flex flex-col items-center justify-center text-gray-400 gap-1 bg-white">
                                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                         </svg>
-                                        <span class="text-xs font-medium">Kundli</span>
+                                        <span class="text-xs font-medium">Biodata</span>
                                         <span class="text-xs">Click to upload</span>
                                     </div>
                                 @endif

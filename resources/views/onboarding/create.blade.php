@@ -263,39 +263,36 @@
                         </div>
 
                         <div class="mt-8 pt-6 border-t border-gray-200">
-                            <h3 class="lang-label text-base font-semibold text-gray-900 mb-1" data-en="Kundli Image" data-mr="कुंडली प्रतिमा">Kundli Image</h3>
-                            <p class="lang-label text-sm text-gray-500 mb-4" data-en="Upload one kundli image. It is required and will be saved separately for admin review." data-mr="एक कुंडली प्रतिमा अपलोड करा. ती आवश्यक आहे आणि अ‍ॅडमिन पुनरावलोकनासाठी वेगळ्या फोल्डरमध्ये जतन केली जाईल.">Upload one kundli image. It is required and will be saved separately for admin review.</p>
+                            <h3 class="lang-label text-base font-semibold text-gray-900 mb-1" data-en="Biodata Image" data-mr="बायोडेटा प्रतिमा">Biodata Image</h3>
+                            <p class="lang-label text-sm text-gray-500 mb-4" data-en="Upload one biodata image (optional). It will be saved separately for admin review." data-mr="एक बायोडेटा प्रतिमा अपलोड करा (पर्यायी). ती अ‍ॅडमिन पुनरावलोकनासाठी वेगळ्या फोल्डरमध्ये जतन केली जाईल.">Upload one biodata image (optional). It will be saved separately for admin review.</p>
 
-                            <div class="max-w-sm">
+                            <div class="max-w-[600px]">
                                 <div class="flex flex-col items-center gap-2" id="kundli-slot">
-                                    <div class="relative w-full aspect-square rounded-xl border-2 border-dashed border-gray-300 overflow-hidden bg-gray-50 hover:border-pink-400 transition cursor-pointer"
+                                    <div class="relative w-full h-[700px] rounded-xl border-2 border-dashed border-gray-300 overflow-hidden bg-gray-50 hover:border-pink-400 transition cursor-pointer"
                                          id="preview-box-kundli"
                                          onclick="document.getElementById('kundli-input').click()">
                                         <img id="preview-img-kundli"
                                              src=""
-                                             alt="Kundli"
-                                             class="hidden w-full h-full object-cover">
+                                             alt="Biodata"
+                                             class="hidden w-full h-full object-contain">
                                         <div id="preview-placeholder-kundli" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-1">
                                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                             </svg>
-                                            <span class="lang-label text-xs font-medium" data-en="Kundli" data-mr="कुंडली">Kundli</span>
+                                            <span class="lang-label text-xs font-medium" data-en="Biodata" data-mr="बायोडेटा">Biodata</span>
                                             <span class="lang-label text-xs" data-en="Click to upload" data-mr="अपलोड करण्यासाठी क्लिक करा">Click to upload</span>
                                         </div>
                                     </div>
 
-                                   <input type="file"
+                                    <input type="file"
                                            id="kundli-input"
                                            name="kundli"
-                                           required
                                            accept="image/*"
                                            class="hidden"
                                            onchange="previewPhoto('kundli', this)">
                                 </div>
                             </div>
-                            <p id="kundli-upload-error" class="hidden mt-3 text-sm font-medium text-red-600">
-                                Please upload your kundli image before continuing.
-                            </p>
+                            <p id="kundli-upload-error" class="hidden mt-3 text-sm font-medium text-red-600"></p>
                         </div>
                     </div>
 
@@ -561,7 +558,7 @@
                 }
 
                 kundliUploadError.classList.add('hidden');
-                kundliUploadError.textContent = 'Please upload your kundli image before continuing.';
+                kundliUploadError.textContent = '';
             }
 
             function showKundliError(message) {
@@ -930,11 +927,6 @@
                 }
 
                 if (valid && currentStep === 2) {
-                    if (!kundliInput || !kundliInput.files || !kundliInput.files[0]) {
-                        showKundliError('Please upload your kundli image before continuing.');
-                        return false;
-                    }
-
                     clearKundliError();
                 }
 

@@ -38,7 +38,7 @@
                     <div class="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-200 shrink-0">
                         @if ($primaryUrl)
                             <img src="{{ $primaryUrl }}" alt="{{ $profile->full_name }}"
-                                 class="w-full h-full object-cover">
+                                 class="w-full h-full object-contain">
                         @else
                             <div class="w-full h-full flex items-center justify-center bg-pink-100">
                                 <span class="text-4xl font-bold text-pink-500">
@@ -102,16 +102,7 @@
                 </div>
 
 
-                @if($kundliUrl)
-                    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                        <h3 class="text-base font-semibold text-gray-900 mb-4">Kundli</h3>
-                        <div class="max-w-sm">
-                            <div class="aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
-                                <img src="{{ $kundliUrl }}" alt="Kundli image" class="w-full h-full object-cover">
-                            </div>
-                        </div>
-                    </div>
-                @endif
+
 
                 <!-- Profile Details Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10 mt-10">
@@ -316,6 +307,20 @@
                                 <div class="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-2xl pointer-events-none"></div>
                             </div>
                         @endforeach
+                    </div>
+                </div>
+            @endif
+
+            {{-- Biodata Image Section --}}
+            @if($kundliUrl)
+                <div class="border-t border-gray-100 bg-white px-6 sm:px-10 py-10">
+                    <h3 class="text-2xl font-semibold text-gray-900 mb-8 text-center">Biodata</h3>
+                    <div class="flex justify-center">
+                        <div class="w-full max-w-[600px] h-[700px]">
+                            <div class="h-full rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+                                <img src="{{ $kundliUrl }}" alt="Biodata image" class="w-full h-full object-contain">
+                            </div>
+                        </div>
                     </div>
                 </div>
             @endif

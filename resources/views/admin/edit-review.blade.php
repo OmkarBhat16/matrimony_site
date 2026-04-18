@@ -154,26 +154,26 @@
             @if($hasKundliChange)
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
                     <div class="px-6 py-4 border-b border-gray-100">
-                        <h3 class="text-base font-semibold text-gray-900">Kundli image pending approval</h3>
+                        <h3 class="text-base font-semibold text-gray-900">Biodata image pending approval</h3>
                     </div>
                     <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <p class="text-xs font-medium text-gray-500 mb-2">Current</p>
-                            <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                            <div class="rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
                                 @if($currentProfile->kundliImageUrl())
-                                    <img src="{{ $currentProfile->kundliImageUrl() }}" alt="Current kundli" class="w-full h-full object-cover">
+                                    <img src="{{ $currentProfile->kundliImageUrl() }}" alt="Current biodata" class="w-full h-auto object-contain">
                                 @else
-                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">No current kundli</div>
+                                    <div class="w-40 h-40 flex items-center justify-center text-gray-400 text-xs">No current biodata</div>
                                 @endif
                             </div>
                         </div>
                         <div>
                             <p class="text-xs font-medium text-gray-500 mb-2">Proposed</p>
-                            <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                            <div class="rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
                                 @if($currentProfile->pendingKundliImageUrl())
-                                    <img src="{{ $currentProfile->pendingKundliImageUrl() }}" alt="Pending kundli" class="w-full h-full object-cover">
+                                    <img src="{{ $currentProfile->pendingKundliImageUrl() }}" alt="Pending biodata" class="w-full h-auto object-contain">
                                 @else
-                                    <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">No pending kundli file</div>
+                                    <div class="w-40 h-40 flex items-center justify-center text-gray-400 text-xs">No pending biodata file</div>
                                 @endif
                             </div>
                         </div>
