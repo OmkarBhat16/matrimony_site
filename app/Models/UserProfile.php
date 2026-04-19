@@ -10,6 +10,38 @@ class UserProfile extends Model
     use HasFactory;
 
     public const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
+    public const BLOOD_GROUPS = [
+        'A +ve',
+        'A -ve',
+        'B +ve',
+        'B -ve',
+        'AB +ve',
+        'AB -ve',
+        'O +ve',
+        'O -ve',
+    ];
+
+    public const RAAS = [
+        'Mesh',
+        'Vrishabh',
+        'Mithun',
+        'Kark',
+        'Singh',
+        'Kanya',
+        'Tula',
+        'Vrishchik',
+        'Dhanu',
+        'Makar',
+        'Kumbh',
+        'Meen',
+    ];
+
+    public const GANN = [
+        'Dev',
+        'Manusha',
+        'Rakshas',
+    ];
+
     public const EDUCATION_TYPES = [
         'SSC',
         'HSC',

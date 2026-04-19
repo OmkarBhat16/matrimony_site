@@ -46,7 +46,7 @@
                     <div class="grid grid-cols-3 gap-4">
                         @foreach($images as $slot => $url)
                             <div class="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
-                                <img src="{{ $url }}" alt="Photo {{ $slot }}" class="w-full h-full object-cover">
+                                <img src="{{ $url }}" alt="Photo {{ $slot }}" class="w-full h-full object-contain">
                                 @if($slot === ($profile->primary_image ?? 1))
                                     <span class="absolute top-2 left-2 px-2 py-0.5 text-xs font-medium bg-pink-600 text-white rounded-full">Primary</span>
                                 @endif

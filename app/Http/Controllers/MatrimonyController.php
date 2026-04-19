@@ -12,17 +12,6 @@ class MatrimonyController extends Controller
 {
     private const FILTER_GENDERS = ['male', 'female'];
 
-    private const FILTER_BLOOD_GROUPS = [
-        'A +ve',
-        'A -ve',
-        'B +ve',
-        'B -ve',
-        'AB +ve',
-        'AB -ve',
-        'O +ve',
-        'O -ve',
-    ];
-
     private const FILTER_BLOOD_GROUP_VARIANTS = [
         'A +ve' => ['A +ve', 'A+ve', 'A+', 'A positive'],
         'A -ve' => ['A -ve', 'A-ve', 'A-', 'A negative'],
@@ -32,27 +21,6 @@ class MatrimonyController extends Controller
         'AB -ve' => ['AB -ve', 'AB-ve', 'AB-', 'AB negative'],
         'O +ve' => ['O +ve', 'O+ve', 'O+', 'O positive'],
         'O -ve' => ['O -ve', 'O-ve', 'O-', 'O negative', 'O -Ve'],
-    ];
-
-    private const FILTER_RAAS = [
-        'Mesh',
-        'Vrishabh',
-        'Mithun',
-        'Kark',
-        'Singh',
-        'Kanya',
-        'Tula',
-        'Vrishchik',
-        'Dhanu',
-        'Makar',
-        'Kumbh',
-        'Meen',
-    ];
-
-    private const FILTER_GANN = [
-        'Dev',
-        'Manusha',
-        'Rakshas',
     ];
 
     /**
@@ -80,10 +48,10 @@ class MatrimonyController extends Controller
         if ($showFilters) {
             $validator = Validator::make($request->query(), [
                 'gender' => ['nullable', Rule::in(self::FILTER_GENDERS)],
-                'blood_group' => ['nullable', Rule::in(self::FILTER_BLOOD_GROUPS)],
+                'blood_group' => ['nullable', Rule::in(UserProfile::BLOOD_GROUPS)],
                 'education_type' => ['nullable', Rule::in(UserProfile::EDUCATION_TYPES)],
-                'zodiac_sign__Raas' => ['nullable', Rule::in(self::FILTER_RAAS)],
-                'gann' => ['nullable', Rule::in(self::FILTER_GANN)],
+                'zodiac_sign__Raas' => ['nullable', Rule::in(UserProfile::RAAS)],
+                'gann' => ['nullable', Rule::in(UserProfile::GANN)],
                 'year_from' => ['nullable', 'integer', 'digits:4', 'min:1950', 'max:'.$currentYear],
                 'year_to' => ['nullable', 'integer', 'digits:4', 'min:1950', 'max:'.$currentYear],
             ]);
@@ -134,10 +102,10 @@ class MatrimonyController extends Controller
             'profiles' => $profiles,
             'filterOptions' => [
                 'genders' => self::FILTER_GENDERS,
-                'blood_groups' => self::FILTER_BLOOD_GROUPS,
+                'blood_groups' => UserProfile::BLOOD_GROUPS,
                 'education_types' => UserProfile::EDUCATION_TYPES,
-                'raas' => self::FILTER_RAAS,
-                'gann' => self::FILTER_GANN,
+                'raas' => UserProfile::RAAS,
+                'gann' => UserProfile::GANN,
                 'year_min' => 1950,
                 'year_max' => $currentYear,
             ],

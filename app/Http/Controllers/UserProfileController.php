@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class UserProfileController extends Controller
 {
@@ -93,15 +94,15 @@ class UserProfileController extends Controller
             'education' => ['nullable', 'string', 'max:255'],
             'occupation' => ['nullable', 'string', 'max:255'],
             'annual_income' => ['nullable', 'numeric'],
-            'blood_group' => ['nullable', 'string', 'max:20'],
+            'blood_group' => ['nullable', Rule::in(UserProfile::BLOOD_GROUPS)],
             'day_and_time_of_birth' => ['nullable', 'string', 'max:255'],
             'place_of_birth' => ['nullable', 'string', 'max:255'],
             'jaath' => ['nullable', 'string', 'max:255'],
             'height_cm__Oonchi' => ['nullable', 'string', 'max:255'],
             'skin_complexion__Rang' => ['nullable', 'string', 'max:255'],
-            'zodiac_sign__Raas' => ['nullable', 'string', 'max:255'],
+            'zodiac_sign__Raas' => ['nullable', Rule::in(UserProfile::RAAS)],
             'naadi' => ['nullable', 'string', 'max:255'],
-            'gann' => ['nullable', 'string', 'max:255'],
+            'gann' => ['nullable', Rule::in(UserProfile::GANN)],
             'devak' => ['nullable', 'string', 'max:255'],
             'kul_devata' => ['nullable', 'string', 'max:255'],
             'fathers_name' => ['nullable', 'string', 'max:255'],
@@ -245,15 +246,15 @@ class UserProfileController extends Controller
             'occupation' => ['nullable', 'string', 'max:255'],
             'annual_income' => ['nullable', 'numeric'],
             'date_of_birth' => ['nullable', 'date'],
-            'blood_group' => ['nullable', 'string', 'max:20'],
+            'blood_group' => ['nullable', Rule::in(UserProfile::BLOOD_GROUPS)],
             'day_and_time_of_birth' => ['nullable', 'string', 'max:255'],
             'place_of_birth' => ['nullable', 'string', 'max:255'],
             'jaath' => ['nullable', 'string', 'max:255'],
             'height_cm__Oonchi' => ['nullable', 'string', 'max:255'],
             'skin_complexion__Rang' => ['nullable', 'string', 'max:255'],
-            'zodiac_sign__Raas' => ['nullable', 'string', 'max:255'],
+            'zodiac_sign__Raas' => ['nullable', Rule::in(UserProfile::RAAS)],
             'naadi' => ['nullable', 'string', 'max:255'],
-            'gann' => ['nullable', 'string', 'max:255'],
+            'gann' => ['nullable', Rule::in(UserProfile::GANN)],
             'devak' => ['nullable', 'string', 'max:255'],
             'kul_devata' => ['nullable', 'string', 'max:255'],
             'fathers_name' => ['nullable', 'string', 'max:255'],
@@ -600,7 +601,11 @@ class UserProfileController extends Controller
     {
         $authUser = auth()->user();
 
-        if (! $authUser->isApproved() || ! $authUser->profile()->exists()) {
+        if (
+            ! $authUser->canAccessProfileManagementPanel()
+            && ! $authUser->canAccessContentManagement()
+            && (! $authUser->isApproved() || ! $authUser->profile()->exists())
+        ) {
             abort(
                 403,
                 'You must be approved and have a profile to view other profiles.',

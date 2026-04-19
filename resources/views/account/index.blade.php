@@ -26,7 +26,7 @@
                     <div class="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-200 shrink-0">
                         @if ($primaryUrl)
                             <img src="{{ $primaryUrl }}" alt="{{ $profile->full_name }}"
-                                 class="w-full h-full object-contain">
+                                 class="w-full h-full object-cover object-[50%_18%]">
                         @else
                             <div class="w-full h-full flex items-center justify-center bg-pink-100">
                                 <svg class="w-16 h-16 text-pink-400" fill="currentColor" viewBox="0 0 24 24">
@@ -86,7 +86,7 @@
                                         @if ($imgUrl)
                                             <img src="{{ $imgUrl }}"
                                                  alt="Photo {{ $slot }}"
-                                             class="w-full h-full object-cover">
+                                                 class="w-full h-full object-cover">
                                         @if (($profile->primary_image ?? 1) == $slot)
                                             <span class="absolute top-2 left-2 bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">
                                                 Primary

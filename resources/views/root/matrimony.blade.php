@@ -28,7 +28,7 @@
 
         {{-- Filters (only for approved users with profiles) --}}
         @if ($showFilters)
-            <form method="GET" action="{{ route('root.matrimony') }}" x-data="{ filtersCollapsed: false }" class="bg-white/95 backdrop-blur rounded-2xl shadow-lg border border-gray-100 mb-8 md:sticky md:top-20 z-30">
+            <form method="GET" action="{{ route('root.matrimony') }}" x-data="{ filtersCollapsed: false }" class="bg-white/95 backdrop-blur rounded-2xl shadow-lg border border-gray-100 mb-8">
                 <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <svg class="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

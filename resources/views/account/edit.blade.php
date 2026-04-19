@@ -123,7 +123,7 @@
                                         @if ($imgUrl)
                                             <img src="{{ $imgUrl }}"
                                                  alt="Photo {{ $slot }}"
-                                                 class="w-full h-full object-cover">
+                                                class="w-full h-full object-contain">
                                             @if (($profile->primary_image ?? 1) == $slot)
                                                 <span class="absolute top-2 left-2 bg-pink-600 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">
                                                     Primary

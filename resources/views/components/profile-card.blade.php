@@ -7,7 +7,7 @@
 
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition duration-300">
     <!-- Image Section -->
-    <div class="relative h-64 bg-gray-200 overflow-hidden">
+    <div class="relative aspect-[4/5] bg-gray-200 overflow-hidden">
         @if ($mode === 'redacted')
             <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-pink-100 to-pink-200">
                 <svg class="w-20 h-20 text-pink-300 opacity-50" fill="currentColor" viewBox="0 0 24 24">
@@ -34,7 +34,7 @@
                 @if ($primaryUrl)
                     <img src="{{ $primaryUrl }}"
                          alt="{{ $profile->full_name }}"
-                         class="w-full h-full object-cover">
+                         class="w-full h-full object-cover object-[50%_20%]">
                 @else
                     <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-pink-100 to-pink-200">
                         <svg class="w-20 h-20 text-pink-300 opacity-50" fill="currentColor" viewBox="0 0 24 24">

@@ -34,11 +34,11 @@
                     $allImgs     = $profile->allImageUrls();          // [slot => url]
                     $kundliUrl   = $profile->kundliImageUrl();
                 @endphp
-                <div class="relative flex flex-col sm:flex-row items-center sm:items-end -mt-16 sm:-mt-12 mb-8 gap-4">
-                    <div class="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-200 shrink-0">
+                <div class="relative flex flex-col sm:flex-row items-center sm:items-end -mt-16 sm:-mt-12 mb-8 gap-6 sm:gap-8">
+                    <div class="w-32 h-40 sm:w-36 sm:h-44 rounded-3xl border-4 border-white shadow-lg overflow-hidden bg-gray-200 shrink-0">
                         @if ($primaryUrl)
                             <img src="{{ $primaryUrl }}" alt="{{ $profile->full_name }}"
-                                 class="w-full h-full object-contain">
+                                 class="w-full h-full object-cover object-[50%_18%]">
                         @else
                             <div class="w-full h-full flex items-center justify-center bg-pink-100">
                                 <span class="text-4xl font-bold text-pink-500">

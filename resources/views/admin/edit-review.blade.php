@@ -128,7 +128,7 @@
                                         <p class="text-xs font-medium text-gray-500 mb-2">Current</p>
                                         <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
                                             @if($currentUrl)
-                                                <img src="{{ $currentUrl }}" alt="Current photo {{ $slot }}" class="w-full h-full object-cover">
+                                                <img src="{{ $currentUrl }}" alt="Current photo {{ $slot }}" class="w-full h-full object-contain">
                                             @else
                                                 <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">No current photo</div>
                                             @endif
@@ -138,7 +138,7 @@
                                         <p class="text-xs font-medium text-gray-500 mb-2">Proposed</p>
                                         <div class="aspect-square rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
                                             @if($pendingUrl)
-                                                <img src="{{ $pendingUrl }}" alt="Pending photo {{ $slot }}" class="w-full h-full object-cover">
+                                                <img src="{{ $pendingUrl }}" alt="Pending photo {{ $slot }}" class="w-full h-full object-contain">
                                             @else
                                                 <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">No pending file</div>
                                             @endif
