@@ -293,13 +293,16 @@
                 </div>
             </div>
 
-            {{-- ── NEW Vertical Photo stack ── --}}
-            @if (count($allImgs) > 1 || (count($allImgs) === 1 && !$primaryUrl))
+            {{-- ── Photo Gallery ── --}}
+            @if (!empty($allImgs))
                 <div class="border-t border-gray-100 bg-gray-50/50 px-6 sm:px-10 py-10">
                     <h3 class="lang-label text-2xl font-semibold text-gray-900 mb-8 text-center" data-en="Photo Gallery" data-mr="फोटो गॅलरी">Photo Gallery</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-10 justify-items-center max-w-[1040px] mx-auto">
                         @foreach ($allImgs as $slot => $url)
-                            <div class="relative w-full aspect-square rounded-2xl overflow-hidden shadow-md group border border-gray-200">
+                            <a href="{{ $url }}"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="relative block w-full max-w-[500px] aspect-[4/5] max-h-[500px] rounded-3xl overflow-hidden shadow-lg group border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2">
                                 <img src="{{ $url }}"
                                      alt="Photo {{ $slot }}"
                                      class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
@@ -308,8 +311,8 @@
                                         Primary Profile Photo
                                     </span>
                                 @endif
-                                <div class="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-2xl pointer-events-none"></div>
-                            </div>
+                                <div class="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-3xl pointer-events-none"></div>
+                            </a>
                         @endforeach
                     </div>
                 </div>
