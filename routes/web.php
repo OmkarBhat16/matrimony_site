@@ -1,17 +1,16 @@
 <?php
 
-use App\Http\Controllers\AdminUserController;
-use App\Http\Controllers\AdminFeaturedProfileController;
 use App\Http\Controllers\AdminContentController;
+use App\Http\Controllers\AdminFeaturedProfileController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\MatrimonyController;
+use App\Http\Controllers\UserProfileController;
 use App\Models\AboutPageContent;
 use App\Models\FeaturedProfile;
 use App\Models\HomePageContent;
-use App\Http\Controllers\UserProfileController;
-use App\Models\UserProfile;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 
@@ -61,6 +60,14 @@ Route::get('/profile-images/{userProfile}/{slot}', [
     ->whereNumber('slot')
     ->name('profile.images.show');
 
+Route::get('/assets/logo', function () {
+    $path = resource_path('assets/logo-removebg-preview (2).png');
+
+    abort_unless(is_file($path), 404);
+
+    return response()->file($path);
+})->name('assets.logo');
+
 Route::get('/profile-images/{userProfile}/kundli', [
     UserProfileController::class,
     'showKundliImage',
@@ -71,14 +78,14 @@ Route::get('/profile-images/{userProfile}/kundli/pending', [
     UserProfileController::class,
     'showPendingKundliImage',
 ])
-    ->middleware(['auth', 'admin'])
+    ->middleware(['auth'])
     ->name('profile.kundli.pending.show');
 
 Route::get('/profile-images/{userProfile}/{slot}/pending', [
     UserProfileController::class,
     'showPendingImage',
 ])
-    ->middleware(['auth', 'admin'])
+    ->middleware(['auth'])
     ->whereNumber('slot')
     ->name('profile.images.pending.show');
 

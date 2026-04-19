@@ -19,20 +19,24 @@
     <!-- Navbar -->
     <nav class="bg-white shadow-sm border-b border-gray-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <!-- Logo -->
-                <div class="flex items-center">
-                    <a href="{{ url('/') }}" class="text-xl font-bold text-pink-600 tracking-tight">
-                        Matrimony
-                    </a>
-                </div>
+	            <div class="flex justify-between h-16">
+	                <!-- Logo -->
+	                <div class="flex items-center">
+	                    <a href="{{ url('/') }}" class="flex items-center">
+	                        <img
+	                            src="{{ route('assets.logo') }}"
+	                            alt="Matrimony"
+	                            class="h-10 w-auto"
+	                        >
+	                    </a>
+	                </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden md:flex items-center gap-1">
                     <a href="{{ url('/') }}" class="px-3 py-2 rounded-lg text-sm font-medium {{ request()->is('/') ? 'text-pink-600 bg-pink-50' : 'text-gray-600 hover:text-pink-600 hover:bg-pink-50' }} transition">
                         Home
                     </a>
-                   
+
                     <a href="{{ route('root.about') }}" class="px-3 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('root.about') ? 'text-pink-600 bg-pink-50' : 'text-gray-600 hover:text-pink-600 hover:bg-pink-50' }} transition">
                         About Us
                     </a>

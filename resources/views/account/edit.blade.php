@@ -182,7 +182,7 @@
 
                 <div class="mb-8 p-6 bg-gray-50 rounded-2xl border border-gray-200">
                     <h2 class="text-lg font-semibold text-gray-900 mb-1">Biodata</h2>
-                    <p class="text-sm text-gray-500 mb-5">Upload or replace your biodata image here. It is required for a complete profile and changes go to admin review before going live.</p>
+                    <p class="text-sm text-gray-500 mb-5">Upload or replace your biodata image here. Changes go to admin review before going live.</p>
 
                     <div class="max-w-xs">
                         <form method="POST"

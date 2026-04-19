@@ -348,12 +348,12 @@ class UserProfileController extends Controller
             return redirect()->back()->withInput()->with('error', 'Profile submission failed. Please try again.');
         }
 
-            Log::info('User onboarding submitted for admin review.', [
-                'user_id' => $user->id,
-                'profile_id' => $profile->id,
-                'verification_step' => $user->fresh()->verification_step,
-                'image_count' => count($images),
-            ]);
+        Log::info('User onboarding submitted for admin review.', [
+            'user_id' => $user->id,
+            'profile_id' => $profile->id,
+            'verification_step' => $user->fresh()->verification_step,
+            'image_count' => count($images),
+        ]);
 
         return redirect('/pending-review');
     }
@@ -569,6 +569,8 @@ class UserProfileController extends Controller
      */
     public function showPendingKundliImage(UserProfile $userProfile)
     {
+        abort_unless($this->canViewPendingProfileAsset($userProfile), 403);
+
         $path = $userProfile->pendingKundliImagePath();
 
         if ($path !== null) {
@@ -584,6 +586,7 @@ class UserProfileController extends Controller
     public function showPendingImage(UserProfile $userProfile, int $slot)
     {
         abort_unless(in_array($slot, [1, 2, 3, 4], true), 404);
+        abort_unless($this->canViewPendingProfileAsset($userProfile), 403);
 
         $path = $userProfile->pendingImagePath($slot);
 
@@ -654,5 +657,13 @@ class UserProfileController extends Controller
 
             $this->images->storeCurrentImage($profile, $slot, $file);
         }
+    }
+
+    private function canViewPendingProfileAsset(UserProfile $profile): bool
+    {
+        $user = auth()->user();
+
+        return $user !== null
+            && ($user->canAccessProfileManagementPanel() || (int) $user->id === (int) $profile->user_id);
     }
 }
