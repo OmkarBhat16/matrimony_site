@@ -3,19 +3,19 @@
     <x-slot:header>User Administration</x-slot:header>
 
     @if (session('reset_password_plain'))
-        <div class="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 shadow-sm">
+        <div class="mb-6 rounded-xl border border-amber-300 bg-amber-50 px-5 py-4 shadow-sm">
             <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <p class="text-sm font-semibold text-amber-900">
+                    <p class="text-sm font-semibold text-amber-950">
                         Standard password pattern generated for {{ session('reset_password_user_name', 'this user') }}
                     </p>
-                    <p class="mt-1 text-sm text-amber-800">
+                    <p class="mt-1 text-sm text-amber-900">
                         <span class="font-mono font-semibold tracking-wider" id="reset-password-value">{{ session('reset_password_plain') }}</span>
                     </p>
                 </div>
                 <button type="button"
                         data-copy-reset-password
-                        class="inline-flex items-center justify-center rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700">
+                        class="inline-flex items-center justify-center rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2">
                     Copy Password
                 </button>
             </div>
@@ -190,9 +190,9 @@
                                             <form action="{{ route('admin.users.reset-password', $user) }}" method="POST">
                                                 @csrf
                                                 <button type="submit"
-                                                        class="text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 px-4 py-1.5 rounded-lg transition">
-                                                        Reset Password
-                                                    </button>
+                                                        class="text-sm font-semibold text-amber-950 bg-amber-200 border border-amber-300 hover:bg-amber-300 hover:border-amber-400 px-4 py-1.5 rounded-lg transition shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2">
+                                                    Reset Password
+                                                </button>
                                             </form>
                                             <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Delete this user account?');">
                                                 @csrf
@@ -338,7 +338,7 @@
                                             @else
                                                 <form action="{{ route('admin.users.reset-password', $user) }}" method="POST">
                                                     @csrf
-                                                    <button type="submit" class="text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 px-4 py-1.5 rounded-lg transition">
+                                                    <button type="submit" class="text-sm font-semibold text-amber-950 bg-amber-200 border border-amber-300 hover:bg-amber-300 hover:border-amber-400 px-4 py-1.5 rounded-lg transition shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2">
                                                         Reset Password
                                                     </button>
                                                 </form>

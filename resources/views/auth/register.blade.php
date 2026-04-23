@@ -97,7 +97,6 @@
                             <option value="" data-en="Select Gender" data-mr="लिंग निवडा">Select Gender</option>
                             <option value="male" data-en="Male" data-mr="पुरुष" {{ old('gender') === 'male' ? 'selected' : '' }}>Male</option>
                             <option value="female" data-en="Female" data-mr="स्त्री" {{ old('gender') === 'female' ? 'selected' : '' }}>Female</option>
-                            <option value="other" data-en="Other" data-mr="इतर" {{ old('gender') === 'other' ? 'selected' : '' }}>Other</option>
                         </select>
                     </div>
 

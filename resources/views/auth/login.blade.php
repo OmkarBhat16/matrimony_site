@@ -1,7 +1,20 @@
 <x-layout>
     <x-slot:title>Login - Matrimony</x-slot:title>
 
-    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-pink-50 to-purple-50">
+    @php
+        $supportName = config('support.admin_name');
+        $supportEmail = config('support.email');
+        $supportPhone = config('support.phone');
+        $supportWhatsapp = config('support.whatsapp');
+        $supportHours = config('support.hours');
+        $whatsappLink = 'https://wa.me/' . preg_replace('/\D+/', '', (string) $supportWhatsapp);
+    @endphp
+
+    <div
+        class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-pink-50 to-purple-50"
+        x-data="{ forgotPasswordOpen: false }"
+        @keydown.escape.window="forgotPasswordOpen = false"
+    >
         <div class="max-w-md w-full space-y-8">
             <!-- Header -->
             <div class="text-center">
@@ -82,6 +95,15 @@
                                 placeholder="••••••••"
                             >
                         </div>
+                        <div class="mt-2 flex justify-end">
+                            <button
+                                type="button"
+                                @click="forgotPasswordOpen = true"
+                                class="text-sm font-medium text-pink-600 hover:text-pink-500 transition"
+                            >
+                                Forgot Password?
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Remember Me -->
@@ -116,6 +138,110 @@
                     Register now
                 </a>
             </p>
+        </div>
+
+        <!-- Forgot Password Modal -->
+        <div
+            x-cloak
+            x-show="forgotPasswordOpen"
+            x-transition.opacity.duration.200ms
+            class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6"
+            aria-labelledby="forgot-password-title"
+            role="dialog"
+            aria-modal="true"
+        >
+            <div
+                class="absolute inset-0 bg-gray-950/60 backdrop-blur-sm"
+                @click="forgotPasswordOpen = false"
+            ></div>
+
+            <div
+                x-transition.scale.origin.center.duration.200ms
+                class="relative w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-black/5"
+            >
+                <div class="bg-gradient-to-r from-pink-600 to-purple-600 px-6 py-5 text-white">
+                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-pink-100">
+                        Need help signing in?
+                    </p>
+                    <h3 id="forgot-password-title" class="mt-2 text-2xl font-bold">
+                        Forgot Password
+                    </h3>
+                    <p class="mt-2 text-sm text-pink-50">
+                        Contact {{ $supportName }} to reset your password securely.
+                    </p>
+                </div>
+
+                <div class="px-6 py-6 space-y-4">
+                    <div class="rounded-2xl border border-pink-100 bg-pink-50/80 p-4">
+                        <p class="text-sm font-semibold text-gray-900">
+                            Contact Details
+                        </p>
+                        <dl class="mt-3 space-y-3 text-sm">
+                            <div class="flex items-start justify-between gap-4">
+                                <dt class="text-gray-500">Admin</dt>
+                                <dd class="text-right font-medium text-gray-900">{{ $supportName }}</dd>
+                            </div>
+                            <div class="flex items-start justify-between gap-4">
+                                <dt class="text-gray-500">Email</dt>
+                                <dd class="text-right">
+                                    <a href="mailto:{{ $supportEmail }}" class="font-medium text-pink-600 hover:text-pink-500">
+                                        {{ $supportEmail }}
+                                    </a>
+                                </dd>
+                            </div>
+                            <div class="flex items-start justify-between gap-4">
+                                <dt class="text-gray-500">Phone</dt>
+                                <dd class="text-right">
+                                    <a href="tel:{{ preg_replace('/\s+/', '', (string) $supportPhone) }}" class="font-medium text-pink-600 hover:text-pink-500">
+                                        {{ $supportPhone }}
+                                    </a>
+                                </dd>
+                            </div>
+                            <div class="flex items-start justify-between gap-4">
+                                <dt class="text-gray-500">WhatsApp</dt>
+                                <dd class="text-right">
+                                    <a href="{{ $whatsappLink }}" target="_blank" rel="noopener noreferrer" class="font-medium text-pink-600 hover:text-pink-500">
+                                        {{ $supportWhatsapp }}
+                                    </a>
+                                </dd>
+                            </div>
+                            <div class="flex items-start justify-between gap-4">
+                                <dt class="text-gray-500">Working Hours</dt>
+                                <dd class="text-right font-medium text-gray-900">{{ $supportHours }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+
+                    <p class="text-sm text-gray-600">
+                        Share your registered phone number when you contact admin, and the team will help you verify and reset access.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <a
+                            href="mailto:{{ $supportEmail }}"
+                            class="inline-flex justify-center items-center rounded-lg bg-pink-600 px-4 py-3 text-sm font-medium text-white hover:bg-pink-700 transition"
+                        >
+                            Email Admin
+                        </a>
+                        <a
+                            href="{{ $whatsappLink }}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex justify-center items-center rounded-lg border border-pink-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-pink-50 transition"
+                        >
+                            WhatsApp Admin
+                        </a>
+                    </div>
+
+                    <button
+                        type="button"
+                        @click="forgotPasswordOpen = false"
+                        class="w-full rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition"
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </x-layout>

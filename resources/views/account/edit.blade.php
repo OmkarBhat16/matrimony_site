@@ -105,7 +105,7 @@
 
                 <div class="mb-8 p-6 bg-gray-50 rounded-2xl border border-gray-200">
                     <h2 class="text-lg font-semibold text-gray-900 mb-1">Account Photos</h2>
-                    <p class="text-sm text-gray-500 mb-5">Add missing photos here. Replacing an existing photo will go to admin review. Changing the primary photo stays immediate.</p>
+                    <p class="text-sm text-gray-500 mb-5">Add missing photos here. Replacing an existing photo will go to admin review. Changing the primary photo stays immediate. Each photo can be up to 10 MB.</p>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                         @foreach ([1, 2, 3, 4] as $slot)
@@ -182,7 +182,7 @@
 
                 <div class="mb-8 p-6 bg-gray-50 rounded-2xl border border-gray-200">
                     <h2 class="text-lg font-semibold text-gray-900 mb-1">Biodata</h2>
-                    <p class="text-sm text-gray-500 mb-5">Upload or replace your biodata image here. Changes go to admin review before going live.</p>
+                    <p class="text-sm text-gray-500 mb-5">Upload or replace your biodata image here. Changes go to admin review before going live. The biodata image can be up to 10 MB.</p>
 
                     <div class="max-w-xs">
                         <form method="POST"

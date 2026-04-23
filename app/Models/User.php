@@ -58,7 +58,7 @@ class User extends Authenticatable
     {
         static::creating(function (self $user): void {
             if (blank($user->public_id)) {
-                $user->public_id = static::generatePublicId($user->gender ?? 'other');
+                $user->public_id = static::generatePublicId($user->gender ?? 'male');
             }
         });
     }
@@ -72,7 +72,7 @@ class User extends Authenticatable
 
     public static function generatePublicId(string $gender): string
     {
-        $gender = in_array($gender, ['male', 'female', 'other'], true) ? $gender : 'other';
+        $gender = in_array($gender, ['male', 'female'], true) ? $gender : 'male';
 
         return DB::transaction(function () use ($gender): string {
             $counter = DB::table('user_id_counters')
@@ -106,7 +106,6 @@ class User extends Authenticatable
             $prefix = match ($gender) {
                 'female' => 'F',
                 'male' => 'M',
-                default => 'O',
             };
 
             return sprintf('%s-%05d', $prefix, $nextSequence);

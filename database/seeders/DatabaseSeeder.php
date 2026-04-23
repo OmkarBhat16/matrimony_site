@@ -156,7 +156,7 @@ class DatabaseSeeder extends Seeder
         }
 
         $user->forceFill([
-            'public_id' => User::generatePublicId($user->gender ?? 'other'),
+            'public_id' => User::generatePublicId($user->gender ?? 'male'),
         ])->saveQuietly();
     }
 }

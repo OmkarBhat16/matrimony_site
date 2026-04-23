@@ -122,7 +122,7 @@
                         <!-- Photo Upload -->
                         <div class="mt-8 pt-6 border-t border-gray-200">
                             <h3 class="lang-label text-base font-semibold text-gray-900 mb-1" data-en="Profile Photos" data-mr="प्रोफाइल फोटो">Profile Photos</h3>
-                            <p class="lang-label text-sm text-gray-500 mb-4" data-en="Upload up to 4 photos. At least one photo is required. The one you mark as primary will be shown on your card." data-mr="जास्तीत जास्त 4 फोटो अपलोड करा. किमान एक फोटो आवश्यक आहे. तुम्ही प्राथमिक म्हणून निवडलेला फोटो तुमच्या कार्डवर दिसेल.">Upload up to 4 photos. At least one photo is required. The one you mark as primary will be shown on your card.</p>
+                            <p class="lang-label text-sm text-gray-500 mb-4" data-en="Upload up to 4 photos. At least one photo is required. Each photo can be up to 10 MB. The one you mark as primary will be shown on your card." data-mr="जास्तीत जास्त 4 फोटो अपलोड करा. किमान एक फोटो आवश्यक आहे. प्रत्येक फोटो 10 MB पर्यंत असू शकतो. तुम्ही प्राथमिक म्हणून निवडलेला फोटो तुमच्या कार्डवर दिसेल.">Upload up to 4 photos. At least one photo is required. Each photo can be up to 10 MB. The one you mark as primary will be shown on your card.</p>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="photo-upload-grid">
                                 @foreach ([1, 2, 3, 4] as $slot)

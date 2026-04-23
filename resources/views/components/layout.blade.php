@@ -185,8 +185,8 @@
                 <div>
                     <h4 class="text-sm font-semibold uppercase tracking-wider text-gray-300 mb-3">Contact</h4>
                     <ul class="space-y-2 text-sm text-gray-400">
-                        <li>support@matrimony.com</li>
-                        <li>+91 98765 43210</li>
+                        <li><a href="mailto:{{ config('support.email') }}" class="hover:text-white transition">{{ config('support.email') }}</a></li>
+                        <li><a href="tel:{{ preg_replace('/\s+/', '', (string) config('support.phone')) }}" class="hover:text-white transition">{{ config('support.phone') }}</a></li>
                     </ul>
                 </div>
             </div>

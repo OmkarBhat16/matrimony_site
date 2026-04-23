@@ -14,6 +14,8 @@ use Illuminate\Validation\Rule;
 
 class UserProfileController extends Controller
 {
+    private const IMAGE_MAX_KB = 10240;
+
     public function __construct(private ProfileImageManager $images) {}
 
     /**
@@ -274,14 +276,14 @@ class UserProfileController extends Controller
             'native_address' => ['nullable', 'string'],
             'village_farm' => ['nullable', 'string', 'max:255'],
             'naathe_relationships' => ['nullable', 'string'],
-            'kundli' => ['nullable', 'file', 'image', 'max:5120'],
-            // Files: up to 4, at least 1, each max 5 MB
+            'kundli' => ['nullable', 'file', 'image', 'max:'.self::IMAGE_MAX_KB],
+            // Files: up to 4, at least 1, each max 10 MB
             'images' => ['required', 'array', 'min:1', 'max:4'],
             'images.*' => [
                 'required',
                 'file',
                 'image',
-                'max:5120',
+                'max:'.self::IMAGE_MAX_KB,
             ],
             'primary_image' => ['required', 'integer', 'in:1,2,3,4'],
         ], [
@@ -289,7 +291,7 @@ class UserProfileController extends Controller
             'images.2.uploaded' => 'The second image failed to upload. It might be too large.',
             'images.3.uploaded' => 'The third image failed to upload. It might be too large.',
             'images.4.uploaded' => 'The fourth image failed to upload. It might be too large.',
-            'images.*.max' => 'Each image must not be greater than 5MB.',
+            'images.*.max' => 'Each image must not be greater than 10MB.',
             'images.*.file' => 'Each upload must be a valid file.',
         ]);
 
@@ -423,15 +425,17 @@ class UserProfileController extends Controller
             'images.*' => [
                 'required',
                 'file',
-                'max:5120',
+                'image',
+                'max:'.self::IMAGE_MAX_KB,
             ],
         ], [
             'images.1.uploaded' => 'The first image failed to upload. It might be too large.',
             'images.2.uploaded' => 'The second image failed to upload. It might be too large.',
             'images.3.uploaded' => 'The third image failed to upload. It might be too large.',
             'images.4.uploaded' => 'The fourth image failed to upload. It might be too large.',
-            'images.*.max' => 'Each image must not be greater than 5MB.',
+            'images.*.max' => 'Each image must not be greater than 10MB.',
             'images.*.file' => 'Each upload must be a valid file.',
+            'images.*.image' => 'Each upload must be an image.',
         ]);
 
         $user = auth()->user();
@@ -495,11 +499,11 @@ class UserProfileController extends Controller
     public function uploadKundli(Request $request)
     {
         $request->validate([
-            'kundli' => ['required', 'file', 'image', 'max:5120'],
+            'kundli' => ['required', 'file', 'image', 'max:'.self::IMAGE_MAX_KB],
         ], [
             'kundli.file' => 'The kundli image must be a valid file.',
             'kundli.image' => 'The kundli image must be an image.',
-            'kundli.max' => 'The kundli image must not be greater than 5MB.',
+            'kundli.max' => 'The kundli image must not be greater than 10MB.',
         ]);
 
         $user = auth()->user();
