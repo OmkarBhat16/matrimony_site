@@ -68,7 +68,6 @@
 
         $siblingsRows = $parseRelationRows($values->siblings ?? '', 'Sibling');
         $relativeRows = $parseRelationRows($values->uncles ?? '', 'Relative');
-        $naatheValue = old('naathe_relationships', $formatJsonField($values->naathe_relationships ?? ''));
     @endphp
 
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -298,12 +297,40 @@
                     <section>
                         <h2 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">Personal Information</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                            @foreach(['full_name', 'navras_naav', 'marital_status', 'height_cm__Oonchi', 'skin_complexion__Rang', 'blood_group'] as $field)
-                                <div>
-                                    <label for="{{ $field }}" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields[$field] }}</label>
-                                    <input type="text" id="{{ $field }}" name="{{ $field }}" value="{{ old($field, $values->{$field} ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
-                                </div>
-                            @endforeach
+                            <div>
+                                <label for="full_name" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['full_name'] }}</label>
+                                <input type="text" id="full_name" name="full_name" value="{{ old('full_name', $values->full_name ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
+                            </div>
+                            <div>
+                                <label for="navras_naav" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['navras_naav'] }}</label>
+                                <input type="text" id="navras_naav" name="navras_naav" value="{{ old('navras_naav', $values->navras_naav ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
+                            </div>
+                            <div>
+                                <label for="marital_status" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['marital_status'] }}</label>
+                                <select id="marital_status" name="marital_status" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition bg-white">
+                                    <option value="" @selected(old('marital_status', $values->marital_status ?? '') === '')>Select status</option>
+                                    <option value="Single" @selected(old('marital_status', $values->marital_status ?? '') === 'Single')>Single</option>
+                                    <option value="Divorced" @selected(old('marital_status', $values->marital_status ?? '') === 'Divorced')>Divorced</option>
+                                    <option value="Widowed" @selected(old('marital_status', $values->marital_status ?? '') === 'Widowed')>Widowed</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="height_cm__Oonchi" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['height_cm__Oonchi'] }}</label>
+                                <input type="text" id="height_cm__Oonchi" name="height_cm__Oonchi" value="{{ old('height_cm__Oonchi', $values->height_cm__Oonchi ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
+                            </div>
+                            <div>
+                                <label for="skin_complexion__Rang" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['skin_complexion__Rang'] }}</label>
+                                <input type="text" id="skin_complexion__Rang" name="skin_complexion__Rang" value="{{ old('skin_complexion__Rang', $values->skin_complexion__Rang ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
+                            </div>
+                            <div>
+                                <label for="blood_group" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['blood_group'] }}</label>
+                                <select id="blood_group" name="blood_group" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition bg-white">
+                                    <option value="" @selected(old('blood_group', $values->blood_group ?? '') === '')>Select blood group</option>
+                                    @foreach(\App\Models\UserProfile::BLOOD_GROUPS as $bloodGroup)
+                                        <option value="{{ $bloodGroup }}" @selected(old('blood_group', $values->blood_group ?? '') === $bloodGroup)>{{ $bloodGroup }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                     </section>
 
@@ -311,12 +338,48 @@
                     <section>
                         <h2 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">Horoscope & Community</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                            @foreach(['day_and_time_of_birth', 'place_of_birth', 'jaath', 'zodiac_sign__Raas', 'naadi', 'gann', 'devak', 'kul_devata'] as $field)
-                                <div>
-                                    <label for="{{ $field }}" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields[$field] }}</label>
-                                    <input type="text" id="{{ $field }}" name="{{ $field }}" value="{{ old($field, $values->{$field} ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
-                                </div>
-                            @endforeach
+                            <div>
+                                <label for="day_and_time_of_birth" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['day_and_time_of_birth'] }}</label>
+                                <input type="text" id="day_and_time_of_birth" name="day_and_time_of_birth" value="{{ old('day_and_time_of_birth', $values->day_and_time_of_birth ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
+                            </div>
+                            <div>
+                                <label for="place_of_birth" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['place_of_birth'] }}</label>
+                                <input type="text" id="place_of_birth" name="place_of_birth" value="{{ old('place_of_birth', $values->place_of_birth ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
+                            </div>
+                            <div>
+                                <label for="jaath" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['jaath'] }}</label>
+                                <input type="text" id="jaath" name="jaath" value="{{ old('jaath', $values->jaath ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
+                            </div>
+                            <div>
+                                <label for="zodiac_sign__Raas" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['zodiac_sign__Raas'] }}</label>
+                                <select id="zodiac_sign__Raas" name="zodiac_sign__Raas" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition bg-white">
+                                    <option value="" @selected(old('zodiac_sign__Raas', $values->zodiac_sign__Raas ?? '') === '')>Select zodiac sign</option>
+                                    @foreach(\App\Models\UserProfile::RAAS as $raas)
+                                        <option value="{{ $raas }}" @selected(old('zodiac_sign__Raas', $values->zodiac_sign__Raas ?? '') === $raas)>{{ $raas }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label for="naadi" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['naadi'] }}</label>
+                                <input type="text" id="naadi" name="naadi" value="{{ old('naadi', $values->naadi ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
+                            </div>
+                            <div>
+                                <label for="gann" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['gann'] }}</label>
+                                <select id="gann" name="gann" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition bg-white">
+                                    <option value="" @selected(old('gann', $values->gann ?? '') === '')>Select gann</option>
+                                    @foreach(\App\Models\UserProfile::GANN as $gann)
+                                        <option value="{{ $gann }}" @selected(old('gann', $values->gann ?? '') === $gann)>{{ $gann }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label for="devak" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['devak'] }}</label>
+                                <input type="text" id="devak" name="devak" value="{{ old('devak', $values->devak ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
+                            </div>
+                            <div>
+                                <label for="kul_devata" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['kul_devata'] }}</label>
+                                <input type="text" id="kul_devata" name="kul_devata" value="{{ old('kul_devata', $values->kul_devata ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
+                            </div>
                         </div>
                     </section>
 
@@ -430,10 +493,6 @@
                             </div>
                         </div>
 
-                    <div class="mt-6">
-                        <label for="naathe_relationships" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['naathe_relationships'] }}</label>
-                        <textarea id="naathe_relationships" name="naathe_relationships" rows="3" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">{{ $naatheValue }}</textarea>
-                    </div>
                     </section>
 
                     {{-- Address --}}

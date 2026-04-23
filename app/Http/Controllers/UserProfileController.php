@@ -109,7 +109,7 @@ class UserProfileController extends Controller
             'kul_devata' => ['nullable', 'string', 'max:255'],
             'fathers_name' => ['nullable', 'string', 'max:255'],
             'mothers_name' => ['nullable', 'string', 'max:255'],
-            'marital_status' => ['nullable', 'string', 'max:255'],
+            'marital_status' => ['nullable', Rule::in(['Single', 'Divorced', 'Widowed'])],
             'siblings' => [
                 'nullable',
                 'string',
@@ -261,7 +261,7 @@ class UserProfileController extends Controller
             'kul_devata' => ['nullable', 'string', 'max:255'],
             'fathers_name' => ['nullable', 'string', 'max:255'],
             'mothers_name' => ['nullable', 'string', 'max:255'],
-            'marital_status' => ['nullable', 'string', 'max:255'],
+            'marital_status' => ['nullable', Rule::in(['Single', 'Divorced', 'Widowed'])],
             'siblings' => [
                 'nullable',
                 'string',

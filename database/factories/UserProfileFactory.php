@@ -60,7 +60,6 @@ class UserProfileFactory extends Factory
             'mothers_name' => $this->faker->name('female'),
             'marital_status' => $this->faker->randomElement([
                 'single',
-                'married',
                 'divorced',
                 'widowed',
             ]),

@@ -36,8 +36,7 @@ class EditUserProfile extends Model
         'uncles' => 'Uncles',
         'address' => 'Residential Address',
         'native_address' => 'Native Address',
-        'village_farm' => 'Village Farm',
-        'naathe_relationships' => 'Naathe Relationships',
+        'village_farm' => 'Properties & Assets',
     ];
 
     public const EDITABLE_FIELDS = [
@@ -65,8 +64,7 @@ class EditUserProfile extends Model
         'uncles' => 'Uncles',
         'address' => 'Residential Address',
         'native_address' => 'Native Address',
-        'village_farm' => 'Village Farm',
-        'naathe_relationships' => 'Naathe Relationships',
+        'village_farm' => 'Properties & Assets',
     ];
 
     protected $fillable = [

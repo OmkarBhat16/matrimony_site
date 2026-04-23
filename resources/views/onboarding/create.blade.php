@@ -96,7 +96,6 @@
                                     class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 @error('marital_status') border-red-500 @enderror">
                                     <option value="" class="lang-label" data-en="Select Status" data-mr="स्थिती निवडा">Select Status</option>
                                     <option value="Single" class="lang-label" data-en="Single" data-mr="अविवाहित" {{ old('marital_status') == 'Single' ? 'selected' : '' }}>Single</option>
-                                    <option value="Married" class="lang-label" data-en="Married" data-mr="विवाहित" {{ old('marital_status') == 'Married' ? 'selected' : '' }}>Married</option>
                                     <option value="Divorced" class="lang-label" data-en="Divorced" data-mr="घटस्फोटित" {{ old('marital_status') == 'Divorced' ? 'selected' : '' }}>Divorced</option>
                                     <option value="Widowed" class="lang-label" data-en="Widowed" data-mr="विधुर/विधवा" {{ old('marital_status') == 'Widowed' ? 'selected' : '' }}>Widowed</option>
                                 </select>
@@ -374,8 +373,6 @@
                                 <div id="relatives-list" class="space-y-3"></div>
 
                                 <input type="hidden" id="uncles" name="uncles" value="{{ old('uncles') }}">
-                                <input type="hidden" name="naathe_relationships" value="">
-
                                 <p class="lang-label mt-2 text-xs text-gray-500" data-en="Use the relation dropdown and add details in the text box." data-mr="नात्याचा प्रकार निवडा आणि उजवीकडे तपशील लिहा.">Use the relation dropdown and add details in the text box.</p>
                             </div>
 
@@ -397,7 +394,7 @@
 
                             <div>
                                 <label for="village_farm" class="block text-sm font-medium text-gray-700 mb-1">
-                                    <span class="lang-label" data-en="Village Farm" data-mr="मालमत्ता">Village Farm</span>
+                                    <span class="lang-label" data-en="Properties & Assets" data-mr="मालमत्ता">Properties & Assets</span>
                                 </label>
                                 <input type="text" id="village_farm" name="village_farm" value="{{ old('village_farm') }}"
                                     class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500">

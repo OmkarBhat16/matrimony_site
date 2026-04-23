@@ -152,25 +152,13 @@
                             return $item['relation'] !== '' || $item['value'] !== '';
                         })->values();
 
-                        if ($relativeEntries->isEmpty()) {
-                            $relativeEntries = collect(json_decode($profile->naathe_relationships ?? '', true))->filter(function ($item) {
-                                return is_array($item);
-                            })->map(function ($item) {
-                                return [
-                                    'relation' => trim((string) ($item['relation'] ?? '')),
-                                    'value' => trim((string) ($item['value'] ?? '')),
-                                ];
-                            })->filter(function ($item) {
-                                return $item['relation'] !== '' || $item['value'] !== '';
-                            })->values();
-                        }
                     @endphp
                     @foreach([
                         'Siblings' => $profile->siblings,
                         'Relatives' => null,
                         'Residential Address' => $profile->address,
                         'Native Address' => $profile->native_address,
-                        'Village Farm' => $profile->village_farm,
+                        'Properties & Assets' => $profile->village_farm,
                     ] as $label => $value)
                         <div>
                             <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $label }}</dt>

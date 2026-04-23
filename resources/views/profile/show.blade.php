@@ -221,9 +221,6 @@
                                 })->filter()->implode("\n");
 
                                 $relativesList = json_decode($profile->uncles ?? '', true);
-                                if (!is_array($relativesList)) {
-                                    $relativesList = json_decode($profile->naathe_relationships ?? '', true);
-                                }
                                 $relativeEntries = collect(is_array($relativesList) ? $relativesList : [])->map(function ($item) {
                                     $relation = trim((string) ($item['relation'] ?? ''));
                                     $value = trim((string) ($item['value'] ?? ''));
@@ -284,7 +281,7 @@
                                     <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ $profile->native_address ?? 'Not provided' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Village Farm" data-mr="मालमत्ता">Village Farm</dt>
+                                    <dt class="lang-label text-sm font-medium text-gray-500" data-en="Properties & Assets" data-mr="मालमत्ता">Properties & Assets</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $profile->village_farm ?? 'Not provided' }}</dd>
                                 </div>
                             </dl>
