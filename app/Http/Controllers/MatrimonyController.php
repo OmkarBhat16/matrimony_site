@@ -11,6 +11,7 @@ use Illuminate\Validation\Rule;
 class MatrimonyController extends Controller
 {
     private const FILTER_GENDERS = ['male', 'female'];
+    private const FILTER_GENDER_ALL = 'all';
 
     private const FILTER_BLOOD_GROUP_VARIANTS = [
         'A +ve' => ['A +ve', 'A+ve', 'A+', 'A positive'],
@@ -29,8 +30,8 @@ class MatrimonyController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-
         $showFilters = $user && $user->isApproved();
+        $hasExplicitGenderFilter = array_key_exists('gender', $request->query());
 
         $query = UserProfile::query()->with('user')->whereHas(
             'user',
@@ -47,7 +48,7 @@ class MatrimonyController extends Controller
 
         if ($showFilters) {
             $validator = Validator::make($request->query(), [
-                'gender' => ['nullable', Rule::in(self::FILTER_GENDERS)],
+                'gender' => ['nullable', Rule::in([...self::FILTER_GENDERS, self::FILTER_GENDER_ALL])],
                 'blood_group' => ['nullable', Rule::in(UserProfile::BLOOD_GROUPS)],
                 'education_type' => ['nullable', Rule::in(UserProfile::EDUCATION_TYPES)],
                 'zodiac_sign__Raas' => ['nullable', Rule::in(UserProfile::RAAS)],
@@ -67,7 +68,13 @@ class MatrimonyController extends Controller
 
             $validated = $validator->validate();
 
-            if (! empty($validated['gender'])) {
+            if ($hasExplicitGenderFilter) {
+                $validated['gender'] = $validated['gender'] ?? self::FILTER_GENDER_ALL;
+            } elseif ($this->shouldApplyDefaultGenderFilter($user, $showFilters)) {
+                $validated['gender'] = $this->defaultGenderFor($user);
+            }
+
+            if (! empty($validated['gender']) && $validated['gender'] !== self::FILTER_GENDER_ALL) {
                 $query->where('gender', $validated['gender']);
             }
 
@@ -101,7 +108,7 @@ class MatrimonyController extends Controller
         return view('root.matrimony', [
             'profiles' => $profiles,
             'filterOptions' => [
-                'genders' => self::FILTER_GENDERS,
+                'genders' => [self::FILTER_GENDER_ALL, ...self::FILTER_GENDERS],
                 'blood_groups' => UserProfile::BLOOD_GROUPS,
                 'education_types' => UserProfile::EDUCATION_TYPES,
                 'raas' => UserProfile::RAAS,
@@ -110,6 +117,25 @@ class MatrimonyController extends Controller
                 'year_max' => $currentYear,
             ],
             'filters' => $validated,
+            'hasActiveFilters' => collect($validated)->contains(
+                fn ($value) => ! is_null($value) && $value !== '',
+            ),
         ]);
+    }
+
+    private function shouldApplyDefaultGenderFilter($user, bool $showFilters): bool
+    {
+        return $showFilters
+            && $user?->isUser()
+            && in_array($user->gender, self::FILTER_GENDERS, true);
+    }
+
+    private function defaultGenderFor($user): ?string
+    {
+        return match ($user?->gender) {
+            'male' => 'female',
+            'female' => 'male',
+            default => null,
+        };
     }
 }
