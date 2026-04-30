@@ -14,6 +14,7 @@ class EditUserProfile extends Model
     public const DIFFABLE_FIELDS = [
         'full_name' => 'Full Name',
         'navras_naav' => 'Navras Naav',
+        'date_of_birth' => 'Date of Birth',
         'blood_group' => 'Blood Group',
         'education_type' => 'Education Type',
         'education' => 'Education',
@@ -42,6 +43,7 @@ class EditUserProfile extends Model
     public const EDITABLE_FIELDS = [
         'full_name' => 'Full Name',
         'navras_naav' => 'Navras Naav',
+        'date_of_birth' => 'Date of Birth',
         'blood_group' => 'Blood Group',
         'education_type' => 'Education Type',
         'education' => 'Education',
@@ -122,8 +124,8 @@ class EditUserProfile extends Model
         $changes = [];
 
         foreach (self::DIFFABLE_FIELDS as $field => $label) {
-            $oldVal = (string) ($currentProfile->{$field} ?? '');
-            $newVal = (string) ($this->{$field} ?? '');
+            $oldVal = $this->formatDiffValue($field, $currentProfile->{$field} ?? null);
+            $newVal = $this->formatDiffValue($field, $this->{$field} ?? null);
 
             if ($oldVal !== $newVal) {
                 $changes[$field] = [
@@ -135,6 +137,21 @@ class EditUserProfile extends Model
         }
 
         return $changes;
+    }
+
+    private function formatDiffValue(string $field, mixed $value): string
+    {
+        if ($field === 'date_of_birth') {
+            if (blank($value)) {
+                return '—';
+            }
+
+            return \Illuminate\Support\Carbon::parse($value)->format('d-m-Y');
+        }
+
+        $stringValue = is_null($value) ? '' : (string) $value;
+
+        return $stringValue !== '' ? $stringValue : '—';
     }
 
     /**

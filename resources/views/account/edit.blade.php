@@ -306,6 +306,22 @@
                                 <input type="text" id="navras_naav" name="navras_naav" value="{{ old('navras_naav', $values->navras_naav ?? '') }}" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition">
                             </div>
                             <div>
+                                <label for="date_of_birth" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['date_of_birth'] }}</label>
+                                <input
+                                    type="text"
+                                    id="date_of_birth"
+                                    name="date_of_birth"
+                                    value="{{ old('date_of_birth', optional($values->date_of_birth ?? null)->format('d-m-Y')) }}"
+                                    placeholder="dd-mm-yyyy"
+                                    inputmode="numeric"
+                                    autocomplete="bday"
+                                    pattern="[0-9]{2}-[0-9]{2}-[0-9]{4}"
+                                    data-datepicker="date-of-birth"
+                                    class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition"
+                                >
+                                <p class="mt-1 text-xs text-gray-500">Pick a date or type it as dd-mm-yyyy.</p>
+                            </div>
+                            <div>
                                 <label for="marital_status" class="block text-sm font-medium text-gray-700 mb-1">{{ $fields['marital_status'] }}</label>
                                 <select id="marital_status" name="marital_status" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-sm transition bg-white">
                                     <option value="" @selected(old('marital_status', $values->marital_status ?? '') === '')>Select status</option>

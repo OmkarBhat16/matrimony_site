@@ -6,6 +6,7 @@ use App\Models\EditUserProfile;
 use App\Models\User;
 use App\Models\UserProfile;
 use App\Services\ProfileImageManager;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -92,6 +93,7 @@ class UserProfileController extends Controller
         $validated = $request->validate([
             'full_name' => ['nullable', 'string', 'max:255'],
             'navras_naav' => ['nullable', 'string', 'max:255'],
+            'date_of_birth' => ['nullable', 'date_format:d-m-Y'],
             'education_type' => ['nullable', 'in:'.implode(',', UserProfile::EDUCATION_TYPES)],
             'education' => ['nullable', 'string', 'max:255'],
             'occupation' => ['nullable', 'string', 'max:255'],
@@ -128,6 +130,10 @@ class UserProfileController extends Controller
 
         $user = auth()->user();
         $profile = $user->profile;
+
+        if (! empty($validated['date_of_birth'])) {
+            $validated['date_of_birth'] = Carbon::createFromFormat('d-m-Y', $validated['date_of_birth'])->toDateString();
+        }
 
         Log::debug('User account update submission received.', [
             'user_id' => $user->id,
@@ -247,7 +253,7 @@ class UserProfileController extends Controller
             'education' => ['nullable', 'string', 'max:255'],
             'occupation' => ['nullable', 'string', 'max:255'],
             'annual_income' => ['nullable', 'numeric'],
-            'date_of_birth' => ['nullable', 'date'],
+            'date_of_birth' => ['nullable', 'date_format:d-m-Y'],
             'blood_group' => ['nullable', Rule::in(UserProfile::BLOOD_GROUPS)],
             'day_and_time_of_birth' => ['nullable', 'string', 'max:255'],
             'place_of_birth' => ['nullable', 'string', 'max:255'],
@@ -296,6 +302,9 @@ class UserProfileController extends Controller
         ]);
 
         $user = Auth::user();
+        if (! empty($validated['date_of_birth'])) {
+            $validated['date_of_birth'] = Carbon::createFromFormat('d-m-Y', $validated['date_of_birth'])->toDateString();
+        }
         $validated['user_id'] = $user->id;
         $validated['gender'] = $user->gender;
 

@@ -84,8 +84,19 @@
                                 <label for="date_of_birth" class="block text-sm font-medium text-gray-700 mb-1">
                                     <span class="lang-label" data-en="Date of Birth" data-mr="जन्मतारीख">Date of Birth</span>
                                 </label>
-                                <input type="date" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth') }}"
-                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 @error('date_of_birth') border-red-500 @enderror">
+                                <input
+                                    type="text"
+                                    id="date_of_birth"
+                                    name="date_of_birth"
+                                    value="{{ old('date_of_birth') }}"
+                                    placeholder="dd-mm-yyyy"
+                                    inputmode="numeric"
+                                    autocomplete="bday"
+                                    pattern="[0-9]{2}-[0-9]{2}-[0-9]{4}"
+                                    data-datepicker="date-of-birth"
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 @error('date_of_birth') border-red-500 @enderror"
+                                >
+                                <p class="mt-1 text-xs text-gray-500">Pick a date or type it as dd-mm-yyyy.</p>
                             </div>
 
                             <div>
