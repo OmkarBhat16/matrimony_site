@@ -23,8 +23,8 @@
     @endif
 
     <!-- Tab Navigation -->
-    <div class="mb-6 border-b border-gray-200">
-        <nav class="-mb-px flex space-x-8">
+    <div class="mb-6 border-b border-gray-200 overflow-x-auto">
+        <nav class="-mb-px flex min-w-max space-x-8 px-1">
             <a href="{{ route('admin.users', ['tab' => 'registrations']) }}"
                class="whitespace-nowrap pb-3 px-1 border-b-2 text-sm font-medium transition
                    {{ $tab === 'registrations' ? 'border-pink-500 text-pink-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
@@ -63,15 +63,15 @@
     {{-- ========== REGISTRATIONS TAB ========== --}}
     @if($tab === 'registrations')
         <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100">
+            <div class="px-4 py-4 border-b border-gray-100 sm:px-6">
                 <h2 class="text-lg font-semibold text-gray-900">New Registrations</h2>
                 <p class="text-sm text-gray-500 mt-1">Users who have registered but don't have an account yet.</p>
             </div>
             @if($registrations->isEmpty())
-                <div class="px-6 py-12 text-center text-sm text-gray-500">No new registrations.</div>
+                <div class="px-4 py-12 text-center text-sm text-gray-500 sm:px-6">No new registrations.</div>
             @else
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left">
+                    <table class="min-w-[720px] w-full text-left">
                         <thead>
                             <tr class="border-b border-gray-100 bg-gray-50">
                                 <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
@@ -110,15 +110,15 @@
     {{-- ========== PENDING REVIEW TAB ========== --}}
     @if($tab === 'pending')
         <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100">
+            <div class="px-4 py-4 border-b border-gray-100 sm:px-6">
                 <h2 class="text-lg font-semibold text-gray-900">Profiles Pending Review</h2>
                 <p class="text-sm text-gray-500 mt-1">Users who have submitted their full profile for approval.</p>
             </div>
             @if($pendingReview->isEmpty())
-                <div class="px-6 py-12 text-center text-sm text-gray-500">No profiles pending review.</div>
+                <div class="px-4 py-12 text-center text-sm text-gray-500 sm:px-6">No profiles pending review.</div>
             @else
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left">
+                    <table class="min-w-[640px] w-full text-left">
                         <thead>
                             <tr class="border-b border-gray-100 bg-gray-50">
                                 <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
@@ -133,17 +133,19 @@
                                     <td class="px-6 py-4 text-sm text-gray-400">#{{ $user->public_id ?? $user->id }}</td>
                                     <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $user->name }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $user->phone_number }}</td>
-                                    <td class="px-6 py-4 flex items-center gap-2">
-                                        <a href="{{ route('admin.users.profile', $user) }}"
-                                           class="text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-1.5 rounded-lg transition">
-                                            View Profile
-                                        </a>
-                                        <form action="{{ route('users.approve', $user) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="text-sm font-medium text-white bg-green-600 hover:bg-green-700 px-4 py-1.5 rounded-lg transition">
-                                                Approve
-                                            </button>
-                                        </form>
+                                    <td class="px-6 py-4">
+                                        <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+                                            <a href="{{ route('admin.users.profile', $user) }}"
+                                               class="inline-flex items-center justify-center text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-1.5 rounded-lg transition">
+                                                View Profile
+                                            </a>
+                                            <form action="{{ route('users.approve', $user) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="inline-flex w-full items-center justify-center text-sm font-medium text-white bg-green-600 hover:bg-green-700 px-4 py-1.5 rounded-lg transition sm:w-auto">
+                                                    Approve
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -157,14 +159,14 @@
     {{-- ========== APPROVED TAB ========== --}}
     @if($tab === 'approved')
         <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100">
+            <div class="px-4 py-4 border-b border-gray-100 sm:px-6">
                 <h2 class="text-lg font-semibold text-gray-900">Approved Users</h2>
             </div>
             @if($approved->isEmpty())
-                <div class="px-6 py-12 text-center text-sm text-gray-500">No approved users yet.</div>
+                <div class="px-4 py-12 text-center text-sm text-gray-500 sm:px-6">No approved users yet.</div>
             @else
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left">
+                    <table class="min-w-[760px] w-full text-left">
                         <thead>
                             <tr class="border-b border-gray-100 bg-gray-50">
                                 <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
@@ -182,10 +184,10 @@
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $user->phone_number }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $user->email ?? '—' }}</td>
                                     <td class="px-6 py-4">
-                                        <div class="flex items-center gap-3 flex-wrap">
+                                        <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                                             @if($user->profile)
                                                 <a href="{{ route('admin.users.profile', $user) }}"
-                                                   class="text-sm text-pink-600 hover:text-pink-700 font-medium">View</a>
+                                                   class="inline-flex items-center justify-center text-sm text-pink-600 hover:text-pink-700 font-medium">View</a>
                                             @endif
                                             <form action="{{ route('admin.users.reset-password', $user) }}" method="POST">
                                                 @csrf
@@ -258,17 +260,17 @@
     {{-- ========== ALL USERS TAB ========== --}}
     @if($tab === 'all')
         <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100">
+            <div class="px-4 py-4 border-b border-gray-100 sm:px-6">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                     <div>
                         <h2 class="text-lg font-semibold text-gray-900">All Users</h2>
                         <p class="text-sm text-gray-500 mt-1">Filter users by verification step or search by name, phone, or email.</p>
                     </div>
-                    <form method="GET" action="{{ route('admin.users') }}" class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                    <form method="GET" action="{{ route('admin.users') }}" class="grid gap-3 sm:grid-cols-2 lg:flex lg:flex-row lg:items-end">
                         <input type="hidden" name="tab" value="all">
                         <div>
                             <label for="step" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Step</label>
-                            <select id="step" name="step" class="rounded-lg border-gray-300 text-sm focus:border-pink-500 focus:ring-pink-500">
+                            <select id="step" name="step" class="w-full rounded-lg border-gray-300 text-sm focus:border-pink-500 focus:ring-pink-500">
                                 <option value="all" @selected($stepFilter === 'all')>All steps</option>
                                 <option value="unverified" @selected($stepFilter === 'unverified')>Unverified</option>
                                 <option value="step1_complete" @selected($stepFilter === 'step1_complete')>Step 1 Complete</option>
@@ -280,13 +282,13 @@
                             <label for="search" class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Search</label>
                             <input id="search" name="search" type="text" value="{{ $search }}"
                                    placeholder="Name, phone, or email"
-                                   class="rounded-lg border-gray-300 text-sm focus:border-pink-500 focus:ring-pink-500">
+                                   class="w-full rounded-lg border-gray-300 text-sm focus:border-pink-500 focus:ring-pink-500">
                         </div>
                         <div class="flex items-center gap-2">
-                            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 rounded-lg transition">
+                            <button type="submit" class="flex-1 px-4 py-2 text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 rounded-lg transition sm:flex-none">
                                 Apply
                             </button>
-                            <a href="{{ route('admin.users', ['tab' => 'all']) }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition">
+                            <a href="{{ route('admin.users', ['tab' => 'all']) }}" class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition text-center sm:flex-none">
                                 Reset
                             </a>
                         </div>
@@ -294,10 +296,10 @@
                 </div>
             </div>
             @if($allUsers->isEmpty())
-                <div class="px-6 py-12 text-center text-sm text-gray-500">No users matched the selected filters.</div>
+                <div class="px-4 py-12 text-center text-sm text-gray-500 sm:px-6">No users matched the selected filters.</div>
             @else
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left">
+                    <table class="min-w-[980px] w-full text-left">
                         <thead>
                             <tr class="border-b border-gray-100 bg-gray-50">
                                 <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
@@ -327,25 +329,25 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="flex flex-wrap items-center gap-2">
+                                        <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                                             @if($user->verification_step === 'unverified')
                                                 <form action="{{ route('admin.users.create-account', $user) }}" method="POST" class="js-single-submit">
                                                     @csrf
-                                                    <button type="submit" class="text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-lg transition">
+                                                    <button type="submit" class="inline-flex w-full items-center justify-center text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-lg transition sm:w-auto">
                                                         Create Account
                                                     </button>
                                                 </form>
                                             @else
                                                 <form action="{{ route('admin.users.reset-password', $user) }}" method="POST">
                                                     @csrf
-                                                    <button type="submit" class="text-sm font-semibold text-amber-950 bg-amber-200 border border-amber-300 hover:bg-amber-300 hover:border-amber-400 px-4 py-1.5 rounded-lg transition shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2">
+                                                    <button type="submit" class="inline-flex w-full items-center justify-center text-sm font-semibold text-amber-950 bg-amber-200 border border-amber-300 hover:bg-amber-300 hover:border-amber-400 px-4 py-1.5 rounded-lg transition shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 sm:w-auto">
                                                         Reset Password
                                                     </button>
                                                 </form>
                                                 <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Delete this user account?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="text-sm font-medium text-white bg-red-600 hover:bg-red-700 px-4 py-1.5 rounded-lg transition">
+                                                    <button type="submit" class="inline-flex w-full items-center justify-center text-sm font-medium text-white bg-red-600 hover:bg-red-700 px-4 py-1.5 rounded-lg transition sm:w-auto">
                                                         Delete
                                                     </button>
                                                 </form>
@@ -370,7 +372,7 @@
                                             @php $pendingEdit = $pendingEditsByUser[$user->id] ?? null; @endphp
                                             @if($pendingEdit)
                                                 <a href="{{ route('admin.pending-edits.review', $pendingEdit) }}"
-                                                   class="text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-1.5 rounded-lg transition">
+                                                   class="inline-flex w-full items-center justify-center text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-1.5 rounded-lg transition sm:w-auto">
                                                     Review Changes
                                                 </a>
                                             @endif

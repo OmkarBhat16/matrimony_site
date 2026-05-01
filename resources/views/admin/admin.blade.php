@@ -1,8 +1,8 @@
 <x-admin-layout>
     <x-slot:header>Dashboard</x-slot:header>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <a href="{{ route('admin.users', ['tab' => 'all']) }}" class="bg-white rounded-xl shadow-sm p-6 block hover:shadow-md hover:ring-2 hover:ring-pink-100 transition">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
+        <a href="{{ route('admin.users', ['tab' => 'all']) }}" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 block hover:shadow-md hover:ring-2 hover:ring-pink-100 transition">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -15,7 +15,7 @@
                 </div>
             </div>
         </a>
-        <a href="{{ route('admin.users', ['tab' => 'registrations']) }}" class="bg-white rounded-xl shadow-sm p-6 block hover:shadow-md hover:ring-2 hover:ring-pink-100 transition">
+        <a href="{{ route('admin.users', ['tab' => 'registrations']) }}" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 block hover:shadow-md hover:ring-2 hover:ring-pink-100 transition">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -28,7 +28,7 @@
                 </div>
             </div>
         </a>
-        <a href="{{ route('admin.users', ['tab' => 'pending']) }}" class="bg-white rounded-xl shadow-sm p-6 block hover:shadow-md hover:ring-2 hover:ring-pink-100 transition">
+        <a href="{{ route('admin.users', ['tab' => 'pending']) }}" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 block hover:shadow-md hover:ring-2 hover:ring-pink-100 transition">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,7 +41,7 @@
                 </div>
             </div>
         </a>
-        <a href="{{ route('admin.users', ['tab' => 'approved']) }}" class="bg-white rounded-xl shadow-sm p-6 block hover:shadow-md hover:ring-2 hover:ring-pink-100 transition">
+        <a href="{{ route('admin.users', ['tab' => 'approved']) }}" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 block hover:shadow-md hover:ring-2 hover:ring-pink-100 transition">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,7 +54,7 @@
                 </div>
             </div>
         </a>
-        <a href="{{ route('admin.pending-edits') }}" class="bg-white rounded-xl shadow-sm p-6 block hover:shadow-md hover:ring-2 hover:ring-pink-100 transition">
+        <a href="{{ route('admin.pending-edits') }}" class="bg-white rounded-xl shadow-sm p-4 sm:p-6 block hover:shadow-md hover:ring-2 hover:ring-pink-100 transition">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,20 +69,20 @@
         </a>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm p-6">
+    <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">New Registrations</h2>
         @php $newRegistrations = \App\Models\User::where('verification_step', 'unverified')->where('role', 'user')->latest()->limit(5)->get(); @endphp
         @if ($newRegistrations->count())
             <div class="space-y-3">
                 @foreach ($newRegistrations as $user)
-                    <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                    <div class="flex flex-col gap-3 rounded-lg bg-gray-50 p-3 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-900">{{ $user->name }}</p>
                             <p class="text-xs text-gray-500">{{ $user->phone_number }} &middot; Registered {{ $user->created_at->diffForHumans() }}</p>
                         </div>
                         <form action="{{ route('admin.users.create-account', $user) }}" method="POST" class="js-single-submit">
                             @csrf
-                            <button type="submit" class="text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition">
+                            <button type="submit" class="w-full text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition sm:w-auto">
                                 Create Account
                             </button>
                         </form>

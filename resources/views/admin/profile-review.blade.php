@@ -4,29 +4,29 @@
 
     <div class="max-w-4xl mx-auto">
         <!-- User Info Header -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <div class="flex items-center justify-between">
+        <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                    <h2 class="text-xl font-bold text-gray-900">{{ $user->name }}</h2>
+                    <h2 class="text-xl font-bold text-gray-900 break-words">{{ $user->name }}</h2>
                     <p class="text-sm text-gray-500 mt-1">
-                        Phone: {{ $user->phone_number }}
+                        Phone: <span class="break-words">{{ $user->phone_number }}</span>
                         &middot; ID: {{ $user->public_id ?? $user->id }}
-                        @if($user->email) &middot; Email: {{ $user->email }} @endif
+                        @if($user->email) &middot; Email: <span class="break-words">{{ $user->email }}</span> @endif
                     </p>
                     <span class="mt-2 inline-flex px-2 py-0.5 text-xs font-medium rounded-full
                         {{ $user->verification_step === 'approved' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
                         {{ str_replace('_', ' ', ucfirst($user->verification_step)) }}
                     </span>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                     <a href="{{ route('admin.users', ['tab' => 'pending']) }}"
-                       class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                       class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
                         &larr; Back to List
                     </a>
                     @if($user->verification_step === 'step2_pending')
                         <form action="{{ route('users.approve', $user) }}" method="POST">
                             @csrf
-                            <button type="submit" class="px-6 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition">
+                            <button type="submit" class="inline-flex w-full items-center justify-center px-6 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition sm:w-auto">
                                 Approve Profile
                             </button>
                         </form>
@@ -41,9 +41,9 @@
             <!-- Profile Images -->
             @php $images = $profile->allImageUrls(); @endphp
             @if(count($images))
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6">
                     <h3 class="text-base font-semibold text-gray-900 mb-4">Profile Photos</h3>
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         @foreach($images as $slot => $url)
                             <div class="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
                                 <img src="{{ $url }}" alt="Photo {{ $slot }}" class="w-full h-full object-contain">
@@ -57,9 +57,9 @@
             @endif
 
             @if($profile->kundliImageUrl())
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6">
                     <h3 class="text-base font-semibold text-gray-900 mb-4">Biodata Image</h3>
-                    <div class="max-w-xs">
+                    <div class="w-full max-w-xs">
                         <div class="rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
                             <img src="{{ $profile->kundliImageUrl() }}" alt="Biodata image" class="w-full h-auto object-contain">
                         </div>
@@ -68,9 +68,9 @@
             @endif
 
             <!-- Profile Details -->
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6">
                 <h3 class="text-base font-semibold text-gray-900 mb-4">Personal Information</h3>
-                <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
                     @foreach([
                         'Full Name' => $profile->full_name,
                         'Navras Naav' => $profile->navras_naav,
@@ -89,9 +89,9 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6">
                 <h3 class="text-base font-semibold text-gray-900 mb-4">Horoscope, Education &amp; Profession</h3>
-                <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
                     @foreach([
                         'Day & Time of Birth' => $profile->day_and_time_of_birth,
                         'Place of Birth' => $profile->place_of_birth,
@@ -114,9 +114,9 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6">
                 <h3 class="text-base font-semibold text-gray-900 mb-4">Family Details</h3>
-                <div class="grid grid-cols-2 gap-x-8 gap-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
                     @foreach([
                         "Father's Name" => $profile->fathers_name,
                         "Mother's Name" => $profile->mothers_name,
@@ -203,17 +203,17 @@
             </div>
 
             @if($user->verification_step === 'step2_pending')
-                <div class="flex justify-end mb-8">
+                <div class="flex justify-stretch sm:justify-end mb-8">
                     <form action="{{ route('users.approve', $user) }}" method="POST">
                         @csrf
-                        <button type="submit" class="px-8 py-3 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition shadow-sm">
+                        <button type="submit" class="w-full px-8 py-3 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition shadow-sm sm:w-auto">
                             Approve Profile
                         </button>
                     </form>
                 </div>
             @endif
         @else
-            <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 text-center">
                 <p class="text-sm text-gray-500">This user has not created a profile yet.</p>
             </div>
         @endif

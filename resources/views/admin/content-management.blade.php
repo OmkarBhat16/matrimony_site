@@ -8,15 +8,17 @@
         $about = $aboutPageContent ?? \App\Models\AboutPageContent::defaults();
     @endphp
 
-    <div class="flex flex-wrap gap-3 mb-6">
-        <a href="{{ route('admin.content-management', ['tab' => 'home-page']) }}"
-           class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $activeTab === 'home-page' ? 'bg-pink-600 text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50' }}">
-            Home Page
-        </a>
-        <a href="{{ route('admin.content-management', ['tab' => 'about-page']) }}"
-           class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $activeTab === 'about-page' ? 'bg-pink-600 text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50' }}">
-            About Page
-        </a>
+    <div class="mb-6 overflow-x-auto">
+        <div class="flex min-w-max gap-3 px-1">
+            <a href="{{ route('admin.content-management', ['tab' => 'home-page']) }}"
+               class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $activeTab === 'home-page' ? 'bg-pink-600 text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50' }}">
+                Home Page
+            </a>
+            <a href="{{ route('admin.content-management', ['tab' => 'about-page']) }}"
+               class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $activeTab === 'about-page' ? 'bg-pink-600 text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50' }}">
+                About Page
+            </a>
+        </div>
     </div>
 
     @if ($activeTab === 'home-page')
@@ -24,7 +26,7 @@
             @csrf
             <input type="hidden" name="page" value="home-page">
 
-            <div class="bg-white rounded-xl shadow-sm p-6 space-y-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 space-y-6">
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900">Hero Section</h2>
                     <p class="text-sm text-gray-500 mt-1">Manage the first section visitors see on the home page.</p>
@@ -53,7 +55,7 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-6 space-y-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 space-y-6">
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900">Stats Section</h2>
                     <p class="text-sm text-gray-500 mt-1">Edit the four summary cards under the hero banner.</p>
@@ -77,7 +79,7 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-6 space-y-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 space-y-6">
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900">Featured Profiles Section</h2>
                 </div>
@@ -93,7 +95,7 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-6 space-y-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 space-y-6">
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900">How It Works</h2>
                 </div>
@@ -144,8 +146,8 @@
                 </div>
             </div>
 
-            <div class="flex justify-end">
-                <button type="submit" class="px-6 py-3 bg-pink-600 text-white rounded-lg text-sm font-medium hover:bg-pink-700 transition shadow-sm">
+            <div class="flex justify-stretch sm:justify-end">
+                <button type="submit" class="w-full px-6 py-3 bg-pink-600 text-white rounded-lg text-sm font-medium hover:bg-pink-700 transition shadow-sm sm:w-auto">
                     Save Home Page Content
                 </button>
             </div>
@@ -155,7 +157,7 @@
             @csrf
             <input type="hidden" name="page" value="about-page">
 
-            <div class="bg-white rounded-xl shadow-sm p-6 space-y-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 space-y-6">
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900">Header Section</h2>
                 </div>
@@ -171,7 +173,7 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-6 space-y-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 space-y-6">
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900">Mission Section</h2>
                 </div>
@@ -187,7 +189,7 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-6 space-y-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 space-y-6">
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900">What We Offer</h2>
                 </div>
@@ -208,7 +210,7 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-6 space-y-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 space-y-6">
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900">Values Section</h2>
                 </div>
@@ -226,8 +228,8 @@
                 </div>
             </div>
 
-            <div class="flex justify-end">
-                <button type="submit" class="px-6 py-3 bg-pink-600 text-white rounded-lg text-sm font-medium hover:bg-pink-700 transition shadow-sm">
+            <div class="flex justify-stretch sm:justify-end">
+                <button type="submit" class="w-full px-6 py-3 bg-pink-600 text-white rounded-lg text-sm font-medium hover:bg-pink-700 transition shadow-sm sm:w-auto">
                     Save About Page Content
                 </button>
             </div>

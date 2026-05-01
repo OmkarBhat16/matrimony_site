@@ -50,38 +50,38 @@
 
     <div class="max-w-4xl mx-auto">
         <!-- User Info -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <div class="flex items-center justify-between">
+        <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                    <h2 class="text-xl font-bold text-gray-900">{{ $edit->user->name }}</h2>
+                    <h2 class="text-xl font-bold text-gray-900 break-words">{{ $edit->user->name }}</h2>
                     <p class="text-sm text-gray-500 mt-1">
-                        Phone: {{ $edit->user->phone_number }}
+                        Phone: <span class="break-words">{{ $edit->user->phone_number }}</span>
                         · Submitted {{ $edit->created_at->diffForHumans() }}
                     </p>
                 </div>
-                <a href="{{ route('admin.pending-edits') }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                <a href="{{ route('admin.pending-edits') }}" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition">
                     &larr; Back to List
                 </a>
             </div>
         </div>
 
         @if(empty($diff) && ! $hasImageChanges && ! $hasKundliChange)
-            <div class="bg-white rounded-xl shadow-sm p-6 text-center">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 text-center">
                 <p class="text-sm text-gray-500">No changes detected — the edit is identical to the current profile.</p>
                 <form action="{{ route('admin.pending-edits.reject', $edit) }}" method="POST" class="mt-4 inline">
                     @csrf
-                    <button type="submit" class="px-6 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition">Dismiss</button>
+                    <button type="submit" class="w-full px-6 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition sm:w-auto">Dismiss</button>
                 </form>
             </div>
         @else
             @if(!empty($diff))
                 <!-- Diff Table -->
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-                    <div class="px-6 py-4 border-b border-gray-100">
+                    <div class="px-4 py-4 border-b border-gray-100 sm:px-6">
                         <h3 class="text-base font-semibold text-gray-900">Changes ({{ count($diff) }} field{{ count($diff) > 1 ? 's' : '' }})</h3>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left">
+                        <table class="min-w-[760px] w-full text-left">
                             <thead>
                                 <tr class="border-b border-gray-100 bg-gray-50">
                                     <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider w-1/4">Field</th>
@@ -109,10 +109,10 @@
 
             @if($hasImageChanges)
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-                    <div class="px-6 py-4 border-b border-gray-100">
+                    <div class="px-4 py-4 border-b border-gray-100 sm:px-6">
                         <h3 class="text-base font-semibold text-gray-900">Photo replacements pending approval</h3>
                     </div>
-                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                         @foreach($pendingImageSlots as $slot)
                             @php
                                 $currentUrl = $currentProfile->imageUrl($slot);
@@ -153,10 +153,10 @@
 
             @if($hasKundliChange)
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
-                    <div class="px-6 py-4 border-b border-gray-100">
+                    <div class="px-4 py-4 border-b border-gray-100 sm:px-6">
                         <h3 class="text-base font-semibold text-gray-900">Biodata image pending approval</h3>
                     </div>
-                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <p class="text-xs font-medium text-gray-500 mb-2">Current</p>
                             <div class="rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
@@ -182,16 +182,16 @@
             @endif
 
             <!-- Action Buttons -->
-            <div class="flex justify-end gap-3 mb-8">
+            <div class="flex flex-col gap-3 mb-8 sm:flex-row sm:justify-end">
                 <form action="{{ route('admin.pending-edits.reject', $edit) }}" method="POST">
                     @csrf
-                    <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition shadow-sm">
+                    <button type="submit" class="w-full px-6 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition shadow-sm sm:w-auto">
                         Reject
                     </button>
                 </form>
                 <form action="{{ route('admin.pending-edits.approve', $edit) }}" method="POST">
                     @csrf
-                    <button type="submit" class="px-6 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition shadow-sm">
+                    <button type="submit" class="w-full px-6 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition shadow-sm sm:w-auto">
                         Approve Changes
                     </button>
                 </form>

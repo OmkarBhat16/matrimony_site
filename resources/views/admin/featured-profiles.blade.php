@@ -8,7 +8,7 @@
         $searchTerm = $search ?? '';
     @endphp
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
         <div class="bg-white rounded-xl shadow-sm p-6">
             <p class="text-sm text-gray-500">Featured Now</p>
             <p class="mt-2 text-3xl font-bold text-gray-900">{{ $currentCount }}</p>
@@ -25,7 +25,7 @@
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
         <div class="xl:col-span-2 space-y-4">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900">Current Featured Profiles</h2>
                     <p class="text-sm text-gray-500 mt-1">These are the profiles currently highlighted on the site.</p>
@@ -40,8 +40,8 @@
                             $user = $profile?->user;
                         @endphp
                         @if ($profile && $user)
-                            <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-                                <div class="flex items-start justify-between gap-4">
+                            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-5 border border-gray-100">
+                                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                     <div>
                                         <p class="text-lg font-semibold text-gray-900">{{ $profile->full_name ?? $user->name }}</p>
                                         <p class="text-sm text-gray-500">{{ $user->phone_number ?? 'No phone number' }}</p>
@@ -50,10 +50,10 @@
                                             Featured
                                         </p>
                                     </div>
-                                    <form method="POST" action="{{ route('admin.featured-profiles.destroy', $featuredProfile) }}" onsubmit="return confirm('Remove this profile from featured profiles?');">
+                                    <form method="POST" action="{{ route('admin.featured-profiles.destroy', $featuredProfile) }}" onsubmit="return confirm('Remove this profile from featured profiles?');" class="sm:shrink-0">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100 transition">
+                                        <button type="submit" class="w-full rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100 transition sm:w-auto">
                                             Unfeature
                                         </button>
                                     </form>
@@ -75,7 +75,7 @@
         </div>
 
         <div class="space-y-4">
-            <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
                 <h2 class="text-lg font-semibold text-gray-900">Add Featured Profile</h2>
                 <p class="text-sm text-gray-500 mt-1">Search by phone number or user ID, then feature the profile from the results.</p>
 
@@ -141,7 +141,7 @@
                 @endif
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
                 <h3 class="text-sm font-semibold text-gray-900">At a glance</h3>
                 <ul class="mt-3 space-y-2 text-sm text-gray-600">
                     <li>• Maximum of 4 featured profiles at any time.</li>

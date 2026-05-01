@@ -21,13 +21,23 @@
         $canManageContent = $user?->canAccessContentManagement() ?? false;
         $canManageDeletedAccounts = $user?->isSuperAdmin() ?? false;
     @endphp
-    <div class="min-h-screen bg-gray-100">
+    <div x-data="{ mobileMenuOpen: false }" class="min-h-screen bg-gray-100 lg:flex">
+        <div x-cloak x-show="mobileMenuOpen" x-transition.opacity class="fixed inset-0 z-40 bg-gray-900/50 lg:hidden" @click="mobileMenuOpen = false" aria-hidden="true"></div>
+
         <!-- Sidebar -->
-        <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-gray-800 text-white transform transition-transform duration-200 ease-in-out">
-            <div class="flex items-center justify-center h-16 bg-gray-900">
-                <span class="text-xl font-bold">Admin Panel</span>
+        <aside
+            class="fixed inset-y-0 left-0 z-50 w-72 bg-gray-800 text-white transform transition-transform duration-200 ease-in-out lg:translate-x-0"
+            :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+        >
+            <div class="flex h-16 items-center justify-between bg-gray-900 px-5">
+                <span class="text-lg font-bold">Admin Panel</span>
+                <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white lg:hidden" @click="mobileMenuOpen = false" aria-label="Close admin menu">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
             </div>
-            <nav class="mt-6 px-4 space-y-2">
+            <nav class="mt-6 px-4 space-y-2 pb-8">
                 @if ($canManageProfiles)
                     <a href="{{ route('admin') }}" class="group flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-colors hover:bg-gray-700 {{ request()->routeIs('admin') ? 'bg-gray-700 text-white shadow-sm' : 'text-gray-300 hover:text-white' }}">
                         <svg class="mr-3 h-5 w-5 {{ request()->routeIs('admin') ? 'text-white' : 'text-gray-400 group-hover:text-gray-300' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,23 +101,32 @@
         </aside>
 
         <!-- Main Content -->
-        <div class="pl-64">
+        <div class="flex min-h-screen w-full flex-1 flex-col lg:pl-72">
             <!-- Top Navigation -->
-            <header class="bg-white shadow">
-                <div class="flex items-center justify-between h-16 px-6">
-                    <h1 class="text-xl font-semibold text-gray-800">{{ $header ?? 'Dashboard' }}</h1>
-                    <div class="flex items-center space-x-4">
-                        <span class="text-sm text-gray-600">{{ auth()->user()->name ?? 'Admin' }}</span>
+            <header class="sticky top-0 z-30 border-b border-gray-100 bg-white shadow-sm">
+                <div class="flex items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:h-16 lg:py-0">
+                    <div class="flex min-w-0 items-center gap-3">
+                        <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:border-pink-300 hover:text-pink-600 lg:hidden" @click="mobileMenuOpen = true" aria-label="Open admin menu">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                        <div class="min-w-0">
+                            <h1 class="truncate text-lg font-semibold text-gray-800 sm:text-xl">{{ $header ?? 'Dashboard' }}</h1>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="hidden text-sm text-gray-600 sm:inline">{{ auth()->user()->name ?? 'Admin' }}</span>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="text-sm text-red-600 hover:text-red-800">Logout</button>
+                            <button type="submit" class="inline-flex items-center rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700">Logout</button>
                         </form>
                     </div>
                 </div>
             </header>
 
             <!-- Page Content -->
-            <main class="p-6">
+            <main class="flex-1 px-4 py-5 sm:px-6 lg:p-6">
                 @if(session('success'))
                     <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-start gap-3 shadow-sm">
                         <svg class="w-5 h-5 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
