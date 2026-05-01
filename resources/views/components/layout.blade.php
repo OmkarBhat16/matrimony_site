@@ -11,6 +11,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -201,6 +202,8 @@
             document.getElementById('mobile-menu').classList.toggle('hidden');
         });
     </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script>
         (function () {
             const STORAGE_KEY = 'matrimony_lang';
@@ -292,6 +295,16 @@
 
             window.setLanguage = setLanguage;
         })();
+    </script>
+    <script>
+        $(function () {
+            $('[data-datepicker="date-of-birth"]').datepicker({
+                dateFormat: 'dd-mm-yy',
+                changeMonth: true,
+                changeYear: true,
+                yearRange: '1950:+0',
+            }).attr('readonly', true);
+        });
     </script>
 </body>
 </html>
