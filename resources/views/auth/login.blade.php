@@ -182,6 +182,14 @@
                                 <dd class="text-right font-medium text-gray-900">{{ $supportName }}</dd>
                             </div>
                             <div class="flex items-start justify-between gap-4">
+                                <dt class="text-gray-500">WhatsApp</dt>
+                                <dd class="text-right">
+                                    <a href="{{ $whatsappLink }}" target="_blank" rel="noopener noreferrer" class="font-medium text-pink-600 hover:text-pink-500">
+                                        {{ $supportWhatsapp }}
+                                    </a>
+                                </dd>
+                            </div>
+                            <div class="flex items-start justify-between gap-4">
                                 <dt class="text-gray-500">Email</dt>
                                 <dd class="text-right">
                                     <a href="mailto:{{ $supportEmail }}" class="font-medium text-pink-600 hover:text-pink-500">
@@ -198,14 +206,6 @@
                                 </dd>
                             </div>
                             <div class="flex items-start justify-between gap-4">
-                                <dt class="text-gray-500">WhatsApp</dt>
-                                <dd class="text-right">
-                                    <a href="{{ $whatsappLink }}" target="_blank" rel="noopener noreferrer" class="font-medium text-pink-600 hover:text-pink-500">
-                                        {{ $supportWhatsapp }}
-                                    </a>
-                                </dd>
-                            </div>
-                            <div class="flex items-start justify-between gap-4">
                                 <dt class="text-gray-500">Working Hours</dt>
                                 <dd class="text-right font-medium text-gray-900">{{ $supportHours }}</dd>
                             </div>
@@ -218,18 +218,18 @@
 
                     <div class="flex flex-col sm:flex-row gap-3">
                         <a
-                            href="mailto:{{ $supportEmail }}"
-                            class="inline-flex justify-center items-center rounded-lg bg-pink-600 px-4 py-3 text-sm font-medium text-white hover:bg-pink-700 transition"
-                        >
-                            Email Admin
-                        </a>
-                        <a
                             href="{{ $whatsappLink }}"
                             target="_blank"
                             rel="noopener noreferrer"
                             class="inline-flex justify-center items-center rounded-lg border border-pink-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-pink-50 transition"
                         >
                             WhatsApp Admin
+                        </a>
+                        <a
+                            href="mailto:{{ $supportEmail }}"
+                            class="inline-flex justify-center items-center rounded-lg bg-pink-600 px-4 py-3 text-sm font-medium text-white hover:bg-pink-700 transition"
+                        >
+                            Email Admin
                         </a>
                     </div>
 

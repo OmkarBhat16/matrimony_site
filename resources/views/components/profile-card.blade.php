@@ -1,8 +1,15 @@
-@props(['profile', 'mode' => 'normal'])
+@props(['profile', 'mode' => 'normal', 'maskSensitive' => false])
 
 @php
     $profileUser = $profile->user;
     $profileUrl = $profileUser ? route('profile.show', ['user' => $profileUser->public_id]) : '#';
+    $fullName = trim((string) ($profile->full_name ?? ''));
+    $nameParts = preg_split('/\s+/', $fullName, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+    $firstName = $nameParts[0] ?? ($fullName !== '' ? $fullName : 'N/A');
+    $maskedName = count($nameParts) > 1 ? implode(' ', array_slice($nameParts, 1)) : '';
+    $displayAddress = $profile->address ?? $profile->native_address ?? 'Location N/A';
+    $fakeAddresses = ['North Vale Street , maple man town, navi mumbai', 'Silver Grove, , amber town, new delhi', 'Amber Fields, , north vale town, bangalore', 'Maple Harbor, silver town , hyderabad'];
+    $fakeAddress = $fakeAddresses[($profile->id ?? 0) % count($fakeAddresses)];
 @endphp
 
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition duration-300">
@@ -78,7 +85,14 @@
             <div class="flex justify-between items-start mb-3">
                 <a href="{{ $profileUrl }}">
                     <h3 class="text-lg font-semibold text-gray-900 hover:text-pink-600 transition">
-                        {{ $profile->full_name ?? 'N/A' }}
+                        @if ($maskSensitive && $fullName !== '')
+                            <span>{{ $firstName }}</span>
+                            @if ($maskedName !== '')
+                                <span class="blur-sm select-none"> {{ $maskedName }}</span>
+                            @endif
+                        @else
+                            {{ $profile->full_name ?? 'N/A' }}
+                        @endif
                     </h3>
                 </a>
                 <span class="inline-flex items-center text-xs font-medium text-pink-600 bg-pink-50 px-2 py-1 rounded-md">
@@ -93,7 +107,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
-                    <span class="line-clamp-1">{{ $profile->address ?? $profile->native_address ?? 'Location N/A' }}</span>
+                    <span class="line-clamp-1">
+                        @if ($maskSensitive)
+                            <span class="blur-sm select-none">{{ $fakeAddress }}</span>
+                        @else
+                            {{ $displayAddress }}
+                        @endif
+                    </span>
                 </div>
 
                 <!-- Education/Profession -->
