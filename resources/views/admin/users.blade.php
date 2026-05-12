@@ -91,12 +91,21 @@
                                     <td class="px-6 py-4 text-sm text-gray-600">{{ $user->email ?? '—' }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-500">{{ $user->created_at->diffForHumans() }}</td>
                                     <td class="px-6 py-4">
-                                        <form action="{{ route('admin.users.create-account', $user) }}" method="POST" class="js-single-submit">
-                                            @csrf
-                                            <button type="submit" class="text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-lg transition">
-                                                Create Account
-                                            </button>
-                                        </form>
+                                        <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                                            <form action="{{ route('admin.users.create-account', $user) }}" method="POST" class="js-single-submit">
+                                                @csrf
+                                                <button type="submit" class="text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-lg transition">
+                                                    Create Account
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Delete this user profile?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-sm font-medium text-white bg-red-600 hover:bg-red-700 px-4 py-1.5 rounded-lg transition">
+                                                    Delete Profile
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach

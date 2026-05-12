@@ -164,6 +164,42 @@
                         >
                     </div>
 
+                    <!-- Consent Checkboxes -->
+                    <div class="space-y-4 rounded-xl border border-gray-200 bg-gray-50 p-4">
+                        <label for="consent_data_processing" class="flex items-start gap-3 text-sm text-gray-700">
+                            <input
+                                id="consent_data_processing"
+                                name="consent_data_processing"
+                                type="checkbox"
+                                value="1"
+                                required
+                                {{ old('consent_data_processing') ? 'checked' : '' }}
+                                class="mt-1 h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                            >
+                            <span>
+                                I consent to the processing of my personal data and photos to private registered members only
+                            </span>
+                        </label>
+
+                        <label for="accept_terms" class="flex items-start gap-3 text-sm text-gray-700">
+                            <input
+                                id="accept_terms"
+                                name="accept_terms"
+                                type="checkbox"
+                                value="1"
+                                required
+                                {{ old('accept_terms') ? 'checked' : '' }}
+                                class="mt-1 h-4 w-4 rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                            >
+                            <span>
+                                I have read and agree to
+                                <a href="{{ route('legal.terms') }}" class="font-medium text-pink-600 hover:text-pink-500 underline decoration-pink-300 underline-offset-2">
+                                    Terms &amp; Conditions
+                                </a>
+                            </span>
+                        </label>
+                    </div>
+
                     <!-- Submit Button -->
                     <div>
                         <button

@@ -57,7 +57,7 @@ class HomePageContent extends Model
             'cta' => [
                 'title' => 'Ready to Begin Your Journey?',
                 'description' => "Join our growing community and find the partner you've been looking for.",
-                'button' => "Register Now - It's Free",
+                'button' => 'Register Now',
             ],
         ];
     }

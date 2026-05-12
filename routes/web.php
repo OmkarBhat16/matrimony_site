@@ -108,6 +108,16 @@ Route::view('/registration-submitted', 'auth.registered')
     ->name('registration.submitted')
     ->middleware('guest');
 
+Route::view('/terms-and-conditions', 'legal.placeholder', [
+    'pageName' => 'Terms & Conditions',
+])
+    ->name('legal.terms');
+
+Route::view('/privacy-policy', 'legal.placeholder', [
+    'pageName' => 'Privacy Policy',
+])
+    ->name('legal.privacy-policy');
+
 Route::view('/pending-review', 'auth.pending-review')
     ->name('pending.review')
     ->middleware('auth');

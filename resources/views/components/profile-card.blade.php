@@ -1,4 +1,4 @@
-@props(['profile', 'mode' => 'normal', 'maskSensitive' => false])
+@props(['profile', 'mode' => 'normal', 'maskSensitive' => false, 'firstNameOnly' => false])
 
 @php
     $profileUser = $profile->user;
@@ -84,8 +84,10 @@
         @else
             <div class="flex justify-between items-start mb-3">
                 <a href="{{ $profileUrl }}">
-                    <h3 class="text-lg font-semibold text-gray-900 hover:text-pink-600 transition">
-                        @if ($maskSensitive && $fullName !== '')
+                        <h3 class="text-lg font-semibold text-gray-900 hover:text-pink-600 transition">
+                        @if ($firstNameOnly && $firstName !== '')
+                            <span>{{ $firstName }}</span>
+                        @elseif ($maskSensitive && $fullName !== '')
                             <span>{{ $firstName }}</span>
                             @if ($maskedName !== '')
                                 <span class="blur-sm select-none"> {{ $maskedName }}</span>

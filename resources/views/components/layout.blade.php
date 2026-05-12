@@ -181,6 +181,8 @@
                         <li><a href="{{ url('/') }}" class="hover:text-white transition">Home</a></li>
                         <li><a href="{{ route('root.matrimony') }}" class="hover:text-white transition">Matrimony</a></li>
                         <li><a href="{{ route('root.about') }}" class="hover:text-white transition">About Us</a></li>
+                        <li><a href="{{ route('legal.privacy-policy') }}" class="hover:text-white transition">Privacy Policy</a></li>
+                        <li><a href="{{ route('legal.terms') }}" class="hover:text-white transition">Terms &amp; Conditions</a></li>
                     </ul>
                 </div>
                 <div>

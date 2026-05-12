@@ -1,6 +1,7 @@
 <x-layout title="Find Your Perfect Match">
     @php
         $home = $homePageContent ?? \App\Models\HomePageContent::defaults();
+        $ctaButton = preg_replace('/\s*-\s*it[’\']s free$/i', '', (string) data_get($home, 'cta.button'));
         $featuredProfiles = $featuredProfiles ?? \App\Models\FeaturedProfile::query()
             ->with(['userProfile.user'])
             ->latest()
@@ -35,20 +36,6 @@
         <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-50 to-transparent"></div>
     </section>
 
-    {{-- Stats Section --}}
-    <section class="bg-gray-50 py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                @foreach(data_get($home, 'stats', []) as $stat)
-                    <div class="bg-white rounded-xl p-6 shadow-sm">
-                        <p class="text-3xl font-bold text-pink-600">{{ $stat['value'] ?? '' }}</p>
-                        <p class="text-sm text-gray-500 mt-1">{{ $stat['label'] ?? '' }}</p>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
     {{-- Featured Profiles --}}
     @if ($featuredProfiles->count())
         <section class="py-16">
@@ -59,7 +46,7 @@
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     @foreach ($featuredProfiles as $profile)
-                        <x-profile-card :profile="$profile" :maskSensitive="true"/>
+                        <x-profile-card :profile="$profile" :maskSensitive="true" :firstNameOnly="true"/>
                     @endforeach
                 </div>
             </div>
@@ -96,7 +83,7 @@
                 <h2 class="text-2xl lg:text-3xl font-bold text-white">{{ data_get($home, 'cta.title') }}</h2>
                 <p class="mt-3 text-pink-100">{{ data_get($home, 'cta.description') }}</p>
                 <a href="{{ route('register') }}" class="mt-6 inline-block bg-white text-pink-600 px-8 py-3 rounded-lg font-semibold hover:bg-pink-50 transition shadow-lg">
-                    {{ data_get($home, 'cta.button') }}
+                    {{ $ctaButton }}
                 </a>
             </div>
         </div>

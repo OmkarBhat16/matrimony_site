@@ -80,12 +80,21 @@
                             <p class="text-sm font-medium text-gray-900">{{ $user->name }}</p>
                             <p class="text-xs text-gray-500">{{ $user->phone_number }} &middot; Registered {{ $user->created_at->diffForHumans() }}</p>
                         </div>
-                        <form action="{{ route('admin.users.create-account', $user) }}" method="POST" class="js-single-submit">
-                            @csrf
-                            <button type="submit" class="w-full text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition sm:w-auto">
-                                Create Account
-                            </button>
-                        </form>
+                        <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                            <form action="{{ route('admin.users.create-account', $user) }}" method="POST" class="js-single-submit">
+                                @csrf
+                                <button type="submit" class="w-full text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition sm:w-auto">
+                                    Create Account
+                                </button>
+                            </form>
+                            <form action="{{ route('admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('Delete this user profile?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="w-full text-xs font-medium text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-lg transition sm:w-auto">
+                                    Delete Profile
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 @endforeach
             </div>

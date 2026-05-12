@@ -25,6 +25,8 @@ class RegisterController extends Controller
             'gender' => ['required', 'in:male,female'],
             'email' => ['nullable', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'consent_data_processing' => ['accepted'],
+            'accept_terms' => ['accepted'],
         ]);
 
         Log::debug('Registration submission received.', [
