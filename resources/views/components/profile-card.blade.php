@@ -1,4 +1,4 @@
-@props(['profile', 'mode' => 'normal', 'maskSensitive' => false, 'firstNameOnly' => false])
+@props(['profile', 'mode' => 'normal', 'maskSensitive' => false, 'firstNameOnly' => false, 'featuredStyle' => false])
 
 @php
     $profileUser = $profile->user;
@@ -7,9 +7,8 @@
     $nameParts = preg_split('/\s+/', $fullName, -1, PREG_SPLIT_NO_EMPTY) ?: [];
     $firstName = $nameParts[0] ?? ($fullName !== '' ? $fullName : 'N/A');
     $maskedName = count($nameParts) > 1 ? implode(' ', array_slice($nameParts, 1)) : '';
-    $displayAddress = $profile->address ?? $profile->native_address ?? 'Location N/A';
-    $fakeAddresses = ['North Vale Street , maple man town, navi mumbai', 'Silver Grove, , amber town, new delhi', 'Amber Fields, , north vale town, bangalore', 'Maple Harbor, silver town , hyderabad'];
-    $fakeAddress = $fakeAddresses[($profile->id ?? 0) % count($fakeAddresses)];
+    $userId = $profileUser?->public_id ?? $profileUser?->id ?? 'N/A';
+    $educationLabel = $profile->education ?: ($profile->education_type ?: 'Education N/A');
 @endphp
 
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition duration-300">
@@ -84,7 +83,7 @@
         @else
             <div class="flex justify-between items-start mb-3">
                 <a href="{{ $profileUrl }}">
-                        <h3 class="text-lg font-semibold text-gray-900 hover:text-pink-600 transition">
+                    <h3 class="text-lg font-semibold text-gray-900 hover:text-pink-600 transition">
                         @if ($firstNameOnly && $firstName !== '')
                             <span>{{ $firstName }}</span>
                         @elseif ($maskSensitive && $fullName !== '')
@@ -97,26 +96,34 @@
                         @endif
                     </h3>
                 </a>
-                <span class="inline-flex items-center text-xs font-medium text-pink-600 bg-pink-50 px-2 py-1 rounded-md">
-                    {{ ucfirst($profile->marital_status ?? 'N/A') }}
-                </span>
+                @if ($featuredStyle)
+                    <span class="inline-flex items-center text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
+                        {{ $userId }}
+                    </span>
+                @else
+                    <span class="inline-flex items-center text-xs font-medium text-pink-600 bg-pink-50 px-2 py-1 rounded-md">
+                        {{ ucfirst($profile->marital_status ?? 'N/A') }}
+                    </span>
+                @endif
             </div>
 
             <div class="space-y-2 mb-4">
-                <!-- Location -->
-                <div class="flex items-start text-sm text-gray-600">
-                    <svg class="w-4 h-4 mr-2 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                    <span class="line-clamp-1">
-                        @if ($maskSensitive)
-                            <span class="blur-sm select-none">{{ $fakeAddress }}</span>
-                        @else
-                            {{ $displayAddress }}
-                        @endif
-                    </span>
-                </div>
+                @if ($featuredStyle)
+                    <div class="flex items-start text-sm text-gray-600">
+                        <svg class="w-4 h-4 mr-2 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422A12.083 12.083 0 0112 20.055a12.083 12.083 0 01-6.16-9.477L12 14z"/>
+                        </svg>
+                        <span class="line-clamp-1">{{ $educationLabel }}</span>
+                    </div>
+                @else
+                    <div class="flex items-start text-sm text-gray-600">
+                        <svg class="w-4 h-4 mr-2 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span class="line-clamp-1">{{ $profile->address ?? $profile->native_address ?? 'Location N/A' }}</span>
+                    </div>
+                @endif
 
                 <!-- Education/Profession -->
                 <div class="flex items-start text-sm text-gray-600">
