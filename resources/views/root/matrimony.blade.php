@@ -39,7 +39,7 @@
                     </div>
                         <div class="flex items-center gap-3">
                         @if ($hasActiveFilters)
-                            <a href="{{ route('root.matrimony', ['gender' => 'all']) }}" class="text-xs text-pink-600 hover:text-pink-700 font-medium flex items-center gap-1">
+                            <a href="{{ route('root.matrimony') }}" class="text-xs text-pink-600 hover:text-pink-700 font-medium flex items-center gap-1">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                 Clear all
                             </a>
@@ -55,21 +55,6 @@
 
                 <div class="p-6" x-show="!filtersCollapsed" x-transition.opacity.duration.200ms>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {{-- Gender Dropdown --}}
-                        <div x-data="{ open: false, selected: '{{ $filters['gender'] ?? 'all' }}' }" class="relative">
-                            <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Gender</label>
-                            <input type="hidden" name="gender" :value="selected">
-                            <button type="button" @click="open = !open" @click.outside="open = false" class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-left hover:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-400 transition">
-                                <span :class="selected ? 'text-gray-900' : 'text-gray-400'" x-text="selected === 'male' ? 'Male' : (selected === 'female' ? 'Female' : 'All genders')"></span>
-                                <svg class="w-4 h-4 text-gray-400 shrink-0 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                            </button>
-                            <div x-show="open" x-transition.opacity.duration.150ms class="absolute z-20 mt-1.5 w-full bg-white border border-gray-200 rounded-lg shadow-lg py-1">
-                                <button type="button" @click="selected = 'all'; open = false" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="selected === 'all' && 'text-pink-600 font-medium'">All genders</button>
-                                <button type="button" @click="selected = 'male'; open = false" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="selected === 'male' && 'text-pink-600 font-medium'">Male</button>
-                                <button type="button" @click="selected = 'female'; open = false" class="w-full px-3.5 py-2 text-sm text-left hover:bg-pink-50 transition" :class="selected === 'female' && 'text-pink-600 font-medium'">Female</button>
-                            </div>
-                        </div>
-
                         {{-- Blood Group Dropdown --}}
                         <div x-data="{ open: false, selected: '{{ $filters['blood_group'] ?? '' }}', search: '' }" class="relative">
                             <label class="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5">Blood Group</label>

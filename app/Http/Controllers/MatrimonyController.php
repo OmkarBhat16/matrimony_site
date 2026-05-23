@@ -10,9 +10,6 @@ use Illuminate\Validation\Rule;
 
 class MatrimonyController extends Controller
 {
-    private const FILTER_GENDERS = ['male', 'female'];
-    private const FILTER_GENDER_ALL = 'all';
-
     private const FILTER_BLOOD_GROUP_VARIANTS = [
         'A +ve' => ['A +ve', 'A+ve', 'A+', 'A positive'],
         'A -ve' => ['A -ve', 'A-ve', 'A-', 'A negative'],
@@ -31,7 +28,6 @@ class MatrimonyController extends Controller
     {
         $user = auth()->user();
         $showFilters = $user && $user->isApproved();
-        $hasExplicitGenderFilter = array_key_exists('gender', $request->query());
 
         $query = UserProfile::query()->with('user')->whereHas(
             'user',
@@ -48,7 +44,6 @@ class MatrimonyController extends Controller
 
         if ($showFilters) {
             $validator = Validator::make($request->query(), [
-                'gender' => ['nullable', Rule::in([...self::FILTER_GENDERS, self::FILTER_GENDER_ALL])],
                 'blood_group' => ['nullable', Rule::in(UserProfile::BLOOD_GROUPS)],
                 'education_type' => ['nullable', Rule::in(UserProfile::EDUCATION_TYPES)],
                 'zodiac_sign__Raas' => ['nullable', Rule::in(UserProfile::RAAS)],
@@ -68,14 +63,8 @@ class MatrimonyController extends Controller
 
             $validated = $validator->validate();
 
-            if ($hasExplicitGenderFilter) {
-                $validated['gender'] = $validated['gender'] ?? self::FILTER_GENDER_ALL;
-            } elseif ($this->shouldApplyDefaultGenderFilter($user, $showFilters)) {
-                $validated['gender'] = $this->defaultGenderFor($user);
-            }
-
-            if (! empty($validated['gender']) && $validated['gender'] !== self::FILTER_GENDER_ALL) {
-                $query->where('gender', $validated['gender']);
+            if ($genderToShow = $this->visibleGenderFor($user, $showFilters)) {
+                $query->where('gender', $genderToShow);
             }
 
             if (! empty($validated['blood_group'])) {
@@ -108,7 +97,6 @@ class MatrimonyController extends Controller
         return view('root.matrimony', [
             'profiles' => $profiles,
             'filterOptions' => [
-                'genders' => [self::FILTER_GENDER_ALL, ...self::FILTER_GENDERS],
                 'blood_groups' => UserProfile::BLOOD_GROUPS,
                 'education_types' => UserProfile::EDUCATION_TYPES,
                 'raas' => UserProfile::RAAS,
@@ -123,16 +111,13 @@ class MatrimonyController extends Controller
         ]);
     }
 
-    private function shouldApplyDefaultGenderFilter($user, bool $showFilters): bool
+    private function visibleGenderFor($user, bool $showFilters): ?string
     {
-        return $showFilters
-            && $user?->isUser()
-            && in_array($user->gender, self::FILTER_GENDERS, true);
-    }
+        if (! $showFilters || ! $user?->isUser()) {
+            return null;
+        }
 
-    private function defaultGenderFor($user): ?string
-    {
-        return match ($user?->gender) {
+        return match ($user->gender) {
             'male' => 'female',
             'female' => 'male',
             default => null,

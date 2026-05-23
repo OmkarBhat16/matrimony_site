@@ -6,7 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('defaults approved basic male users to female profiles on matrimony', function () {
+it('shows approved male users only female profiles on matrimony', function () {
     $viewer = User::factory()->create([
         'role' => 'user',
         'gender' => 'male',
@@ -45,18 +45,18 @@ it('defaults approved basic male users to female profiles on matrimony', functio
         ->assertOk()
         ->assertSee('Female Match')
         ->assertDontSee('Male Match')
-        ->assertViewHas('filters', fn (array $filters) => ($filters['gender'] ?? null) === 'female');
+        ->assertDontSee('name="gender"', false);
 });
 
-it('shows all profiles when an approved basic user selects all genders', function () {
+it('shows approved female users only male profiles on matrimony', function () {
     $viewer = User::factory()->create([
         'role' => 'user',
-        'gender' => 'male',
+        'gender' => 'female',
         'verification_step' => 'approved',
     ]);
 
     UserProfile::factory()->for($viewer)->create([
-        'gender' => 'male',
+        'gender' => 'female',
         'full_name' => 'Viewer Profile',
     ]);
 
@@ -83,14 +83,13 @@ it('shows all profiles when an approved basic user selects all genders', functio
     ]);
 
     $this->actingAs($viewer)
-        ->get(route('root.matrimony', ['gender' => 'all']))
+        ->get(route('root.matrimony'))
         ->assertOk()
-        ->assertSee('Female Match')
         ->assertSee('Male Match')
-        ->assertViewHas('filters', fn (array $filters) => ($filters['gender'] ?? null) === 'all');
+        ->assertDontSee('Female Match');
 });
 
-it('does not apply the default gender filter to approved admin users', function () {
+it('shows all approved profiles to approved non-user accounts', function () {
     $viewer = User::factory()->create([
         'role' => 'profile_manager',
         'gender' => 'male',
@@ -124,5 +123,5 @@ it('does not apply the default gender filter to approved admin users', function 
         ->assertOk()
         ->assertSee('Female Match')
         ->assertSee('Male Match')
-        ->assertViewHas('filters', fn (array $filters) => ! array_key_exists('gender', $filters));
+        ->assertDontSee('name="gender"', false);
 });
